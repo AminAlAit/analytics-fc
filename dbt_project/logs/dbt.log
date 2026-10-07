@@ -1,0 +1,1281 @@
+[0m15:59:10.953577 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C3AB6660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C612FED0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C612FC50>]}
+
+
+============================== 15:59:10.957729 | dbd90146-7255-439c-aeac-6ba508efcef7 ==============================
+[0m15:59:10.957729 [info ] [MainThread]: Running with dbt=1.12.5
+[0m15:59:10.958267 [debug] [MainThread]: running dbt with arguments {'maximum_seed_size_mib': '1', 'no_print': 'None', 'static_parser': 'True', 'target_path': 'None', 'version_check': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'printer_width': '80', 'write_json': 'True', 'empty': 'False', 'log_cache_events': 'False', 'introspect': 'True', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'invocation_command': 'dbt run', 'hints_enabled': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'log_path': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project\\logs'}
+[0m15:59:11.271647 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C3FFA8B0>]}
+[0m15:59:11.325112 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C2174160>]}
+[0m15:59:11.328241 [info ] [MainThread]: Registered adapter: duckdb=1.11.0
+[0m15:59:11.525944 [debug] [MainThread]: checksum: 7119ea9ea0a8c0e9670f38f33f87c32becf9f2d7f739bdc9a20c0de7769a393a, vars: {}, profile: analytics_fc, target: dev, version: 1.12.5
+[0m15:59:11.526833 [info ] [MainThread]: Unable to do partial parsing because saved manifest not found. Starting full parse.
+[0m15:59:11.527199 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'partial_parser', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C6201250>]}
+[0m15:59:14.829396 [warn ] [MainThread]: [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.analytics_fc.marts
+[0m15:59:14.834534 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C5DEF110>]}
+[0m15:59:14.950467 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m15:59:14.959935 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m15:59:15.041825 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m15:59:15.082641 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C6AB44B0>]}
+[0m15:59:15.084381 [info ] [MainThread]: Found 1 model, 3 sources, 500 macros
+[0m15:59:15.085075 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C67F1300>]}
+[0m15:59:15.090196 [info ] [MainThread]: 
+[0m15:59:15.091244 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m15:59:15.091724 [info ] [MainThread]: 
+[0m15:59:15.092674 [debug] [MainThread]: Acquiring new duckdb connection 'master'
+[0m15:59:15.096629 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc'
+[0m15:59:18.936818 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc"
+[0m15:59:18.937858 [debug] [ThreadPool]: On list_analytics_fc: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc"} */
+
+    
+    select schema_name
+    from system.information_schema.schemata
+    
+    where lower(catalog_name) = '"analytics_fc"'
+    
+  
+  
+[0m15:59:18.938322 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m15:59:18.960435 [debug] [ThreadPool]: SQL status: OK in 0.022 seconds
+[0m15:59:18.962100 [debug] [ThreadPool]: On list_analytics_fc: Close
+[0m15:59:18.963401 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_analytics_fc, now create_analytics_fc_main)
+[0m15:59:18.963836 [debug] [ThreadPool]: Creating schema "database: "analytics_fc"
+schema: "main"
+"
+[0m15:59:18.970105 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m15:59:18.970503 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+        select type from duckdb_databases()
+        where lower(database_name)='analytics_fc'
+        and type != 'duckdb'
+    
+  
+[0m15:59:18.970732 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m15:59:18.972891 [debug] [ThreadPool]: SQL status: OK in 0.002 seconds
+[0m15:59:18.974192 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m15:59:18.974475 [debug] [ThreadPool]: On create_analytics_fc_main: BEGIN
+[0m15:59:18.974938 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m15:59:18.975174 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m15:59:18.975364 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+    
+        create schema if not exists "analytics_fc"."main"
+    
+[0m15:59:18.975813 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m15:59:18.976456 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m15:59:18.976687 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m15:59:18.976870 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m15:59:18.977194 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m15:59:18.977422 [debug] [ThreadPool]: On create_analytics_fc_main: Close
+[0m15:59:18.978949 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc_main'
+[0m15:59:18.983135 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m15:59:18.983463 [debug] [ThreadPool]: On list_analytics_fc_main: BEGIN
+[0m15:59:18.983676 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m15:59:18.984230 [debug] [ThreadPool]: SQL status: OK in 0.001 seconds
+[0m15:59:18.984458 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m15:59:18.984644 [debug] [ThreadPool]: On list_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc_main"} */
+select
+      'analytics_fc' as database,
+      table_name as name,
+      table_schema as schema,
+      CASE table_type
+        WHEN 'BASE TABLE' THEN 'table'
+        WHEN 'VIEW' THEN 'view'
+        WHEN 'LOCAL TEMPORARY' THEN 'table'
+        END as type
+    from system.information_schema.tables
+    where lower(table_schema) = 'main'
+    and lower(table_catalog) = 'analytics_fc'
+  
+[0m15:59:18.992108 [debug] [ThreadPool]: SQL status: OK in 0.007 seconds
+[0m15:59:18.993928 [debug] [ThreadPool]: On list_analytics_fc_main: ROLLBACK
+[0m15:59:18.994536 [debug] [ThreadPool]: On list_analytics_fc_main: Close
+[0m15:59:18.995328 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C6A8BF50>]}
+[0m15:59:18.995734 [debug] [MainThread]: Using duckdb connection "master"
+[0m15:59:18.995954 [debug] [MainThread]: On master: BEGIN
+[0m15:59:18.996141 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m15:59:18.996574 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m15:59:18.996779 [debug] [MainThread]: On master: COMMIT
+[0m15:59:18.996957 [debug] [MainThread]: Using duckdb connection "master"
+[0m15:59:18.997300 [debug] [MainThread]: On master: COMMIT
+[0m15:59:18.997663 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m15:59:18.997875 [debug] [MainThread]: On master: Close
+[0m15:59:19.003781 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_fifatable
+[0m15:59:19.004468 [info ] [Thread-1 (]: 1 of 1 START sql view model main.stg_fifatable ................................. [RUN]
+[0m15:59:19.005005 [debug] [Thread-1 (]: Acquiring new duckdb connection 'model.analytics_fc.stg_fifatable'
+[0m15:59:19.005271 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_fifatable
+[0m15:59:19.011176 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_fifatable"
+[0m15:59:19.013006 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_fifatable
+[0m15:59:19.041366 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_fifatable"
+[0m15:59:19.044353 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m15:59:19.044748 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: BEGIN
+[0m15:59:19.044990 [debug] [Thread-1 (]: Opening a new connection, currently in state init
+[0m15:59:19.045938 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m15:59:19.046252 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m15:59:19.046490 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+  
+  create view "analytics_fc"."main"."stg_fifatable__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."fifatable"
+),
+
+renamed AS (
+    SELECT
+        player_id,
+        Fifa_year AS fifa_edition_year,
+        age,
+        short_name,
+        long_name,
+        nationality,
+        club,
+        position
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m15:59:19.047950 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m15:59:19.052869 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m15:59:19.053215 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+alter view "analytics_fc"."main"."stg_fifatable__dbt_tmp" rename to "stg_fifatable"
+[0m15:59:19.054523 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m15:59:19.063880 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m15:59:19.064333 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m15:59:19.064587 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m15:59:19.066843 [debug] [Thread-1 (]: SQL status: OK in 0.002 seconds
+[0m15:59:19.071077 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m15:59:19.071474 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+      drop view if exists "analytics_fc"."main"."stg_fifatable__dbt_backup" cascade
+    
+[0m15:59:19.072141 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m15:59:19.074030 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: Close
+[0m15:59:19.077058 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'dbd90146-7255-439c-aeac-6ba508efcef7', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C6AA3E30>]}
+[0m15:59:19.077743 [info ] [Thread-1 (]: 1 of 1 OK created sql view model main.stg_fifatable ............................ [[32mOK[0m in 0.07s]
+[0m15:59:19.078301 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_fifatable
+[0m15:59:19.079573 [debug] [MainThread]: Using duckdb connection "master"
+[0m15:59:19.079864 [debug] [MainThread]: On master: BEGIN
+[0m15:59:19.080070 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m15:59:19.080627 [debug] [MainThread]: SQL status: OK in 0.001 seconds
+[0m15:59:19.080906 [debug] [MainThread]: On master: COMMIT
+[0m15:59:19.081120 [debug] [MainThread]: Using duckdb connection "master"
+[0m15:59:19.081293 [debug] [MainThread]: On master: COMMIT
+[0m15:59:19.081624 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m15:59:19.081830 [debug] [MainThread]: On master: Close
+[0m15:59:19.082136 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m15:59:19.082329 [debug] [MainThread]: Connection 'create_analytics_fc_main' was properly closed.
+[0m15:59:19.082489 [debug] [MainThread]: Connection 'list_analytics_fc_main' was properly closed.
+[0m15:59:19.082638 [debug] [MainThread]: Connection 'model.analytics_fc.stg_fifatable' was properly closed.
+[0m15:59:19.082879 [info ] [MainThread]: 
+[0m15:59:19.083183 [info ] [MainThread]: Finished running 1 view model in 0 hours 0 minutes and 3.99 seconds (3.99s).
+[0m15:59:19.084000 [debug] [MainThread]: Command end result
+[0m15:59:19.111728 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m15:59:19.114890 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m15:59:19.117708 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m15:59:19.125249 [debug] [MainThread]: Wrote artifact RunExecutionResult to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\run_results.json
+[0m15:59:19.125724 [info ] [MainThread]: 
+[0m15:59:19.126100 [info ] [MainThread]: [32mCompleted successfully[0m
+[0m15:59:19.126340 [info ] [MainThread]: 
+[0m15:59:19.126588 [info ] [MainThread]: Done. PASS=1 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=1
+[0m15:59:19.127415 [debug] [MainThread]: Command `dbt run` succeeded at 15:59:19.127284 after 8.31 seconds
+[0m15:59:19.127755 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C17D9B30>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C6AD43B0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001C5C6956DD0>]}
+[0m15:59:19.128089 [debug] [MainThread]: Flushing usage events
+[0m15:59:19.882008 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m16:02:20.514193 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3C446660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3EABFED0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3EABFC50>]}
+
+
+============================== 16:02:20.518887 | a5cc43ce-4dc4-4bf8-8446-c616f29bbaab ==============================
+[0m16:02:20.518887 [info ] [MainThread]: Running with dbt=1.12.5
+[0m16:02:20.519415 [debug] [MainThread]: running dbt with arguments {'maximum_seed_size_mib': '1', 'no_print': 'None', 'version_check': 'True', 'target_path': 'None', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'printer_width': '80', 'write_json': 'True', 'introspect': 'True', 'log_cache_events': 'False', 'empty': 'False', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'use_colors': 'True', 'hints_enabled': 'True', 'invocation_command': 'dbt run', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'log_path': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project\\logs'}
+[0m16:02:20.708729 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3C98E8B0>]}
+[0m16:02:20.762378 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3AB14160>]}
+[0m16:02:20.765107 [info ] [MainThread]: Registered adapter: duckdb=1.11.0
+[0m16:02:20.901712 [debug] [MainThread]: checksum: 7119ea9ea0a8c0e9670f38f33f87c32becf9f2d7f739bdc9a20c0de7769a393a, vars: {}, profile: analytics_fc, target: dev, version: 1.12.5
+[0m16:02:21.080755 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 2 files added, 0 files changed.
+[0m16:02:21.081398 [debug] [MainThread]: Partial parsing: added file: analytics_fc://models\staging\stg_tm_stats.sql
+[0m16:02:21.081663 [debug] [MainThread]: Partial parsing: added file: analytics_fc://models\staging\stg_tm_trophies.sql
+[0m16:02:21.319083 [warn ] [MainThread]: [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.analytics_fc.marts
+[0m16:02:21.322424 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3EEC0A50>]}
+[0m16:02:21.393223 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m16:02:21.396128 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m16:02:21.418615 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m16:02:21.430295 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F292C60>]}
+[0m16:02:21.430787 [info ] [MainThread]: Found 3 models, 3 sources, 500 macros
+[0m16:02:21.431098 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F30E190>]}
+[0m16:02:21.432763 [info ] [MainThread]: 
+[0m16:02:21.433255 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m16:02:21.433673 [info ] [MainThread]: 
+[0m16:02:21.434360 [debug] [MainThread]: Acquiring new duckdb connection 'master'
+[0m16:02:21.439479 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc'
+[0m16:02:21.482911 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc"
+[0m16:02:21.483319 [debug] [ThreadPool]: On list_analytics_fc: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc"} */
+
+    
+    select schema_name
+    from system.information_schema.schemata
+    
+    where lower(catalog_name) = '"analytics_fc"'
+    
+  
+  
+[0m16:02:21.483596 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:02:21.498591 [debug] [ThreadPool]: SQL status: OK in 0.015 seconds
+[0m16:02:21.499789 [debug] [ThreadPool]: On list_analytics_fc: Close
+[0m16:02:21.500501 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_analytics_fc, now create_analytics_fc_main)
+[0m16:02:21.500906 [debug] [ThreadPool]: Creating schema "database: "analytics_fc"
+schema: "main"
+"
+[0m16:02:21.506273 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:21.506617 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+        select type from duckdb_databases()
+        where lower(database_name)='analytics_fc'
+        and type != 'duckdb'
+    
+  
+[0m16:02:21.506838 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m16:02:21.507925 [debug] [ThreadPool]: SQL status: OK in 0.001 seconds
+[0m16:02:21.508922 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:21.509162 [debug] [ThreadPool]: On create_analytics_fc_main: BEGIN
+[0m16:02:21.509587 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:02:21.509806 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:21.509982 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+    
+        create schema if not exists "analytics_fc"."main"
+    
+[0m16:02:21.510451 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:02:21.511070 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m16:02:21.511290 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:21.511572 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m16:02:21.511943 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:02:21.512172 [debug] [ThreadPool]: On create_analytics_fc_main: Close
+[0m16:02:21.513497 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc_main'
+[0m16:02:21.517081 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m16:02:21.517517 [debug] [ThreadPool]: On list_analytics_fc_main: BEGIN
+[0m16:02:21.517775 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:02:21.518315 [debug] [ThreadPool]: SQL status: OK in 0.001 seconds
+[0m16:02:21.518526 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m16:02:21.518768 [debug] [ThreadPool]: On list_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc_main"} */
+select
+      'analytics_fc' as database,
+      table_name as name,
+      table_schema as schema,
+      CASE table_type
+        WHEN 'BASE TABLE' THEN 'table'
+        WHEN 'VIEW' THEN 'view'
+        WHEN 'LOCAL TEMPORARY' THEN 'table'
+        END as type
+    from system.information_schema.tables
+    where lower(table_schema) = 'main'
+    and lower(table_catalog) = 'analytics_fc'
+  
+[0m16:02:21.522367 [debug] [ThreadPool]: SQL status: OK in 0.003 seconds
+[0m16:02:21.523460 [debug] [ThreadPool]: On list_analytics_fc_main: ROLLBACK
+[0m16:02:21.523995 [debug] [ThreadPool]: On list_analytics_fc_main: Close
+[0m16:02:21.524849 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F326820>]}
+[0m16:02:21.525213 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:21.525419 [debug] [MainThread]: On master: BEGIN
+[0m16:02:21.525585 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m16:02:21.525978 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:02:21.526170 [debug] [MainThread]: On master: COMMIT
+[0m16:02:21.526341 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:21.526493 [debug] [MainThread]: On master: COMMIT
+[0m16:02:21.526825 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:02:21.527028 [debug] [MainThread]: On master: Close
+[0m16:02:21.529980 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_fifatable
+[0m16:02:21.530452 [info ] [Thread-1 (]: 1 of 3 START sql view model main.stg_fifatable ................................. [RUN]
+[0m16:02:21.530947 [debug] [Thread-1 (]: Acquiring new duckdb connection 'model.analytics_fc.stg_fifatable'
+[0m16:02:21.531215 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_fifatable
+[0m16:02:21.535438 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_fifatable"
+[0m16:02:21.536462 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_fifatable
+[0m16:02:21.558905 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_fifatable"
+[0m16:02:21.559943 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:21.560265 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: BEGIN
+[0m16:02:21.560487 [debug] [Thread-1 (]: Opening a new connection, currently in state init
+[0m16:02:21.561229 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.561498 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:21.561734 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+  
+  create view "analytics_fc"."main"."stg_fifatable__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."fifatable"
+),
+
+renamed AS (
+    SELECT
+        player_id,
+        Fifa_year AS fifa_edition_year,
+        age,
+        short_name,
+        long_name,
+        nationality,
+        club,
+        position
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:02:21.562605 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.566881 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:21.567226 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+alter view "analytics_fc"."main"."stg_fifatable" rename to "stg_fifatable__dbt_backup"
+[0m16:02:21.568107 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.569823 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:21.570084 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+alter view "analytics_fc"."main"."stg_fifatable__dbt_tmp" rename to "stg_fifatable"
+[0m16:02:21.570553 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:21.580765 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m16:02:21.581215 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:21.581487 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m16:02:21.590768 [debug] [Thread-1 (]: SQL status: OK in 0.009 seconds
+[0m16:02:21.594570 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:21.594864 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+      drop view if exists "analytics_fc"."main"."stg_fifatable__dbt_backup" cascade
+    
+[0m16:02:21.596023 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.597841 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: Close
+[0m16:02:21.599585 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F6C8E90>]}
+[0m16:02:21.600128 [info ] [Thread-1 (]: 1 of 3 OK created sql view model main.stg_fifatable ............................ [[32mOK[0m in 0.07s]
+[0m16:02:21.600584 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_fifatable
+[0m16:02:21.600859 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_tm_stats
+[0m16:02:21.601197 [info ] [Thread-1 (]: 2 of 3 START sql view model main.stg_tm_stats .................................. [RUN]
+[0m16:02:21.601777 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.analytics_fc.stg_fifatable, now model.analytics_fc.stg_tm_stats)
+[0m16:02:21.602142 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_tm_stats
+[0m16:02:21.603669 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_tm_stats"
+[0m16:02:21.604434 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_tm_stats
+[0m16:02:21.607234 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_tm_stats"
+[0m16:02:21.608745 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:21.609088 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: BEGIN
+[0m16:02:21.609341 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m16:02:21.609931 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.610163 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:21.610392 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+
+  
+  create view "analytics_fc"."main"."stg_tm_stats__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."tm_stats"
+),
+
+renamed AS (
+    SELECT
+        FifaIndex AS fifa_index,
+        short_name,
+        competition,
+        club,
+        games_played,
+        goals,
+        assists,
+        minutes
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:02:21.611156 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.612860 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:21.613107 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+alter view "analytics_fc"."main"."stg_tm_stats__dbt_tmp" rename to "stg_tm_stats"
+[0m16:02:21.613628 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:21.614767 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: COMMIT
+[0m16:02:21.615038 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:21.615246 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: COMMIT
+[0m16:02:21.616371 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.617608 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:21.617886 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+
+      drop view if exists "analytics_fc"."main"."stg_tm_stats__dbt_backup" cascade
+    
+[0m16:02:21.618404 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:21.619853 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: Close
+[0m16:02:21.621041 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F35E570>]}
+[0m16:02:21.622124 [info ] [Thread-1 (]: 2 of 3 OK created sql view model main.stg_tm_stats ............................. [[32mOK[0m in 0.02s]
+[0m16:02:21.623186 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_tm_stats
+[0m16:02:21.623898 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_tm_trophies
+[0m16:02:21.624618 [info ] [Thread-1 (]: 3 of 3 START sql view model main.stg_tm_trophies ............................... [RUN]
+[0m16:02:21.625517 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.analytics_fc.stg_tm_stats, now model.analytics_fc.stg_tm_trophies)
+[0m16:02:21.625824 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_tm_trophies
+[0m16:02:21.627970 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_tm_trophies"
+[0m16:02:21.629326 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_tm_trophies
+[0m16:02:21.631428 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_tm_trophies"
+[0m16:02:21.632430 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:21.632749 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: BEGIN
+[0m16:02:21.632963 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m16:02:21.633520 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.633774 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:21.633997 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+
+  
+  create view "analytics_fc"."main"."stg_tm_trophies__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."tm_trophies"
+),
+
+renamed AS (
+    SELECT
+        short_name,
+        club,
+        team_trophy,
+        individual_trophy,
+        trophy,
+        year AS trophy_year
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:02:21.634783 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.636789 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:21.637090 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+alter view "analytics_fc"."main"."stg_tm_trophies__dbt_tmp" rename to "stg_tm_trophies"
+[0m16:02:21.637764 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:21.639385 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: COMMIT
+[0m16:02:21.639663 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:21.639898 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: COMMIT
+[0m16:02:21.640989 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:21.642354 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:21.642638 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+
+      drop view if exists "analytics_fc"."main"."stg_tm_trophies__dbt_backup" cascade
+    
+[0m16:02:21.643199 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:21.644281 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: Close
+[0m16:02:21.644796 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a5cc43ce-4dc4-4bf8-8446-c616f29bbaab', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F6F59F0>]}
+[0m16:02:21.645300 [info ] [Thread-1 (]: 3 of 3 OK created sql view model main.stg_tm_trophies .......................... [[32mOK[0m in 0.02s]
+[0m16:02:21.645782 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_tm_trophies
+[0m16:02:21.646968 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:21.647243 [debug] [MainThread]: On master: BEGIN
+[0m16:02:21.647438 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m16:02:21.648013 [debug] [MainThread]: SQL status: OK in 0.001 seconds
+[0m16:02:21.648303 [debug] [MainThread]: On master: COMMIT
+[0m16:02:21.648537 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:21.648724 [debug] [MainThread]: On master: COMMIT
+[0m16:02:21.649185 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:02:21.649416 [debug] [MainThread]: On master: Close
+[0m16:02:21.649763 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m16:02:21.649968 [debug] [MainThread]: Connection 'create_analytics_fc_main' was properly closed.
+[0m16:02:21.650132 [debug] [MainThread]: Connection 'list_analytics_fc_main' was properly closed.
+[0m16:02:21.650281 [debug] [MainThread]: Connection 'model.analytics_fc.stg_tm_trophies' was properly closed.
+[0m16:02:21.650758 [info ] [MainThread]: 
+[0m16:02:21.651128 [info ] [MainThread]: Finished running 3 view models in 0 hours 0 minutes and 0.22 seconds (0.22s).
+[0m16:02:21.652509 [debug] [MainThread]: Command end result
+[0m16:02:21.688316 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m16:02:21.693443 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m16:02:21.698581 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m16:02:21.706026 [debug] [MainThread]: Wrote artifact RunExecutionResult to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\run_results.json
+[0m16:02:21.706407 [info ] [MainThread]: 
+[0m16:02:21.706752 [info ] [MainThread]: [32mCompleted successfully[0m
+[0m16:02:21.706990 [info ] [MainThread]: 
+[0m16:02:21.707220 [info ] [MainThread]: Done. PASS=3 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=3
+[0m16:02:21.708071 [debug] [MainThread]: Command `dbt run` succeeded at 16:02:21.707928 after 1.33 seconds
+[0m16:02:21.708412 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F0970D0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3F0B28D0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002CA3EAE3A80>]}
+[0m16:02:21.708715 [debug] [MainThread]: Flushing usage events
+[0m16:02:22.401256 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m16:02:44.720658 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5C3D6660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5EA4FED0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5EA4FC50>]}
+
+
+============================== 16:02:44.725230 | 38d0b1b5-bd33-4a84-9cc9-9f90f38ace72 ==============================
+[0m16:02:44.725230 [info ] [MainThread]: Running with dbt=1.12.5
+[0m16:02:44.725730 [debug] [MainThread]: running dbt with arguments {'static_parser': 'True', 'no_print': 'None', 'maximum_seed_size_mib': '1', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'version_check': 'True', 'target_path': 'None', 'printer_width': '80', 'write_json': 'True', 'empty': 'False', 'log_cache_events': 'False', 'introspect': 'True', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'invocation_command': 'dbt run', 'hints_enabled': 'True', 'indirect_selection': 'eager', 'use_experimental_parser': 'False', 'use_colors': 'True', 'log_path': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project\\logs'}
+[0m16:02:44.922782 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5C91A8B0>]}
+[0m16:02:44.979235 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5AA9C160>]}
+[0m16:02:44.983029 [info ] [MainThread]: Registered adapter: duckdb=1.11.0
+[0m16:02:45.144639 [debug] [MainThread]: checksum: 7119ea9ea0a8c0e9670f38f33f87c32becf9f2d7f739bdc9a20c0de7769a393a, vars: {}, profile: analytics_fc, target: dev, version: 1.12.5
+[0m16:02:45.386309 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 0 files added, 1 files changed.
+[0m16:02:45.386976 [debug] [MainThread]: Partial parsing: updated file: analytics_fc://models\staging\stg_fifatable.sql
+[0m16:02:45.636428 [warn ] [MainThread]: [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.analytics_fc.marts
+[0m16:02:45.640178 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5EE44750>]}
+[0m16:02:45.715436 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m16:02:45.718737 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m16:02:45.744969 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m16:02:45.764151 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5F24AB70>]}
+[0m16:02:45.764736 [info ] [MainThread]: Found 3 models, 3 sources, 500 macros
+[0m16:02:45.765084 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5F292430>]}
+[0m16:02:45.767395 [info ] [MainThread]: 
+[0m16:02:45.767932 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m16:02:45.768231 [info ] [MainThread]: 
+[0m16:02:45.768698 [debug] [MainThread]: Acquiring new duckdb connection 'master'
+[0m16:02:45.773302 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc'
+[0m16:02:45.821773 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc"
+[0m16:02:45.822178 [debug] [ThreadPool]: On list_analytics_fc: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc"} */
+
+    
+    select schema_name
+    from system.information_schema.schemata
+    
+    where lower(catalog_name) = '"analytics_fc"'
+    
+  
+  
+[0m16:02:45.822419 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:02:45.837229 [debug] [ThreadPool]: SQL status: OK in 0.015 seconds
+[0m16:02:45.838443 [debug] [ThreadPool]: On list_analytics_fc: Close
+[0m16:02:45.839489 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_analytics_fc, now create_analytics_fc_main)
+[0m16:02:45.840251 [debug] [ThreadPool]: Creating schema "database: "analytics_fc"
+schema: "main"
+"
+[0m16:02:45.845986 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:45.846425 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+        select type from duckdb_databases()
+        where lower(database_name)='analytics_fc'
+        and type != 'duckdb'
+    
+  
+[0m16:02:45.847166 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m16:02:45.848571 [debug] [ThreadPool]: SQL status: OK in 0.001 seconds
+[0m16:02:45.850340 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:45.850808 [debug] [ThreadPool]: On create_analytics_fc_main: BEGIN
+[0m16:02:45.851252 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:02:45.851456 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:45.851635 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+    
+        create schema if not exists "analytics_fc"."main"
+    
+[0m16:02:45.852053 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:02:45.852685 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m16:02:45.852921 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:02:45.853399 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m16:02:45.853912 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:02:45.854165 [debug] [ThreadPool]: On create_analytics_fc_main: Close
+[0m16:02:45.855890 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc_main'
+[0m16:02:45.860586 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m16:02:45.861216 [debug] [ThreadPool]: On list_analytics_fc_main: BEGIN
+[0m16:02:45.861744 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:02:45.862912 [debug] [ThreadPool]: SQL status: OK in 0.001 seconds
+[0m16:02:45.863284 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m16:02:45.863664 [debug] [ThreadPool]: On list_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc_main"} */
+select
+      'analytics_fc' as database,
+      table_name as name,
+      table_schema as schema,
+      CASE table_type
+        WHEN 'BASE TABLE' THEN 'table'
+        WHEN 'VIEW' THEN 'view'
+        WHEN 'LOCAL TEMPORARY' THEN 'table'
+        END as type
+    from system.information_schema.tables
+    where lower(table_schema) = 'main'
+    and lower(table_catalog) = 'analytics_fc'
+  
+[0m16:02:45.869021 [debug] [ThreadPool]: SQL status: OK in 0.005 seconds
+[0m16:02:45.870867 [debug] [ThreadPool]: On list_analytics_fc_main: ROLLBACK
+[0m16:02:45.871650 [debug] [ThreadPool]: On list_analytics_fc_main: Close
+[0m16:02:45.873396 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5F4ABEE0>]}
+[0m16:02:45.874217 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:45.874743 [debug] [MainThread]: On master: BEGIN
+[0m16:02:45.875195 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m16:02:45.876044 [debug] [MainThread]: SQL status: OK in 0.001 seconds
+[0m16:02:45.876453 [debug] [MainThread]: On master: COMMIT
+[0m16:02:45.876787 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:45.877114 [debug] [MainThread]: On master: COMMIT
+[0m16:02:45.877849 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:02:45.878319 [debug] [MainThread]: On master: Close
+[0m16:02:45.883282 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_fifatable
+[0m16:02:45.883843 [info ] [Thread-1 (]: 1 of 3 START sql view model main.stg_fifatable ................................. [RUN]
+[0m16:02:45.884348 [debug] [Thread-1 (]: Acquiring new duckdb connection 'model.analytics_fc.stg_fifatable'
+[0m16:02:45.884661 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_fifatable
+[0m16:02:45.890367 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_fifatable"
+[0m16:02:45.891801 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_fifatable
+[0m16:02:45.932391 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_fifatable"
+[0m16:02:45.933874 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:45.934378 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: BEGIN
+[0m16:02:45.934825 [debug] [Thread-1 (]: Opening a new connection, currently in state init
+[0m16:02:45.936030 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:45.936507 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:45.937025 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+  
+  create view "analytics_fc"."main"."stg_fifatable__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."fifatable"
+),
+
+renamed AS (
+    SELECT
+        player_id,
+        Fifa_year AS fifa_edition_year,
+        age,
+        short_name,
+        long_name,
+        nationality,
+        club,
+        position,
+        overall,
+        max_potential
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:02:45.938604 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:45.944937 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:45.945431 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+alter view "analytics_fc"."main"."stg_fifatable" rename to "stg_fifatable__dbt_backup"
+[0m16:02:45.946377 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:45.948758 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:45.949179 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+alter view "analytics_fc"."main"."stg_fifatable__dbt_tmp" rename to "stg_fifatable"
+[0m16:02:45.950087 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:45.966370 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m16:02:45.967045 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:45.967490 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m16:02:45.977318 [debug] [Thread-1 (]: SQL status: OK in 0.009 seconds
+[0m16:02:45.983062 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:02:45.983551 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+      drop view if exists "analytics_fc"."main"."stg_fifatable__dbt_backup" cascade
+    
+[0m16:02:45.985674 [debug] [Thread-1 (]: SQL status: OK in 0.002 seconds
+[0m16:02:45.988391 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: Close
+[0m16:02:45.990942 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5F644A10>]}
+[0m16:02:45.991640 [info ] [Thread-1 (]: 1 of 3 OK created sql view model main.stg_fifatable ............................ [[32mOK[0m in 0.10s]
+[0m16:02:45.992465 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_fifatable
+[0m16:02:45.993011 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_tm_stats
+[0m16:02:45.993715 [info ] [Thread-1 (]: 2 of 3 START sql view model main.stg_tm_stats .................................. [RUN]
+[0m16:02:45.994303 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.analytics_fc.stg_fifatable, now model.analytics_fc.stg_tm_stats)
+[0m16:02:45.994714 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_tm_stats
+[0m16:02:45.996835 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_tm_stats"
+[0m16:02:45.997987 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_tm_stats
+[0m16:02:46.002507 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_tm_stats"
+[0m16:02:46.004076 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:46.004564 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: BEGIN
+[0m16:02:46.004998 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m16:02:46.005949 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:46.006408 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:46.006883 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+
+  
+  create view "analytics_fc"."main"."stg_tm_stats__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."tm_stats"
+),
+
+renamed AS (
+    SELECT
+        FifaIndex AS fifa_index,
+        short_name,
+        competition,
+        club,
+        games_played,
+        goals,
+        assists,
+        minutes
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:02:46.008377 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:46.011146 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:46.011615 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+alter view "analytics_fc"."main"."stg_tm_stats" rename to "stg_tm_stats__dbt_backup"
+[0m16:02:46.012483 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:46.014956 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:46.015427 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+alter view "analytics_fc"."main"."stg_tm_stats__dbt_tmp" rename to "stg_tm_stats"
+[0m16:02:46.016298 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:46.018114 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: COMMIT
+[0m16:02:46.018540 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:46.018940 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: COMMIT
+[0m16:02:46.021135 [debug] [Thread-1 (]: SQL status: OK in 0.002 seconds
+[0m16:02:46.022942 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:02:46.023321 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+
+      drop view if exists "analytics_fc"."main"."stg_tm_stats__dbt_backup" cascade
+    
+[0m16:02:46.025577 [debug] [Thread-1 (]: SQL status: OK in 0.002 seconds
+[0m16:02:46.027104 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: Close
+[0m16:02:46.027836 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5F2DA780>]}
+[0m16:02:46.028529 [info ] [Thread-1 (]: 2 of 3 OK created sql view model main.stg_tm_stats ............................. [[32mOK[0m in 0.03s]
+[0m16:02:46.029403 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_tm_stats
+[0m16:02:46.029951 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_tm_trophies
+[0m16:02:46.030675 [info ] [Thread-1 (]: 3 of 3 START sql view model main.stg_tm_trophies ............................... [RUN]
+[0m16:02:46.031248 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.analytics_fc.stg_tm_stats, now model.analytics_fc.stg_tm_trophies)
+[0m16:02:46.031675 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_tm_trophies
+[0m16:02:46.033880 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.035124 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_tm_trophies
+[0m16:02:46.038770 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.039900 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.040337 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: BEGIN
+[0m16:02:46.040736 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m16:02:46.041597 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:46.042236 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.042723 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+
+  
+  create view "analytics_fc"."main"."stg_tm_trophies__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."tm_trophies"
+),
+
+renamed AS (
+    SELECT
+        short_name,
+        club,
+        team_trophy,
+        individual_trophy,
+        trophy,
+        year AS trophy_year
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:02:46.043799 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:46.046538 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.046977 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+alter view "analytics_fc"."main"."stg_tm_trophies" rename to "stg_tm_trophies__dbt_backup"
+[0m16:02:46.048026 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:02:46.050606 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.051055 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+alter view "analytics_fc"."main"."stg_tm_trophies__dbt_tmp" rename to "stg_tm_trophies"
+[0m16:02:46.051994 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:02:46.053728 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: COMMIT
+[0m16:02:46.054174 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.054570 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: COMMIT
+[0m16:02:46.057493 [debug] [Thread-1 (]: SQL status: OK in 0.002 seconds
+[0m16:02:46.059511 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:02:46.059933 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+
+      drop view if exists "analytics_fc"."main"."stg_tm_trophies__dbt_backup" cascade
+    
+[0m16:02:46.063156 [debug] [Thread-1 (]: SQL status: OK in 0.003 seconds
+[0m16:02:46.064956 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: Close
+[0m16:02:46.065579 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': '38d0b1b5-bd33-4a84-9cc9-9f90f38ace72', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5F6D4F50>]}
+[0m16:02:46.066221 [info ] [Thread-1 (]: 3 of 3 OK created sql view model main.stg_tm_trophies .......................... [[32mOK[0m in 0.03s]
+[0m16:02:46.066979 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_tm_trophies
+[0m16:02:46.068470 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:46.068856 [debug] [MainThread]: On master: BEGIN
+[0m16:02:46.069181 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m16:02:46.069896 [debug] [MainThread]: SQL status: OK in 0.001 seconds
+[0m16:02:46.070215 [debug] [MainThread]: On master: COMMIT
+[0m16:02:46.070510 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:02:46.070785 [debug] [MainThread]: On master: COMMIT
+[0m16:02:46.071331 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:02:46.071755 [debug] [MainThread]: On master: Close
+[0m16:02:46.072195 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m16:02:46.072480 [debug] [MainThread]: Connection 'create_analytics_fc_main' was properly closed.
+[0m16:02:46.072745 [debug] [MainThread]: Connection 'list_analytics_fc_main' was properly closed.
+[0m16:02:46.073033 [debug] [MainThread]: Connection 'model.analytics_fc.stg_tm_trophies' was properly closed.
+[0m16:02:46.073418 [info ] [MainThread]: 
+[0m16:02:46.073788 [info ] [MainThread]: Finished running 3 view models in 0 hours 0 minutes and 0.30 seconds (0.30s).
+[0m16:02:46.074949 [debug] [MainThread]: Command end result
+[0m16:02:46.111744 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m16:02:46.114877 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m16:02:46.118851 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m16:02:46.124940 [debug] [MainThread]: Wrote artifact RunExecutionResult to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\run_results.json
+[0m16:02:46.125311 [info ] [MainThread]: 
+[0m16:02:46.125637 [info ] [MainThread]: [32mCompleted successfully[0m
+[0m16:02:46.125863 [info ] [MainThread]: 
+[0m16:02:46.126094 [info ] [MainThread]: Done. PASS=3 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=3
+[0m16:02:46.127146 [debug] [MainThread]: Command `dbt run` succeeded at 16:02:46.126949 after 1.54 seconds
+[0m16:02:46.127665 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5F0170D0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5C8BBE50>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x0000023C5EA73A80>]}
+[0m16:02:46.128174 [debug] [MainThread]: Flushing usage events
+[0m16:02:46.864111 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m16:23:37.049414 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060C2F6660>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060E96FED0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060E96FC50>]}
+
+
+============================== 16:23:37.055527 | a40a6864-e3e3-4561-a2d2-6ce92b44cf75 ==============================
+[0m16:23:37.055527 [info ] [MainThread]: Running with dbt=1.12.5
+[0m16:23:37.056007 [debug] [MainThread]: running dbt with arguments {'static_parser': 'True', 'no_print': 'None', 'maximum_seed_size_mib': '1', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'version_check': 'True', 'printer_width': '80', 'write_json': 'True', 'empty': 'False', 'log_cache_events': 'False', 'introspect': 'True', 'cache_selected_only': 'False', 'log_format': 'default', 'debug': 'False', 'fail_fast': 'False', 'profiles_dir': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project', 'send_anonymous_usage_stats': 'True', 'quiet': 'False', 'warn_error': 'None', 'partial_parse': 'True', 'use_colors': 'True', 'hints_enabled': 'True', 'indirect_selection': 'eager', 'use_experimental_parser': 'False', 'invocation_command': 'dbt run', 'log_path': 'C:\\Users\\AminE\\Documents\\Fifa Project\\analytics-fc\\dbt_project\\logs'}
+[0m16:23:37.451335 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'project_id', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060C8368B0>]}
+[0m16:23:37.506205 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'adapter_info', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060A9B4160>]}
+[0m16:23:37.509282 [info ] [MainThread]: Registered adapter: duckdb=1.11.0
+[0m16:23:37.655551 [debug] [MainThread]: checksum: 7119ea9ea0a8c0e9670f38f33f87c32becf9f2d7f739bdc9a20c0de7769a393a, vars: {}, profile: analytics_fc, target: dev, version: 1.12.5
+[0m16:23:37.849435 [debug] [MainThread]: Partial parsing enabled: 0 files deleted, 1 files added, 0 files changed.
+[0m16:23:37.849989 [debug] [MainThread]: Partial parsing: added file: analytics_fc://models\marts\cascade\mart_scdi_overall.sql
+[0m16:23:38.096800 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'load_project', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060ED54750>]}
+[0m16:23:38.171296 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m16:23:38.175120 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m16:23:38.211516 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m16:23:38.230018 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'resource_counts', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060F142C60>]}
+[0m16:23:38.230451 [info ] [MainThread]: Found 4 models, 3 sources, 500 macros
+[0m16:23:38.230827 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060F1A2430>]}
+[0m16:23:38.233403 [info ] [MainThread]: 
+[0m16:23:38.233893 [info ] [MainThread]: Concurrency: 1 threads (target='dev')
+[0m16:23:38.234141 [info ] [MainThread]: 
+[0m16:23:38.234665 [debug] [MainThread]: Acquiring new duckdb connection 'master'
+[0m16:23:38.239506 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc'
+[0m16:23:38.284654 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc"
+[0m16:23:38.285012 [debug] [ThreadPool]: On list_analytics_fc: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc"} */
+
+    
+    select schema_name
+    from system.information_schema.schemata
+    
+    where lower(catalog_name) = '"analytics_fc"'
+    
+  
+  
+[0m16:23:38.285240 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:23:38.335508 [debug] [ThreadPool]: SQL status: OK in 0.050 seconds
+[0m16:23:38.337420 [debug] [ThreadPool]: On list_analytics_fc: Close
+[0m16:23:38.338041 [debug] [ThreadPool]: Re-using an available connection from the pool (formerly list_analytics_fc, now create_analytics_fc_main)
+[0m16:23:38.338434 [debug] [ThreadPool]: Creating schema "database: "analytics_fc"
+schema: "main"
+"
+[0m16:23:38.343685 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:23:38.343957 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+        select type from duckdb_databases()
+        where lower(database_name)='analytics_fc'
+        and type != 'duckdb'
+    
+  
+[0m16:23:38.344154 [debug] [ThreadPool]: Opening a new connection, currently in state closed
+[0m16:23:38.345301 [debug] [ThreadPool]: SQL status: OK in 0.001 seconds
+[0m16:23:38.346210 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:23:38.346430 [debug] [ThreadPool]: On create_analytics_fc_main: BEGIN
+[0m16:23:38.346878 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:23:38.347092 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:23:38.347273 [debug] [ThreadPool]: On create_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "create_analytics_fc_main"} */
+
+    
+    
+        create schema if not exists "analytics_fc"."main"
+    
+[0m16:23:38.348883 [debug] [ThreadPool]: SQL status: OK in 0.001 seconds
+[0m16:23:38.349499 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m16:23:38.349771 [debug] [ThreadPool]: Using duckdb connection "create_analytics_fc_main"
+[0m16:23:38.350070 [debug] [ThreadPool]: On create_analytics_fc_main: COMMIT
+[0m16:23:38.350430 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:23:38.350654 [debug] [ThreadPool]: On create_analytics_fc_main: Close
+[0m16:23:38.351925 [debug] [ThreadPool]: Acquiring new duckdb connection 'list_analytics_fc_main'
+[0m16:23:38.355615 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m16:23:38.355936 [debug] [ThreadPool]: On list_analytics_fc_main: BEGIN
+[0m16:23:38.356179 [debug] [ThreadPool]: Opening a new connection, currently in state init
+[0m16:23:38.356687 [debug] [ThreadPool]: SQL status: OK in 0.000 seconds
+[0m16:23:38.356998 [debug] [ThreadPool]: Using duckdb connection "list_analytics_fc_main"
+[0m16:23:38.357209 [debug] [ThreadPool]: On list_analytics_fc_main: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "connection_name": "list_analytics_fc_main"} */
+select
+      'analytics_fc' as database,
+      table_name as name,
+      table_schema as schema,
+      CASE table_type
+        WHEN 'BASE TABLE' THEN 'table'
+        WHEN 'VIEW' THEN 'view'
+        WHEN 'LOCAL TEMPORARY' THEN 'table'
+        END as type
+    from system.information_schema.tables
+    where lower(table_schema) = 'main'
+    and lower(table_catalog) = 'analytics_fc'
+  
+[0m16:23:38.368592 [debug] [ThreadPool]: SQL status: OK in 0.011 seconds
+[0m16:23:38.369575 [debug] [ThreadPool]: On list_analytics_fc_main: ROLLBACK
+[0m16:23:38.369971 [debug] [ThreadPool]: On list_analytics_fc_main: Close
+[0m16:23:38.371203 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'runnable_timing', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060F3C3D40>]}
+[0m16:23:38.371542 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:23:38.371739 [debug] [MainThread]: On master: BEGIN
+[0m16:23:38.371903 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m16:23:38.372284 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:23:38.372495 [debug] [MainThread]: On master: COMMIT
+[0m16:23:38.372673 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:23:38.372845 [debug] [MainThread]: On master: COMMIT
+[0m16:23:38.373154 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:23:38.373338 [debug] [MainThread]: On master: Close
+[0m16:23:38.378188 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_fifatable
+[0m16:23:38.378635 [info ] [Thread-1 (]: 1 of 4 START sql view model main.stg_fifatable ................................. [RUN]
+[0m16:23:38.379133 [debug] [Thread-1 (]: Acquiring new duckdb connection 'model.analytics_fc.stg_fifatable'
+[0m16:23:38.379408 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_fifatable
+[0m16:23:38.383863 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_fifatable"
+[0m16:23:38.385376 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_fifatable
+[0m16:23:38.408086 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_fifatable"
+[0m16:23:38.409303 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:23:38.409595 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: BEGIN
+[0m16:23:38.409804 [debug] [Thread-1 (]: Opening a new connection, currently in state init
+[0m16:23:38.410415 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.410663 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:23:38.410887 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+  
+  create view "analytics_fc"."main"."stg_fifatable__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."fifatable"
+),
+
+renamed AS (
+    SELECT
+        player_id,
+        Fifa_year AS fifa_edition_year,
+        age,
+        short_name,
+        long_name,
+        nationality,
+        club,
+        position,
+        overall,
+        max_potential
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:23:38.412452 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.416625 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:23:38.416909 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+alter view "analytics_fc"."main"."stg_fifatable" rename to "stg_fifatable__dbt_backup"
+[0m16:23:38.417491 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:23:38.418953 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:23:38.419196 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+alter view "analytics_fc"."main"."stg_fifatable__dbt_tmp" rename to "stg_fifatable"
+[0m16:23:38.419695 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:23:38.428749 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m16:23:38.429112 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:23:38.429340 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: COMMIT
+[0m16:23:38.432638 [debug] [Thread-1 (]: SQL status: OK in 0.003 seconds
+[0m16:23:38.436651 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_fifatable"
+[0m16:23:38.437025 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_fifatable"} */
+
+      drop view if exists "analytics_fc"."main"."stg_fifatable__dbt_backup" cascade
+    
+[0m16:23:38.438653 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.440572 [debug] [Thread-1 (]: On model.analytics_fc.stg_fifatable: Close
+[0m16:23:38.442578 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060F558710>]}
+[0m16:23:38.443300 [info ] [Thread-1 (]: 1 of 4 OK created sql view model main.stg_fifatable ............................ [[32mOK[0m in 0.06s]
+[0m16:23:38.443820 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_fifatable
+[0m16:23:38.444145 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_tm_stats
+[0m16:23:38.444578 [info ] [Thread-1 (]: 2 of 4 START sql view model main.stg_tm_stats .................................. [RUN]
+[0m16:23:38.445137 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.analytics_fc.stg_fifatable, now model.analytics_fc.stg_tm_stats)
+[0m16:23:38.445430 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_tm_stats
+[0m16:23:38.447243 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.448106 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_tm_stats
+[0m16:23:38.451163 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.452240 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.452600 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: BEGIN
+[0m16:23:38.452834 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m16:23:38.453440 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.453757 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.454122 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+
+  
+  create view "analytics_fc"."main"."stg_tm_stats__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."tm_stats"
+),
+
+renamed AS (
+    SELECT
+        FifaIndex AS fifa_index,
+        short_name,
+        competition,
+        club,
+        games_played,
+        goals,
+        assists,
+        minutes
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:23:38.454982 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.457092 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.457432 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+alter view "analytics_fc"."main"."stg_tm_stats" rename to "stg_tm_stats__dbt_backup"
+[0m16:23:38.458100 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:23:38.459840 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.460129 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+alter view "analytics_fc"."main"."stg_tm_stats__dbt_tmp" rename to "stg_tm_stats"
+[0m16:23:38.460683 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:23:38.462004 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: COMMIT
+[0m16:23:38.462473 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.462773 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: COMMIT
+[0m16:23:38.464291 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.465694 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_stats"
+[0m16:23:38.465981 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_stats"} */
+
+      drop view if exists "analytics_fc"."main"."stg_tm_stats__dbt_backup" cascade
+    
+[0m16:23:38.467377 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.468571 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_stats: Close
+[0m16:23:38.469055 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060F1EE780>]}
+[0m16:23:38.469537 [info ] [Thread-1 (]: 2 of 4 OK created sql view model main.stg_tm_stats ............................. [[32mOK[0m in 0.02s]
+[0m16:23:38.470001 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_tm_stats
+[0m16:23:38.470291 [debug] [Thread-1 (]: Began running node model.analytics_fc.stg_tm_trophies
+[0m16:23:38.470773 [info ] [Thread-1 (]: 3 of 4 START sql view model main.stg_tm_trophies ............................... [RUN]
+[0m16:23:38.471176 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.analytics_fc.stg_tm_stats, now model.analytics_fc.stg_tm_trophies)
+[0m16:23:38.471457 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.stg_tm_trophies
+[0m16:23:38.473279 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.474176 [debug] [Thread-1 (]: Began executing node model.analytics_fc.stg_tm_trophies
+[0m16:23:38.477379 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.478718 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.479144 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: BEGIN
+[0m16:23:38.479398 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m16:23:38.480025 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.480341 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.480585 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+
+  
+  create view "analytics_fc"."main"."stg_tm_trophies__dbt_tmp" as (
+    ﻿WITH source AS (
+    SELECT * FROM "analytics_fc"."raw"."tm_trophies"
+),
+
+renamed AS (
+    SELECT
+        short_name,
+        club,
+        team_trophy,
+        individual_trophy,
+        trophy,
+        year AS trophy_year
+    FROM source
+)
+
+SELECT * FROM renamed
+  );
+
+[0m16:23:38.481337 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:23:38.483440 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.483788 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+alter view "analytics_fc"."main"."stg_tm_trophies" rename to "stg_tm_trophies__dbt_backup"
+[0m16:23:38.484454 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:23:38.486123 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.486420 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+alter view "analytics_fc"."main"."stg_tm_trophies__dbt_tmp" rename to "stg_tm_trophies"
+[0m16:23:38.487029 [debug] [Thread-1 (]: SQL status: OK in 0.000 seconds
+[0m16:23:38.488185 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: COMMIT
+[0m16:23:38.488467 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.488722 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: COMMIT
+[0m16:23:38.490128 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.491433 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.stg_tm_trophies"
+[0m16:23:38.491697 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.stg_tm_trophies"} */
+
+      drop view if exists "analytics_fc"."main"."stg_tm_trophies__dbt_backup" cascade
+    
+[0m16:23:38.492919 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.494177 [debug] [Thread-1 (]: On model.analytics_fc.stg_tm_trophies: Close
+[0m16:23:38.494632 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060F5F4370>]}
+[0m16:23:38.495125 [info ] [Thread-1 (]: 3 of 4 OK created sql view model main.stg_tm_trophies .......................... [[32mOK[0m in 0.02s]
+[0m16:23:38.495623 [debug] [Thread-1 (]: Finished running node model.analytics_fc.stg_tm_trophies
+[0m16:23:38.495907 [debug] [Thread-1 (]: Began running node model.analytics_fc.mart_scdi_overall
+[0m16:23:38.496268 [info ] [Thread-1 (]: 4 of 4 START sql table model main.mart_scdi_overall ............................ [RUN]
+[0m16:23:38.496769 [debug] [Thread-1 (]: Re-using an available connection from the pool (formerly model.analytics_fc.stg_tm_trophies, now model.analytics_fc.mart_scdi_overall)
+[0m16:23:38.497081 [debug] [Thread-1 (]: Began compiling node model.analytics_fc.mart_scdi_overall
+[0m16:23:38.498951 [debug] [Thread-1 (]: Writing injected SQL for node "model.analytics_fc.mart_scdi_overall"
+[0m16:23:38.500282 [debug] [Thread-1 (]: Began executing node model.analytics_fc.mart_scdi_overall
+[0m16:23:38.529616 [debug] [Thread-1 (]: Writing runtime sql for node "model.analytics_fc.mart_scdi_overall"
+[0m16:23:38.531402 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.mart_scdi_overall"
+[0m16:23:38.531789 [debug] [Thread-1 (]: On model.analytics_fc.mart_scdi_overall: BEGIN
+[0m16:23:38.532039 [debug] [Thread-1 (]: Opening a new connection, currently in state closed
+[0m16:23:38.532632 [debug] [Thread-1 (]: SQL status: OK in 0.001 seconds
+[0m16:23:38.532931 [debug] [Thread-1 (]: Using duckdb connection "model.analytics_fc.mart_scdi_overall"
+[0m16:23:38.533300 [debug] [Thread-1 (]: On model.analytics_fc.mart_scdi_overall: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.mart_scdi_overall"} */
+
+    
+
+    create  table
+      "analytics_fc"."main"."mart_scdi_overall__dbt_tmp"
+  
+    
+    as (
+      ﻿-- Level 1: Single Correlating Dyadic Index (SCDI)
+-- This model finds pairs of players whose 'overall' rating trajectories 
+-- highly correlate during their developmental years (ages 18 to 21).
+
+WITH base AS (
+    SELECT 
+        player_id, 
+        short_name,
+        age, 
+        overall
+    FROM "analytics_fc"."main"."stg_fifatable"
+    WHERE age BETWEEN 18 AND 21
+),
+
+-- Ensure we only compare players who actually have data for all 4 years in this window
+complete_trajectories AS (
+    SELECT player_id
+    FROM base
+    GROUP BY player_id
+    HAVING COUNT(*) = 4
+),
+
+filtered_base AS (
+    SELECT b.*
+    FROM base b
+    INNER JOIN complete_trajectories ct ON b.player_id = ct.player_id
+),
+
+-- Join every player with every other player based on the same age
+trajectory_pairs AS (
+    SELECT 
+        a.player_id AS player_a_id,
+        a.short_name AS player_a_name,
+        b.player_id AS player_b_id,
+        b.short_name AS player_b_name,
+        a.age,
+        a.overall AS overall_a,
+        b.overall AS overall_b
+    FROM filtered_base a
+    INNER JOIN filtered_base b ON a.age = b.age
+    WHERE a.player_id < b.player_id -- ensures we don't compare A to A, or do A->B and B->A
+)
+
+-- Calculate the Pearson Correlation (SCDI) for the trajectory
+SELECT 
+    player_a_id,
+    player_a_name,
+    player_b_id,
+    player_b_name,
+    CORR(overall_a, overall_b) AS scdi_score
+FROM trajectory_pairs
+GROUP BY 
+    player_a_id, player_a_name, player_b_id, player_b_name
+-- Filter for only highly correlated pairs (the "gems")
+HAVING CORR(overall_a, overall_b) >= 0.85
+    );
+    
+  
+[0m16:23:38.546301 [debug] [Thread-1 (]: DuckDB adapter: duckdb error: Binder Error: Cannot mix values of type VARCHAR and INTEGER_LITERAL in BETWEEN clause - an explicit cast is required
+
+LINE 21:     WHERE age BETWEEN 18 AND 21
+                       ^
+[0m16:23:38.546795 [debug] [Thread-1 (]: DuckDB adapter: Error running SQL: /* {"app": "dbt", "dbt_version": "1.12.5", "profile_name": "analytics_fc", "target_name": "dev", "node_id": "model.analytics_fc.mart_scdi_overall"} */
+
+    
+
+    create  table
+      "analytics_fc"."main"."mart_scdi_overall__dbt_tmp"
+  
+    
+    as (
+      ﻿-- Level 1: Single Correlating Dyadic Index (SCDI)
+-- This model finds pairs of players whose 'overall' rating trajectories 
+-- highly correlate during their developmental years (ages 18 to 21).
+
+WITH base AS (
+    SELECT 
+        player_id, 
+        short_name,
+        age, 
+        overall
+    FROM "analytics_fc"."main"."stg_fifatable"
+    WHERE age BETWEEN 18 AND 21
+),
+
+-- Ensure we only compare players who actually have data for all 4 years in this window
+complete_trajectories AS (
+    SELECT player_id
+    FROM base
+    GROUP BY player_id
+    HAVING COUNT(*) = 4
+),
+
+filtered_base AS (
+    SELECT b.*
+    FROM base b
+    INNER JOIN complete_trajectories ct ON b.player_id = ct.player_id
+),
+
+-- Join every player with every other player based on the same age
+trajectory_pairs AS (
+    SELECT 
+        a.player_id AS player_a_id,
+        a.short_name AS player_a_name,
+        b.player_id AS player_b_id,
+        b.short_name AS player_b_name,
+        a.age,
+        a.overall AS overall_a,
+        b.overall AS overall_b
+    FROM filtered_base a
+    INNER JOIN filtered_base b ON a.age = b.age
+    WHERE a.player_id < b.player_id -- ensures we don't compare A to A, or do A->B and B->A
+)
+
+-- Calculate the Pearson Correlation (SCDI) for the trajectory
+SELECT 
+    player_a_id,
+    player_a_name,
+    player_b_id,
+    player_b_name,
+    CORR(overall_a, overall_b) AS scdi_score
+FROM trajectory_pairs
+GROUP BY 
+    player_a_id, player_a_name, player_b_id, player_b_name
+-- Filter for only highly correlated pairs (the "gems")
+HAVING CORR(overall_a, overall_b) >= 0.85
+    );
+    
+  
+[0m16:23:38.547116 [debug] [Thread-1 (]: DuckDB adapter: Rolling back transaction.
+[0m16:23:38.547400 [debug] [Thread-1 (]: On model.analytics_fc.mart_scdi_overall: ROLLBACK
+[0m16:23:38.547989 [debug] [Thread-1 (]: On model.analytics_fc.mart_scdi_overall: Close
+[0m16:23:38.645139 [debug] [Thread-1 (]: Runtime Error in model mart_scdi_overall (models\marts\cascade\mart_scdi_overall.sql)
+  Binder Error: Cannot mix values of type VARCHAR and INTEGER_LITERAL in BETWEEN clause - an explicit cast is required
+  
+  LINE 21:     WHERE age BETWEEN 18 AND 21
+                         ^
+[0m16:23:38.645632 [debug] [Thread-1 (]: Sending event: {'category': 'dbt', 'action': 'run_model', 'label': 'a40a6864-e3e3-4561-a2d2-6ce92b44cf75', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060F192FD0>]}
+[0m16:23:38.646127 [error] [Thread-1 (]: 4 of 4 ERROR creating sql table model main.mart_scdi_overall ................... [[31mERROR[0m in 0.15s]
+[0m16:23:38.646577 [debug] [Thread-1 (]: Finished running node model.analytics_fc.mart_scdi_overall
+[0m16:23:38.646930 [debug] [Thread-4 (]: Marking all children of 'model.analytics_fc.mart_scdi_overall' to be skipped because of status 'error'.  Reason: Runtime Error in model mart_scdi_overall (models\marts\cascade\mart_scdi_overall.sql)
+  Binder Error: Cannot mix values of type VARCHAR and INTEGER_LITERAL in BETWEEN clause - an explicit cast is required
+  
+  LINE 21:     WHERE age BETWEEN 18 AND 21
+                         ^.
+[0m16:23:38.648438 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:23:38.648731 [debug] [MainThread]: On master: BEGIN
+[0m16:23:38.648940 [debug] [MainThread]: Opening a new connection, currently in state closed
+[0m16:23:38.649470 [debug] [MainThread]: SQL status: OK in 0.001 seconds
+[0m16:23:38.649682 [debug] [MainThread]: On master: COMMIT
+[0m16:23:38.649884 [debug] [MainThread]: Using duckdb connection "master"
+[0m16:23:38.650075 [debug] [MainThread]: On master: COMMIT
+[0m16:23:38.650396 [debug] [MainThread]: SQL status: OK in 0.000 seconds
+[0m16:23:38.650621 [debug] [MainThread]: On master: Close
+[0m16:23:38.650904 [debug] [MainThread]: Connection 'master' was properly closed.
+[0m16:23:38.651126 [debug] [MainThread]: Connection 'create_analytics_fc_main' was properly closed.
+[0m16:23:38.651292 [debug] [MainThread]: Connection 'list_analytics_fc_main' was properly closed.
+[0m16:23:38.651442 [debug] [MainThread]: Connection 'model.analytics_fc.mart_scdi_overall' was properly closed.
+[0m16:23:38.651716 [info ] [MainThread]: 
+[0m16:23:38.651968 [info ] [MainThread]: Finished running 1 table model, 3 view models in 0 hours 0 minutes and 0.42 seconds (0.42s).
+[0m16:23:38.652796 [debug] [MainThread]: Command end result
+[0m16:23:38.677227 [debug] [MainThread]: Wrote artifact WritableManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\manifest.json
+[0m16:23:38.680097 [debug] [MainThread]: Wrote artifact SemanticManifest to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\semantic_manifest.json
+[0m16:23:38.682402 [debug] [MainThread]: Wrote artifact OsiDocument to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\osi_document.json
+[0m16:23:38.687946 [debug] [MainThread]: Wrote artifact RunExecutionResult to C:\Users\AminE\Documents\Fifa Project\analytics-fc\dbt_project\target\run_results.json
+[0m16:23:38.688228 [info ] [MainThread]: 
+[0m16:23:38.688521 [info ] [MainThread]: [31mCompleted with 1 error, 0 partial successes, and 0 warnings:[0m
+[0m16:23:38.688747 [info ] [MainThread]: 
+[0m16:23:38.689008 [error] [MainThread]: [[31mERROR[0m]: in model mart_scdi_overall (models\marts\cascade\mart_scdi_overall.sql)
+[0m16:23:38.689273 [error] [MainThread]:   Runtime Error in model mart_scdi_overall (models\marts\cascade\mart_scdi_overall.sql)
+  Binder Error: Cannot mix values of type VARCHAR and INTEGER_LITERAL in BETWEEN clause - an explicit cast is required
+  
+  LINE 21:     WHERE age BETWEEN 18 AND 21
+                         ^
+[0m16:23:38.689464 [info ] [MainThread]: 
+[0m16:23:38.689725 [info ] [MainThread]:   compiled code at target\compiled\analytics_fc\models\marts\cascade\mart_scdi_overall.sql
+[0m16:23:38.689921 [info ] [MainThread]: 
+[0m16:23:38.690169 [info ] [MainThread]: Done. PASS=3 WARN=0 ERROR=1 SKIP=0 NO-OP=0 REUSED=0 TOTAL=4
+[0m16:23:38.690898 [debug] [MainThread]: Command `dbt run` failed at 16:23:38.690789 after 1.76 seconds
+[0m16:23:38.691260 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060E993A80>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060E747070>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000002060C0C5250>]}
+[0m16:23:38.691556 [debug] [MainThread]: Flushing usage events
+[0m16:23:39.503640 [debug] [MainThread]: An error was encountered while trying to flush usage events
