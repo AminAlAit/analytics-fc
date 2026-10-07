@@ -1,6 +1,6 @@
 # Architecture Blueprint: FIFA Wonderkid MLOps Platform
 
-This is our "North Star" diagram.
+This document outlines the high-level system architecture and data flow for the Analytics FC platform.
 
 ```mermaid
 flowchart TD
