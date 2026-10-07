@@ -6,14 +6,14 @@ renamed AS (
     SELECT
         player_id,
         Fifa_year AS fifa_edition_year,
-        age,
+        CAST(age AS INTEGER) AS age,
         short_name,
         long_name,
         nationality,
         club,
         position,
-        overall,
-        max_potential
+        CAST(overall AS INTEGER) AS overall,
+        CAST(max_potential AS INTEGER) AS max_potential
     FROM source
 )
 
