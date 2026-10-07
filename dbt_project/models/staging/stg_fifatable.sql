@@ -11,7 +11,9 @@ renamed AS (
         long_name,
         nationality,
         club,
-        position
+        position,
+        overall,
+        max_potential
     FROM source
 )
 
