@@ -1,8 +1,4 @@
-﻿-- Level 1 & 2: Pattern Maker (Multi-Indicator SCDIs)
--- Calculates the Pearson Correlation across multiple traits (Overall, Potential, Minutes)
--- and filters for pairs that strongly correlate on ALL indicators.
-
-WITH base AS (
+﻿WITH base AS (
     SELECT 
         player_id, 
         short_name,
@@ -11,10 +7,9 @@ WITH base AS (
         max_potential,
         minutes
     FROM "analytics_fc"."main"."stg_fifatable"
-    WHERE age BETWEEN 18 AND 21
+    WHERE age BETWEEN 19 AND 22
 ),
 
--- Ensure 4 years of data
 complete_trajectories AS (
     SELECT player_id
     FROM base
@@ -54,6 +49,5 @@ SELECT
 FROM trajectory_pairs
 GROUP BY 
     player_a_id, player_a_name, player_b_id, player_b_name
--- Level 2 Pattern Filter: Must strongly correlate across multiple traits
 HAVING CORR(overall_a, overall_b) >= 0.85
    AND CORR(pot_a, pot_b) >= 0.80
