@@ -13,7 +13,9 @@ renamed AS (
         club,
         position,
         TRY_CAST(overall AS INTEGER) AS overall,
-        TRY_CAST(max_potential AS INTEGER) AS max_potential
+        TRY_CAST(max_potential AS INTEGER) AS max_potential,
+        TRY_CAST(minutes AS INTEGER) AS minutes,
+        TRY_CAST(goals AS INTEGER) AS goals
     FROM source
 )
 
