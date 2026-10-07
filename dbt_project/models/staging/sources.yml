@@ -1,0 +1,9 @@
+﻿version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: fifatable
+      - name: tm_stats
+      - name: tm_trophies
