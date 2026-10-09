@@ -7,3 +7,8 @@ __pycache__/
 dbt_project/target/
 dbt_project/logs/
 dbt_project/dbt_packages/
+
+mlruns/
+data/
+*.zip
+mlflow.db

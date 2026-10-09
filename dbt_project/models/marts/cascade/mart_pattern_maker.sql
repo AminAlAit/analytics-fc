@@ -1,4 +1,4 @@
-﻿WITH base AS (
+WITH base AS (
     SELECT 
         player_id, 
         short_name,
@@ -43,11 +43,33 @@ SELECT
     player_a_name,
     player_b_id,
     player_b_name,
-    CORR(overall_a, overall_b) AS scdi_overall,
-    CORR(pot_a, pot_b) AS scdi_potential,
-    CORR(min_a, min_b) AS scdi_minutes
+    CASE 
+        WHEN stddev_pop(overall_a) = 0 AND stddev_pop(overall_b) = 0 THEN 1.0
+        WHEN stddev_pop(overall_a) = 0 OR stddev_pop(overall_b) = 0 THEN 0.0
+        ELSE CORR(overall_a, overall_b)
+    END AS scdi_overall,
+    CASE 
+        WHEN stddev_pop(pot_a) = 0 AND stddev_pop(pot_b) = 0 THEN 1.0
+        WHEN stddev_pop(pot_a) = 0 OR stddev_pop(pot_b) = 0 THEN 0.0
+        ELSE CORR(pot_a, pot_b)
+    END AS scdi_potential,
+    NULL AS scdi_minutes
 FROM trajectory_pairs
 GROUP BY 
     player_a_id, player_a_name, player_b_id, player_b_name
-HAVING CORR(overall_a, overall_b) >= 0.85
-   AND CORR(pot_a, pot_b) >= 0.80
+HAVING 
+    (
+        CASE 
+            WHEN stddev_pop(overall_a) = 0 AND stddev_pop(overall_b) = 0 THEN 1.0
+            WHEN stddev_pop(overall_a) = 0 OR stddev_pop(overall_b) = 0 THEN 0.0
+            ELSE CORR(overall_a, overall_b)
+        END
+    ) >= 0.85
+    AND 
+    (
+        CASE 
+            WHEN stddev_pop(pot_a) = 0 AND stddev_pop(pot_b) = 0 THEN 1.0
+            WHEN stddev_pop(pot_a) = 0 OR stddev_pop(pot_b) = 0 THEN 0.0
+            ELSE CORR(pot_a, pot_b)
+        END
+    ) >= 0.80
