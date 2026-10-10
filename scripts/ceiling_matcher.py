@@ -98,6 +98,10 @@ class SuperstarCeilingMatcher:
         # Filter candidates in the same sector (or adjacent offensive sectors if striker/winger)
         candidates = []
         for star in self.gallery:
+            # Exclude self-matching to ensure genuine external archetype comparisons
+            if star["player_id"] == int(prospect["player_id"]):
+                continue
+
             star_sector = star["tactical_sector"]
             # Allow positional fluidity between wingers and strikers
             sector_match = (star_sector == sector) or (
@@ -147,11 +151,12 @@ class SuperstarCeilingMatcher:
                 key=lambda x: x["difference"]
             )[:3]
 
+            peak_window = f"{star.get('peak_age_min', 26)}-{star.get('peak_age_max', 29)}"
             candidates.append({
                 "superstar_name": star["short_name"],
                 "tactical_sector": star["tactical_sector"],
                 "peak_overall": star["peak_overall"],
-                "prime_age_window": star["prime_age_window"],
+                "prime_age_window": peak_window,
                 "similarity_score_pct": calibrated_pct,
                 "top_growth_priorities": top_growth_needed,
                 "closest_matching_traits": strengths_aligned
@@ -187,14 +192,16 @@ if __name__ == "__main__":
             continue
             
         p = res["prospect"]
+        safe_p_name = p['name'].encode('ascii', 'replace').decode()
         print(f"\n==================================================")
-        print(f"PROSPECT: {p['name']} (Age {p['age_at_evaluation']} in FIFA {p['fifa_edition']})")
+        print(f"PROSPECT: {safe_p_name} (Age {p['age_at_evaluation']} in FIFA {p['fifa_edition']})")
         print(f"Position: {p['positions']} | Rating: {p['overall']} OVR (Potential: {p['potential']})")
         print(f"Tactical Sector: {p['tactical_sector']}")
         print("--------------------------------------------------")
         print("PROJECTED SUPERSTAR CEILINGS:")
         for i, m in enumerate(res["matches"], 1):
-            print(f"  #{i} {m['superstar_name']} ({m['peak_overall']} Peak OVR [{m['prime_age_window']}])")
+            safe_s_name = m['superstar_name'].encode('ascii', 'replace').decode()
+            print(f"  #{i} {safe_s_name} ({m['peak_overall']} Peak OVR [{m['prime_age_window']}])")
             print(f"     Playstyle Match: {m['similarity_score_pct']}%")
             traits = ", ".join([t['attribute'].replace('skill_', '').replace('movement_', '').replace('mentality_', '') for t in m['closest_matching_traits']])
             print(f"     Closest Traits: {traits}")
