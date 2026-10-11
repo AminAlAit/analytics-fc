@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.gitignore
+data/raw/
+mlruns/
+mlflow.db
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/

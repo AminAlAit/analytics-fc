@@ -1,0 +1,18 @@
+services:
+  terminal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: analytics-fc-terminal:latest
+    container_name: analytics-fc-terminal
+    ports:
+      - "8501:8501"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1.5G
+    volumes:
+      - ./dbt_project/analytics_fc.duckdb:/app/dbt_project/analytics_fc.duckdb:ro
+      - ./data/processed:/app/data/processed:ro
+    restart: unless-stopped
