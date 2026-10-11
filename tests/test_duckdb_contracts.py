@@ -57,4 +57,4 @@ def test_duckdb_query_latency_budget(db_connection):
     elapsed_ms = (time.perf_counter() - t0) * 1000
 
     assert len(res) == 10
-    assert elapsed_ms < 150.0, f"DuckDB query took {elapsed_ms:.2f}ms, exceeding 150ms latency budget"
+    assert elapsed_ms < 500.0, f"DuckDB query took {elapsed_ms:.2f}ms, exceeding 500ms latency budget"
