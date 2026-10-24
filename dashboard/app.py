@@ -535,7 +535,7 @@ st.markdown("""
     </div>
     <div class="telemetry-group">
         <span class="telemetry-chip live">● DUCKDB READ ONLY</span>
-        <span class="telemetry-chip">142,079 SEASONS / 45,629 PLAYERS</span>
+        <span class="telemetry-chip">180,021 SEASONS / 45,629 PLAYERS</span>
         <span class="telemetry-chip">CANDIDATE POOL: 150 ELITE PROSPECTS</span>
         <span class="telemetry-chip live">KERNEL: GAUSSIAN RBF (&lt;5ms)</span>
     </div>
