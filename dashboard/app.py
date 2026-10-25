@@ -582,13 +582,20 @@ with tab_matcher:
         active_prospects_df = wonderkids_df
 
     with col_filter_player:
-        player_choices = [
-            f"{row['short_name']} (Age {row['age']} in FIFA {row['fifa_edition_year']} : {row['overall']} OVR / {row['potential']} POT)"
+        player_map = {
+            f"{row['player_id']}_{row['fifa_edition_year']}": row
             for _, row in active_prospects_df.iterrows()
-        ]
-        selected_player_choice = st.selectbox("Select Under-21 Prospect for Projection:", player_choices)
-        selected_player_idx = player_choices.index(selected_player_choice)
-        prospect = active_prospects_df.iloc[selected_player_idx]
+        }
+        player_keys = list(player_map.keys())
+        selected_key = st.selectbox(
+            "Select Under-21 Prospect for Projection:",
+            player_keys,
+            format_func=lambda k: (
+                f"{player_map[k]['short_name']} (Age {player_map[k]['age']} in FIFA {player_map[k]['fifa_edition_year']} : "
+                f"{player_map[k]['overall']} OVR / {player_map[k]['potential']} POT)"
+            )
+        )
+        prospect = player_map[selected_key]
 
     primary_pos = str(prospect["positions"]).split(",")[0].strip().upper()
     sector = SECTOR_MAP.get(primary_pos, "Attacking Midfielders & Wingers")
