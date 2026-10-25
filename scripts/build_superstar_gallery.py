@@ -1,6 +1,8 @@
 import os
 import time
 import json
+import argparse
+import subprocess
 import duckdb
 import pandas as pd
 from pathlib import Path
@@ -33,7 +35,7 @@ SECTOR_MAP = {
     "CF": "Center Forwards & Strikers", "ST": "Center Forwards & Strikers"
 }
 
-def build_gallery(target_count=100):
+def build_gallery(target_count=100, dvc_commit=False):
     print(f"[1/5] Initializing gentle environment for Top {target_count} personal peaks...")
     base_dir = Path(__file__).resolve().parent.parent
     db_path = str(base_dir / "dbt_project" / "analytics_fc.duckdb")
@@ -181,5 +183,13 @@ def build_gallery(target_count=100):
     null_composure_count = sum(1 for g in gallery if g["attributes"].get("mentality_composure") is None)
     print(f"Remaining null composure values: {null_composure_count}")
 
+    if dvc_commit:
+        print("[DVC] Automatically updating data/processed DVC tracking...")
+        subprocess.run(["dvc", "add", "data/processed"], cwd=str(base_dir), check=False)
+
 if __name__ == "__main__":
-    build_gallery(target_count=100)
+    parser = argparse.ArgumentParser(description="Build Top 100 Personal Peak Superstar Gallery")
+    parser.add_argument("--count", type=int, default=100, help="Target superstar count (default: 100)")
+    parser.add_argument("--dvc-commit", action="store_true", help="Automatically commit updated artifact to DVC")
+    args = parser.parse_args()
+    build_gallery(target_count=args.count, dvc_commit=args.dvc_commit)
