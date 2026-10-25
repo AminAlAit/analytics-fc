@@ -549,6 +549,9 @@ tab_matcher, tab_audit = st.tabs([
 ])
 
 gallery = load_gallery()
+if not gallery:
+    st.warning("Superstar gallery artifact (superstar_gallery.json) not found or empty. Please run scripts/build_superstar_gallery.py to compile the archetype database.")
+    st.stop()
 
 # ==============================================================================
 # TAB 1: THE SUPERSTAR CEILING MATCHER
@@ -709,13 +712,16 @@ with tab_matcher:
     </div>
     """, unsafe_allow_html=True)
 
-    card_cols = st.columns(3)
-    tier_labels = ["#1 PRIMARY TARGET", "#2 SECONDARY MATCH", "#3 CONTINGENT MATCH"]
-    tier_classes = ["", "rank-2", "rank-3"]
-    badge_colors = ["", "cyan", ""]
+    if not top_3:
+        st.info("No matching superstar archetypes found for this tactical sector.")
+    else:
+        card_cols = st.columns(len(top_3))
+        tier_labels = ["#1 PRIMARY TARGET", "#2 SECONDARY MATCH", "#3 CONTINGENT MATCH"]
+        tier_classes = ["", "rank-2", "rank-3"]
+        badge_colors = ["", "cyan", ""]
 
-    for idx, cand in enumerate(top_3):
-        with card_cols[idx]:
+        for idx, cand in enumerate(top_3):
+            with card_cols[idx]:
             aligned_pills = "".join([
                 f"<span class='trait-pill-aligned'>{t['attribute'].replace('skill_', '').replace('movement_', '').replace('mentality_', '')}</span>"
                 for t in cand["strengths"]

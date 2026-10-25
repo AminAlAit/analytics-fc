@@ -34,6 +34,10 @@ def trello_api(method, endpoint, params=None, data=None):
     with urllib.request.urlopen(req) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
+def get_card(ticket_id):
+    cards = trello_api("GET", f"boards/{BOARD_ID}/cards")
+    return next((c for c in cards if ticket_id.upper() in c["name"].upper()), None)
+
 def move_card(ticket_id, target_list_name):
     lists = trello_api("GET", f"boards/{BOARD_ID}/lists")
     target_list = next((l for l in lists if l["name"].lower() == target_list_name.lower()), None)
@@ -42,8 +46,7 @@ def move_card(ticket_id, target_list_name):
         print(f"List '{target_list_name}' not found. Active lists: {valid_lists}")
         return False
     
-    cards = trello_api("GET", f"boards/{BOARD_ID}/cards")
-    card = next((c for c in cards if ticket_id.upper() in c["name"].upper()), None)
+    card = get_card(ticket_id)
     if not card:
         print(f"Card for '{ticket_id}' not found.")
         return False
@@ -52,9 +55,28 @@ def move_card(ticket_id, target_list_name):
     print(f"Moved card {ticket_id} ('{card['name'][:30]}...') to '{target_list['name']}'.")
     return True
 
+def add_comment(ticket_id, comment_text):
+    card = get_card(ticket_id)
+    if not card:
+        print(f"Card for '{ticket_id}' not found.")
+        return False
+    
+    trello_api("POST", f"cards/{card['id']}/actions/comments", params={"text": comment_text})
+    print(f"Added comment to card {ticket_id}.")
+    return True
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: python trello_sync.py <TICKET_ID> <LIST_NAME>")
-        print("Example: python trello_sync.py AFC-501 'Done'")
+        print("Usage:")
+        print("  python trello_sync.py move <TICKET_ID> <LIST_NAME>")
+        print("  python trello_sync.py comment <TICKET_ID> <COMMENT_TEXT>")
         sys.exit(1)
-    move_card(sys.argv[1], sys.argv[2])
+        
+    action = sys.argv[1].lower()
+    if action == "move":
+        move_card(sys.argv[2], sys.argv[3])
+    elif action == "comment":
+        add_comment(sys.argv[2], sys.argv[3])
+    else:
+        # Backward compatibility: python trello_sync.py AFC-501 'Done'
+        move_card(sys.argv[1], sys.argv[2])
