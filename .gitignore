@@ -1,4 +1,4 @@
-﻿.venv/
+.venv/
 __pycache__/
 *.csv
 .DS_Store
@@ -9,6 +9,10 @@ dbt_project/logs/
 dbt_project/dbt_packages/
 
 mlruns/
-data/
+# Data binaries tracked via DVC
+/data/raw
+/data/processed
+!/data/**/*.dvc
+!/data/**/.gitignore
 *.zip
 mlflow.db

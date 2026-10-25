@@ -1,0 +1,7 @@
+[cache]
+    type = copy
+[core]
+    remote = local_storage
+    analytics = false
+['remote "local_storage"']
+    url = ../../.dvc_remote
