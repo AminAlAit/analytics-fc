@@ -375,7 +375,7 @@ OUTFIELD_COLS = [col for col in SKILL_COLS if not col.startswith("goalkeeping_")
 # ==============================================================================
 # HARDWARE SAFE RESOURCE LOADING
 # ==============================================================================
-@st.cache_resource
+@st.cache_data
 def load_gallery():
     if not GALLERY_PATH.exists():
         return []
@@ -385,21 +385,23 @@ def load_gallery():
 @st.cache_data
 def get_popular_wonderkids():
     con = duckdb.connect(str(DUCKDB_PATH), read_only=True)
-    con.execute("SET threads = 1;")
-    con.execute("SET memory_limit = '1GB';")
-    query = """
-    SELECT 
-        player_id, short_name, long_name, age, fifa_edition_year, overall, potential, positions,
-        nationality, club, league_name, preferred_foot, height_cm, weight_kg, value_eur, wage_eur,
-        pace, shooting, passing, dribbling, defending, physic,
-        """ + ", ".join(SKILL_COLS) + """
-    FROM stg_fifa_granular
-    WHERE age <= 21 AND overall >= 78
-    ORDER BY overall DESC, potential DESC
-    LIMIT 150
-    """
-    df = con.execute(query).df()
-    con.close()
+    try:
+        con.execute("SET threads = 1;")
+        con.execute("SET memory_limit = '1GB';")
+        query = """
+        SELECT 
+            player_id, short_name, long_name, age, fifa_edition_year, overall, potential, positions,
+            nationality, club, league_name, preferred_foot, height_cm, weight_kg, value_eur, wage_eur,
+            pace, shooting, passing, dribbling, defending, physic,
+            """ + ", ".join(SKILL_COLS) + """
+        FROM stg_fifa_granular
+        WHERE age <= 21 AND overall >= 78
+        ORDER BY overall DESC, potential DESC
+        LIMIT 150
+        """
+        df = con.execute(query).df()
+    finally:
+        con.close()
 
     # Precompute primary position and tactical sector
     df["primary_pos"] = df["positions"].apply(
@@ -603,6 +605,8 @@ with tab_matcher:
 
     # Executive Player Dossier Card
     formatted_val = format_currency_eur(prospect["value_eur"])
+    height_disp = f"{int(prospect['height_cm'])} cm" if pd.notna(prospect.get("height_cm")) else "N/A"
+    weight_disp = f"{int(prospect['weight_kg'])} kg" if pd.notna(prospect.get("weight_kg")) else "N/A"
     st.markdown(f"""
     <div class="dossier-card">
         <div class="dossier-header">
@@ -622,7 +626,7 @@ with tab_matcher:
                     MARKET VALUATION: {formatted_val}
                 </span>
                 <div style="color:#64748B; font-size:0.75rem; margin-top:0.35rem; font-family:monospace;">
-                    Foot: {prospect['preferred_foot']} | {int(prospect['height_cm'])} cm / {int(prospect['weight_kg'])} kg
+                    Foot: {prospect['preferred_foot']} | {height_disp} / {weight_disp}
                 </div>
             </div>
         </div>
@@ -833,20 +837,11 @@ with tab_matcher:
             st.altair_chart(radar_chart, use_container_width=True)
 
         with col_telemetry:
-            st.markdown(f"""
-            <div style="background:#111827; border:1px solid #1E293B; border-radius:8px; padding:1.25rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #1E293B; padding-bottom:0.5rem;">
-                    <span style="font-size:0.8rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em;">Macro Dimension</span>
-                    <span style="font-size:0.75rem; font-family:monospace; color:#94A3B8;">
-                        <span style="color:#10B981;">● PROSPECT</span> | <span style="color:#06B6D4;">● ARCHETYPE</span>
-                    </span>
-                </div>
-            """, unsafe_allow_html=True)
-
+            rows_html = []
             for cr in comparison_rows:
                 delta_sign = f"+{cr['delta']}" if cr["delta"] > 0 else f"{cr['delta']}"
                 delta_class = "neg" if cr["delta"] > 0 else "pos"
-                st.markdown(f"""
+                rows_html.append(f"""
                 <div class="gap-metric-row">
                     <span style="font-weight:700; color:#F8FAFC;">{cr['dimension']}</span>
                     <div>
@@ -856,9 +851,20 @@ with tab_matcher:
                         <span class="gap-delta {delta_class}" style="margin-left:0.75rem;">({delta_sign})</span>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
 
-            st.markdown("</div>", unsafe_allow_html=True)
+            telemetry_card_html = f"""
+            <div style="background:#111827; border:1px solid #1E293B; border-radius:8px; padding:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid #1E293B; padding-bottom:0.5rem;">
+                    <span style="font-size:0.8rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em;">Macro Dimension</span>
+                    <span style="font-size:0.75rem; font-family:monospace; color:#94A3B8;">
+                        <span style="color:#10B981;">● PROSPECT</span> | <span style="color:#06B6D4;">● ARCHETYPE</span>
+                    </span>
+                </div>
+                {"".join(rows_html)}
+            </div>
+            """
+            st.markdown(telemetry_card_html, unsafe_allow_html=True)
 
         with st.expander("🔬 Deep Vector Audit: Granular Trait-by-Trait Comparison (All Skills)"):
             detailed_data = []
