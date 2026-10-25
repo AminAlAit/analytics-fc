@@ -437,8 +437,8 @@ def build_tactical_radar_altair(categories, p_vals, s_vals, p_name="Prospect", s
     grid_chart = alt.Chart(df_grid).mark_line(
         color="#223147", strokeWidth=1, strokeDash=[3, 3]
     ).encode(
-        x=alt.X("x:Q", axis=None, scale=alt.Scale(domain=[-140, 140])),
-        y=alt.Y("y:Q", axis=None, scale=alt.Scale(domain=[-140, 140])),
+        x=alt.X("x:Q", axis=None, scale=alt.Scale(domain=[-150, 150])),
+        y=alt.Y("y:Q", axis=None, scale=alt.Scale(domain=[-150, 150])),
         detail="level:N"
     )
 
@@ -502,10 +502,12 @@ def build_tactical_radar_altair(categories, p_vals, s_vals, p_name="Prospect", s
     # 5. Dimension Perimeter Labels
     label_rows = []
     for cat, p, s, ang in zip(categories, p_vals, s_vals, angles):
+        p_clean = 50.0 if (pd.isna(p) or np.isnan(p)) else p
+        s_clean = 50.0 if (pd.isna(s) or np.isnan(s)) else s
         label_rows.append({
             "x": 122 * np.cos(ang),
             "y": 122 * np.sin(ang),
-            "label": f"{cat}: {int(round(p))} | {int(round(s))}"
+            "label": f"{cat}: {int(round(p_clean))} | {int(round(s_clean))}"
         })
     df_labels = pd.DataFrame(label_rows)
 
@@ -799,8 +801,10 @@ with tab_matcher:
         comparison_rows = []
 
         for dim, subcols in macro_dimensions.items():
-            p_mean = float(np.mean([float(prospect[c]) for c in subcols if pd.notna(prospect[c])]))
-            s_mean = float(np.mean([float(best_star["attributes"].get(c, 50.0)) for c in subcols]))
+            valid_p = [float(prospect[c]) for c in subcols if pd.notna(prospect[c])]
+            p_mean = float(np.mean(valid_p)) if valid_p else 50.0
+            valid_s = [float(best_star["attributes"].get(c, 50.0)) for c in subcols if pd.notna(best_star["attributes"].get(c))]
+            s_mean = float(np.mean(valid_s)) if valid_s else 50.0
             p_vals.append(p_mean)
             s_vals.append(s_mean)
             delta = round(s_mean - p_mean, 1)
