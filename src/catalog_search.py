@@ -437,7 +437,10 @@ def get_player_by_id_and_year(
         row = cursor.fetchone()
         if row is None:
             return None
-        return dict(zip(col_names, row))
+        record = dict(zip(col_names, row))
+        record["primary_pos"] = get_primary_position(record.get("positions"))
+        record["tactical_sector"] = get_sector_for_position(record.get("positions"))
+        return record
     finally:
         if should_close:
             active_con.close()
