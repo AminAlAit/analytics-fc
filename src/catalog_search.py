@@ -171,18 +171,20 @@ def search_players(
     max_overall: int | None = None,
     limit: int = 50,
     offset: int = 0,
+    match_long_name: bool | None = None,
     db_path: Path | str | None = None,
     con: duckdb.DuckDBPyConnection | None = None,
 ) -> list[dict[str, Any]]:
     """Execute a parameterized search for players matching a name query and optional filters.
 
     Args:
-        query: Substring to search across short_name and long_name.
+        query: Substring to search across player names.
         edition_year: Optional FIFA edition year filter (e.g. 2024).
         min_overall: Optional minimum overall rating threshold.
         max_overall: Optional maximum overall rating threshold.
         limit: Maximum number of rows to return (default 50).
         offset: Number of initial matching rows to skip (default 0).
+        match_long_name: Whether to include long_name in search (defaults to True if query contains spaces).
         db_path: Optional path override for DuckDB database file.
         con: Optional active DuckDB connection to reuse across calls.
 
@@ -195,8 +197,13 @@ def search_players(
 
     if clean_query:
         pattern = f"%{clean_query}%"
-        where_clauses.append("(short_name ILIKE ? OR long_name ILIKE ?)")
-        params.extend([pattern, pattern])
+        should_match_long = match_long_name if match_long_name is not None else (" " in clean_query)
+        if should_match_long:
+            where_clauses.append("(short_name ILIKE ? OR long_name ILIKE ?)")
+            params.extend([pattern, pattern])
+        else:
+            where_clauses.append("short_name ILIKE ?")
+            params.append(pattern)
 
     if edition_year is not None:
         where_clauses.append("fifa_edition_year = ?")
@@ -249,13 +256,14 @@ def search_players_paginated(
     limit: int = 50,
     offset: int = 0,
     include_sector_counts: bool = True,
+    match_long_name: bool | None = None,
     db_path: Path | str | None = None,
     con: duckdb.DuckDBPyConnection | None = None,
 ) -> dict[str, Any]:
     """Execute a faceted, paginated player search across the catalog.
 
     Args:
-        query: Substring to search across short_name and long_name.
+        query: Substring to search across player names.
         edition_year: Optional FIFA edition year filter (e.g. 2022).
         min_overall: Optional minimum overall rating threshold.
         max_overall: Optional maximum overall rating threshold.
@@ -263,6 +271,7 @@ def search_players_paginated(
         limit: Maximum number of rows to return per page (default 50).
         offset: Number of initial matching rows to skip (default 0).
         include_sector_counts: Whether to compute sector breakdown counts.
+        match_long_name: Whether to include long_name in search (defaults to True if query contains spaces).
         db_path: Optional path override for DuckDB database file.
         con: Optional active DuckDB connection to reuse across calls.
 
@@ -281,8 +290,13 @@ def search_players_paginated(
 
     if clean_query:
         pattern = f"%{clean_query}%"
-        base_clauses.append("(short_name ILIKE ? OR long_name ILIKE ?)")
-        base_params.extend([pattern, pattern])
+        should_match_long = match_long_name if match_long_name is not None else (" " in clean_query)
+        if should_match_long:
+            base_clauses.append("(short_name ILIKE ? OR long_name ILIKE ?)")
+            base_params.extend([pattern, pattern])
+        else:
+            base_clauses.append("short_name ILIKE ?")
+            base_params.append(pattern)
 
     if edition_year is not None:
         base_clauses.append("fifa_edition_year = ?")
