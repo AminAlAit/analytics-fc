@@ -14,6 +14,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.config import settings
+from src.api.routers.players import router as players_router
 from src.catalog_search import get_catalog_stats, get_connection
 
 logging.basicConfig(
@@ -38,6 +39,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register API Sub-Routers
+app.include_router(players_router)
 
 
 @app.get("/", tags=["Diagnostic"])
