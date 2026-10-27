@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import sys
 import altair as alt
 import duckdb
 import numpy as np
@@ -341,10 +342,20 @@ st.markdown("""
 # PATHS AND TAXONOMY CONSTANTS
 # ==============================================================================
 BASE_DIR = Path(__file__).resolve().parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+from src.catalog_search import (
+    search_players_paginated,
+    get_player_by_id_and_year,
+    SECTOR_MAP,
+    SECTOR_ORDER,
+)
+
 DUCKDB_PATH = BASE_DIR / "dbt_project" / "analytics_fc.duckdb"
 GALLERY_PATH = BASE_DIR / "data" / "processed" / "superstar_gallery.json"
 
-SECTOR_MAP = {
+SECTOR_MAP_LEGACY = {
     "GK": "Goalkeepers",
     "CB": "Defenders", "LB": "Defenders", "RB": "Defenders",
     "LWB": "Defenders", "RWB": "Defenders",
@@ -381,6 +392,27 @@ def load_gallery():
         return []
     with open(GALLERY_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
+
+@st.cache_data
+def cached_search_players(
+    query: str = "",
+    edition_year: int | None = None,
+    min_overall: int | None = None,
+    sector: str | None = None,
+    limit: int = 50,
+):
+    return search_players_paginated(
+        query=query,
+        edition_year=edition_year,
+        min_overall=min_overall,
+        sector=sector,
+        limit=limit,
+        include_sector_counts=True,
+    )
+
+@st.cache_data
+def cached_get_player_profile(player_id: int, fifa_edition_year: int):
+    return get_player_by_id_and_year(player_id, fifa_edition_year)
 
 @st.cache_data
 def get_popular_wonderkids():
@@ -540,7 +572,7 @@ st.markdown("""
     <div class="telemetry-group">
         <span class="telemetry-chip live">● DUCKDB READ ONLY</span>
         <span class="telemetry-chip">180,021 SEASONS / 45,629 PLAYERS</span>
-        <span class="telemetry-chip">CANDIDATE POOL: 150 ELITE PROSPECTS</span>
+        <span class="telemetry-chip live">CATALOG SEARCH: 180,021 RECORDS ACTIVE</span>
         <span class="telemetry-chip live">KERNEL: GAUSSIAN RBF (&lt;5ms)</span>
     </div>
 </div>
@@ -561,47 +593,91 @@ if not gallery:
 # TAB 1: THE SUPERSTAR CEILING MATCHER
 # ==============================================================================
 with tab_matcher:
-    wonderkids_df = get_popular_wonderkids()
+    st.markdown("""
+    <div class="section-header-hud" style="margin-top:0.5rem; margin-bottom:0.75rem;">
+        <span class="section-prefix">// 00</span>
+        <span>GLOBAL PLAYER DISCOVERY & SEARCH ENGINE</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-    col_filter_sector, col_filter_player = st.columns([1, 2])
+    col_search, col_edition, col_min_ovr, col_sector = st.columns([2.5, 1, 1, 1.5])
 
-    with col_filter_sector:
-        sector_options = [
-            "All Tactical Sectors",
-            "Attacking Midfielders & Wingers",
-            "Center Forwards & Strikers",
-            "Defensive & Central Midfielders",
-            "Defenders",
-            "Goalkeepers",
-        ]
-        selected_sector = st.selectbox("Filter by Tactical Sector:", sector_options)
-
-    if selected_sector != "All Tactical Sectors":
-        active_prospects_df = wonderkids_df[wonderkids_df["tactical_sector"] == selected_sector]
-        if active_prospects_df.empty:
-            active_prospects_df = wonderkids_df
-    else:
-        active_prospects_df = wonderkids_df
-
-    with col_filter_player:
-        player_map = {
-            f"{row['player_id']}_{row['fifa_edition_year']}": row
-            for _, row in active_prospects_df.iterrows()
-        }
-        player_keys = list(player_map.keys())
-        selected_key = st.selectbox(
-            "Select Under-21 Prospect for Projection:",
-            player_keys,
-            format_func=lambda k: (
-                f"{player_map[k]['short_name']} (Age {player_map[k]['age']} in FIFA {player_map[k]['fifa_edition_year']} : "
-                f"{player_map[k]['overall']} OVR / {player_map[k]['potential']} POT)"
-            )
+    with col_search:
+        search_query = st.text_input(
+            "Search Player Name (min 3 chars):",
+            value="",
+            placeholder="Search all 180,021 records (e.g. Haaland, Mbappe, Saka)...",
+            help="Debounced search scans across the complete historical DuckDB catalog.",
         )
-        prospect = player_map[selected_key]
+
+    with col_edition:
+        edition_options = ["All Editions"] + [str(y) for y in range(2022, 2014, -1)]
+        selected_edition_str = st.selectbox("FIFA Edition:", edition_options)
+        selected_edition = int(selected_edition_str) if selected_edition_str != "All Editions" else None
+
+    with col_min_ovr:
+        min_overall = st.slider("Min Overall:", min_value=50, max_value=90, value=75, step=1)
+
+    with col_sector:
+        sector_options = ["All Tactical Sectors"] + SECTOR_ORDER
+        selected_sector_str = st.selectbox("Tactical Sector:", sector_options)
+        selected_sector = selected_sector_str if selected_sector_str != "All Tactical Sectors" else None
+
+    # Execute search query
+    query_str = search_query.strip()
+    is_active_search = len(query_str) >= 3
+
+    if is_active_search:
+        search_result = cached_search_players(
+            query=query_str,
+            edition_year=selected_edition,
+            min_overall=min_overall,
+            sector=selected_sector,
+            limit=50,
+        )
+        candidates = search_result["items"]
+        total_found = search_result["total_matching"]
+    else:
+        # Default discovery fallback: Top elite prospects matching filters
+        search_result = cached_search_players(
+            query="",
+            edition_year=selected_edition,
+            min_overall=max(78, min_overall),
+            sector=selected_sector,
+            limit=50,
+        )
+        candidates = search_result["items"]
+        total_found = search_result["total_matching"]
+
+    if not candidates:
+        st.warning("No players matched the selected criteria. Try adjusting the search term or lowering the overall rating threshold.")
+        st.stop()
+
+    # Player Selection Dropdown
+    player_keys = [f"{c['player_id']}_{c['fifa_edition_year']}" for c in candidates]
+    player_map = {f"{c['player_id']}_{c['fifa_edition_year']}": c for c in candidates}
+
+    status_note = f"{total_found} MATCHES FOUND IN CATALOG" if is_active_search else f"SHOWING TOP PROSPECTS ({total_found} IN POOL - TYPE 3+ CHARS TO SEARCH COMPLETE CATALOG)"
+    selected_key = st.selectbox(
+        f"Select Player for Projection ({status_note}):",
+        player_keys,
+        format_func=lambda k: (
+            f"{player_map[k]['short_name']} ({player_map[k]['club'] or 'Free Agent'} | "
+            f"FIFA {player_map[k]['fifa_edition_year']} | "
+            f"{player_map[k]['overall']} OVR / {player_map[k]['potential']} POT | "
+            f"{player_map[k]['tactical_sector']})"
+        ),
+    )
+
+    cand_selected = player_map[selected_key]
+    # Pull complete 34-skill profile from catalog for radar and ceiling calculation
+    prospect_full = cached_get_player_profile(cand_selected["player_id"], cand_selected["fifa_edition_year"])
+    prospect = prospect_full if prospect_full is not None else cand_selected
 
     primary_pos = str(prospect["positions"]).split(",")[0].strip().upper()
     sector = SECTOR_MAP.get(primary_pos, "Attacking Midfielders & Wingers")
     growth_delta = int(prospect["potential"]) - int(prospect["overall"])
+    growth_disp = f"+{growth_delta}" if growth_delta >= 0 else str(growth_delta)
 
     # Executive Player Dossier Card
     formatted_val = format_currency_eur(prospect["value_eur"])
@@ -639,7 +715,7 @@ with tab_matcher:
             <div class="kpi-pod">
                 <div class="kpi-label">Stated Potential</div>
                 <div class="kpi-val cyan">{prospect['potential']}</div>
-                <div class="kpi-sub">+{growth_delta} Trajectory Vector</div>
+                <div class="kpi-sub">{growth_disp} Trajectory Vector</div>
             </div>
             <div class="kpi-pod">
                 <div class="kpi-label">Evaluation Age</div>
@@ -735,47 +811,47 @@ with tab_matcher:
 
         for idx, cand in enumerate(top_3):
             with card_cols[idx]:
-            aligned_pills = "".join([
-                f"<span class='trait-pill-aligned'>{t['attribute'].replace('skill_', '').replace('movement_', '').replace('mentality_', '')}</span>"
-                for t in cand["strengths"]
-            ])
-            growth_pills = "".join([
-                f"<span class='trait-pill-growth'>{g['attribute'].replace('attacking_', '').replace('mentality_', '')} (+{g['gap']})</span>"
-                for g in cand["growth_needed"][:2]
-            ])
+                aligned_pills = "".join([
+                    f"<span class='trait-pill-aligned'>{t['attribute'].replace('skill_', '').replace('movement_', '').replace('mentality_', '')}</span>"
+                    for t in cand["strengths"]
+                ])
+                growth_pills = "".join([
+                    f"<span class='trait-pill-growth'>{g['attribute'].replace('attacking_', '').replace('mentality_', '')} (+{g['gap']})</span>"
+                    for g in cand["growth_needed"][:2]
+                ])
 
-            st.markdown(f"""
-            <div class="archetype-card-dark {tier_classes[idx]}">
-                <div>
-                    <div class="pod-topbar">
-                        <span class="pod-tier-chip">{tier_labels[idx]}</span>
-                        <span class="pod-pct-badge {badge_colors[idx]}">{cand['similarity_pct']}%</span>
+                st.markdown(f"""
+                <div class="archetype-card-dark {tier_classes[idx]}">
+                    <div>
+                        <div class="pod-topbar">
+                            <span class="pod-tier-chip">{tier_labels[idx]}</span>
+                            <span class="pod-pct-badge {badge_colors[idx]}">{cand['similarity_pct']}%</span>
+                        </div>
+                        <div class="confidence-meter-track">
+                            <div class="confidence-meter-fill" style="width: {cand['similarity_pct']}%;"></div>
+                        </div>
+                        <h3 class="star-name">{cand['name']}</h3>
+                        <div class="star-meta">
+                            <b>Peak: {cand['peak_overall']} OVR</b> (Ages {cand['peak_age_window']})<br>
+                            <span>Sector: {cand['sector']}</span>
+                        </div>
+                        <div style="font-size:0.75rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">
+                            Core Matching Traits:
+                        </div>
+                        <div class="trait-badge-group">
+                            {aligned_pills}
+                        </div>
                     </div>
-                    <div class="confidence-meter-track">
-                        <div class="confidence-meter-fill" style="width: {cand['similarity_pct']}%;"></div>
-                    </div>
-                    <h3 class="star-name">{cand['name']}</h3>
-                    <div class="star-meta">
-                        <b>Peak: {cand['peak_overall']} OVR</b> (Ages {cand['peak_age_window']})<br>
-                        <span>Sector: {cand['sector']}</span>
-                    </div>
-                    <div style="font-size:0.75rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">
-                        Core Matching Traits:
-                    </div>
-                    <div class="trait-badge-group">
-                        {aligned_pills}
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">
+                            Priority Growth Focus:
+                        </div>
+                        <div class="trait-badge-group">
+                            {growth_pills}
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <div style="font-size:0.75rem; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">
-                        Priority Growth Focus:
-                    </div>
-                    <div class="trait-badge-group">
-                        {growth_pills}
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
     # Tactical Fingerprint: Dual-Polygon Radar and Gap Telemetry
     if top_3:
