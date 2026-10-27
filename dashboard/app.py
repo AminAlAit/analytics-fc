@@ -351,6 +351,13 @@ from src.catalog_search import (
     SECTOR_MAP,
     SECTOR_ORDER,
 )
+from dashboard.api_client import (
+    get_connection_status,
+    get_player_profile,
+    is_api_online,
+    match_ceiling,
+    search_players,
+)
 
 DUCKDB_PATH = BASE_DIR / "dbt_project" / "analytics_fc.duckdb"
 GALLERY_PATH = BASE_DIR / "data" / "processed" / "superstar_gallery.json"
@@ -401,7 +408,7 @@ def cached_search_players(
     sector: str | None = None,
     limit: int = 50,
 ):
-    return search_players_paginated(
+    return search_players(
         query=query,
         edition_year=edition_year,
         min_overall=min_overall,
@@ -412,7 +419,11 @@ def cached_search_players(
 
 @st.cache_data
 def cached_get_player_profile(player_id: int, fifa_edition_year: int):
-    return get_player_by_id_and_year(player_id, fifa_edition_year)
+    return get_player_profile(player_id, fifa_edition_year)
+
+@st.cache_data
+def cached_match_ceiling(player_id: int, fifa_edition_year: int, top_k: int = 3):
+    return match_ceiling(player_id, fifa_edition_year, top_k)
 
 @st.cache_data
 def get_popular_wonderkids():
@@ -563,14 +574,18 @@ def build_tactical_radar_altair(categories, p_vals, s_vals, p_name="Prospect", s
 # ==============================================================================
 # UI HEADER: EXECUTIVE COMMAND STATUS BAR
 # ==============================================================================
-st.markdown("""
+backend_status = get_connection_status()
+is_live_rest = (backend_status == "FASTAPI REST ONLINE")
+status_chip_class = "telemetry-chip live" if is_live_rest else "telemetry-chip"
+
+st.markdown(f"""
 <div class="terminal-bar">
     <div class="brand-title">
         <span>⚽ ANALYTICS FC</span>
         <span class="brand-accent">// SCOUTING INTELLIGENCE ENGINE</span>
     </div>
     <div class="telemetry-group">
-        <span class="telemetry-chip live">● DUCKDB READ ONLY</span>
+        <span class="{status_chip_class}">● {backend_status}</span>
         <span class="telemetry-chip">180,021 SEASONS / 45,629 PLAYERS</span>
         <span class="telemetry-chip live">CATALOG SEARCH: 180,021 RECORDS ACTIVE</span>
         <span class="telemetry-chip live">KERNEL: GAUSSIAN RBF (&lt;5ms)</span>
@@ -731,68 +746,12 @@ with tab_matcher:
     </div>
     """, unsafe_allow_html=True)
 
-    # Vector Matching Engine (NumPy in-memory vector projection <5ms)
+    # Vector Matching Engine via FastAPI Client (with local fallback)
     is_gk = (primary_pos == "GK")
     active_cols = [c for c in SKILL_COLS if c.startswith("goalkeeping_")] if is_gk else OUTFIELD_COLS
-
-    p_vec = np.array([float(prospect[c]) if pd.notna(prospect[c]) else 50.0 for c in active_cols])
-    p_norm = np.linalg.norm(p_vec)
-    p_unit = p_vec / p_norm if p_norm > 0 else p_vec
-
-    candidates = []
-    for star in gallery:
-        if star["player_id"] == int(prospect["player_id"]):
-            continue
-        star_sector = star["tactical_sector"]
-        sector_match = (star_sector == sector) or (
-            sector in ["Attacking Midfielders & Wingers", "Center Forwards & Strikers"] and
-            star_sector in ["Attacking Midfielders & Wingers", "Center Forwards & Strikers"]
-        )
-        if is_gk and star_sector != "Goalkeepers":
-            continue
-        if not is_gk and star_sector == "Goalkeepers":
-            continue
-        if not sector_match:
-            continue
-
-        s_vec = np.array([float(star["attributes"].get(c, 50.0)) for c in active_cols])
-        s_norm = np.linalg.norm(s_vec)
-        s_unit = s_vec / s_norm if s_norm > 0 else s_vec
-
-        norm_dist = float(np.linalg.norm(p_unit - s_unit))
-        calibrated_pct = round(float(np.exp(- (norm_dist ** 2) / (2 * (0.28 ** 2))) * 100), 1)
-
-        trait_deltas = {}
-        for col in active_cols:
-            s_val = star["attributes"].get(col)
-            p_val = prospect[col]
-            if s_val is not None and pd.notna(p_val):
-                trait_deltas[col] = round(float(s_val) - float(p_val), 1)
-
-        top_growth_needed = sorted(
-            [{"attribute": k, "gap": v} for k, v in trait_deltas.items() if v > 0],
-            key=lambda x: x["gap"], reverse=True
-        )[:3]
-
-        strengths_aligned = sorted(
-            [{"attribute": k, "difference": abs(v)} for k, v in trait_deltas.items()],
-            key=lambda x: x["difference"]
-        )[:3]
-
-        peak_window = f"{star.get('peak_age_min', 26)} to {star.get('peak_age_max', 29)}"
-        candidates.append({
-            "name": star["short_name"],
-            "sector": star["tactical_sector"],
-            "peak_overall": star["peak_overall"],
-            "peak_age_window": peak_window,
-            "similarity_pct": calibrated_pct,
-            "growth_needed": top_growth_needed,
-            "strengths": strengths_aligned,
-            "attributes": star["attributes"],
-        })
-
-    candidates.sort(key=lambda x: x["similarity_pct"], reverse=True)
-    top_3 = candidates[:3]
+    ceiling_result = cached_match_ceiling(int(prospect["player_id"]), int(prospect["fifa_edition_year"]), top_k=3)
+    top_3 = ceiling_result.get("matches", []) if ceiling_result else []
+    macro_radar_dims = ceiling_result.get("macro_radar", []) if ceiling_result else []
 
     st.markdown("""
     <div class="section-header-hud">
@@ -882,25 +841,39 @@ with tab_matcher:
                 "Reactions": ["movement_reactions"],
             }
 
-        radar_cats = list(macro_dimensions.keys())
-        p_vals = []
-        s_vals = []
-        comparison_rows = []
+        if macro_radar_dims:
+            radar_cats = [r["dimension"] for r in macro_radar_dims]
+            p_vals = [float(r["prospect_value"]) for r in macro_radar_dims]
+            s_vals = [float(r["benchmark_value"]) for r in macro_radar_dims]
+            comparison_rows = [
+                {
+                    "dimension": r["dimension"],
+                    "p_val": round(r["prospect_value"], 1),
+                    "s_val": round(r["benchmark_value"], 1),
+                    "delta": round(r["gap"], 1),
+                }
+                for r in macro_radar_dims
+            ]
+        else:
+            radar_cats = list(macro_dimensions.keys())
+            p_vals = []
+            s_vals = []
+            comparison_rows = []
 
-        for dim, subcols in macro_dimensions.items():
-            valid_p = [float(prospect[c]) for c in subcols if pd.notna(prospect[c])]
-            p_mean = float(np.mean(valid_p)) if valid_p else 50.0
-            valid_s = [float(best_star["attributes"].get(c, 50.0)) for c in subcols if pd.notna(best_star["attributes"].get(c))]
-            s_mean = float(np.mean(valid_s)) if valid_s else 50.0
-            p_vals.append(p_mean)
-            s_vals.append(s_mean)
-            delta = round(s_mean - p_mean, 1)
-            comparison_rows.append({
-                "dimension": dim,
-                "p_val": round(p_mean, 1),
-                "s_val": round(s_mean, 1),
-                "delta": delta,
-            })
+            for dim, subcols in macro_dimensions.items():
+                valid_p = [float(prospect[c]) for c in subcols if pd.notna(prospect[c])]
+                p_mean = float(np.mean(valid_p)) if valid_p else 50.0
+                valid_s = [float(best_star["attributes"].get(c, 50.0)) for c in subcols if pd.notna(best_star["attributes"].get(c))]
+                s_mean = float(np.mean(valid_s)) if valid_s else 50.0
+                p_vals.append(p_mean)
+                s_vals.append(s_mean)
+                delta = round(s_mean - p_mean, 1)
+                comparison_rows.append({
+                    "dimension": dim,
+                    "p_val": round(p_mean, 1),
+                    "s_val": round(s_mean, 1),
+                    "delta": delta,
+                })
 
         col_radar, col_telemetry = st.columns([3, 2])
 
