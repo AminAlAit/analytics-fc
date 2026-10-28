@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: stg_fifatable
+    description: "Historical FIFA player season statistics from FIFA 07 to FIFA 21."
+    columns:
+      - name: player_id
+        tests:
+          - not_null
+      - name: fifa_edition_year
+        tests:
+          - not_null
+
+  - name: stg_fifa_granular
+    description: "Granular FIFA player season attributes covering FIFA 15 to FIFA 22."
+    columns:
+      - name: player_id
+        tests:
+          - not_null
+      - name: fifa_edition_year
+        tests:
+          - not_null
