@@ -14,6 +14,7 @@ from typing import Any
 from prefect import flow, task
 
 from pipelines.config import config, configure_ephemeral_prefect
+from pipelines.tasks.ingest import ingest_raw_data_task
 
 # Ensure purely ephemeral in-process Prefect execution
 configure_ephemeral_prefect()
@@ -66,8 +67,12 @@ def master_pipeline_flow(dry_run: bool = False) -> dict[str, Any]:
     # Step 1: Pre-flight environment and hardware boundary check
     env_results = verify_pipeline_environment()
 
-    # Downstream task stages (AFC-521 to AFC-524) will be plugged into this sequence:
-    # 1. Ingest: Verify DVC hashes and load raw CSVs into DuckDB
+    # Step 2: Ingest and validate raw DVC datasets
+    ingest_results = None
+    if not dry_run:
+        ingest_results = ingest_raw_data_task()
+
+    # Downstream task stages (AFC-522 to AFC-524) will be plugged into this sequence:
     # 2. Transform: Execute dbt run and dbt test models
     # 3. Gallery: Compile personal peak superstar gallery JSON
     # 4. Gate: Execute pytest contract and regression suite
@@ -79,6 +84,7 @@ def master_pipeline_flow(dry_run: bool = False) -> dict[str, Any]:
         "dry_run": dry_run,
         "duration_seconds": total_duration,
         "environment": env_results,
+        "ingestion": ingest_results,
     }
     logger.info(f"Master pipeline flow completed successfully in {total_duration}s.")
     return summary
