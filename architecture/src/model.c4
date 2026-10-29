@@ -375,14 +375,14 @@ model {
       }
 
       mypyChecker = component 'Mypy Static Typing' {
-        #backlog
+        #in_progress
         description 'Strict type checking across API schemas, search functions, and pipeline tasks.'
         technology 'Mypy Daemon'
         link https://trello.com/c/JQNL2Y9Q 'Trello: AFC-526'
         metadata {
           ticket 'AFC-526'
           card 'Establish Static Type Checking with Mypy'
-          status 'Backlog'
+          status 'In Progress'
         }
       }
 

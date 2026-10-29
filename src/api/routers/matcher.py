@@ -149,7 +149,7 @@ def execute_vector_matching(
 
         strengths_aligned = sorted(
             [{"attribute": k, "difference": abs(v)} for k, v in trait_deltas.items()],
-            key=lambda x: x["difference"],
+            key=lambda x: float(str(x["difference"])),
         )[:3]
 
         peak_window = f"{star.get('peak_age_min', 26)} to {star.get('peak_age_max', 29)}"

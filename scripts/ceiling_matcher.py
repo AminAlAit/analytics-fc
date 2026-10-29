@@ -178,13 +178,13 @@ class SuperstarCeilingMatcher:
             # Sort deltas: biggest development needed vs already matched
             top_growth_needed = sorted(
                 [{"attribute": k, "gap": v} for k, v in trait_deltas.items() if v > 0],
-                key=lambda x: x["gap"],
+                key=lambda x: float(str(x["gap"])),
                 reverse=True,
             )[:3]
 
             strengths_aligned = sorted(
                 [{"attribute": k, "difference": abs(v)} for k, v in trait_deltas.items()],
-                key=lambda x: x["difference"],
+                key=lambda x: float(str(x["difference"])),
             )[:3]
 
             peak_window = f"{star.get('peak_age_min', 26)}-{star.get('peak_age_max', 29)}"

@@ -96,8 +96,10 @@ def verify_and_ingest_raw_tables(db_path: Path | str | None = None) -> dict[str,
             )
 
         # Query and verify verified record counts
-        fifatable_count = int(con.execute("SELECT COUNT(*) FROM raw.fifatable;").fetchone()[0])
-        granular_count = int(con.execute("SELECT COUNT(*) FROM raw.fifa_granular;").fetchone()[0])
+        fifa_res = con.execute("SELECT COUNT(*) FROM raw.fifatable;").fetchone()
+        granular_res_count = con.execute("SELECT COUNT(*) FROM raw.fifa_granular;").fetchone()
+        fifatable_count = int(fifa_res[0]) if fifa_res else 0
+        granular_count = int(granular_res_count[0]) if granular_res_count else 0
 
         if fifatable_count != EXPECTED_FIFATABLE_ROWS:
             raise AssertionError(

@@ -154,6 +154,13 @@ def get_catalog_stats(
             FROM stg_fifa_granular;
             """
         ).fetchone()
+        if row is None:
+            return {
+                "total_rows": 0,
+                "distinct_players": 0,
+                "min_year": 0,
+                "max_year": 0,
+            }
         return {
             "total_rows": int(row[0]),
             "distinct_players": int(row[1]),
