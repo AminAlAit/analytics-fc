@@ -19,7 +19,7 @@ model {
       technology 'DuckDB / DVC / YAML'
       style {
         shape storage
-        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/duckdb/duckdb-original.svg
+        icon bootstrap:database-fill
       }
 
       duckdbBronze = component 'DuckDB Bronze Raw Tables' {
@@ -51,7 +51,7 @@ model {
 
         style {
           shape cylinder
-          icon https://raw.githubusercontent.com/devicons/devicon/master/icons/dbt/dbt-original.svg
+          icon tech:dbt
         }
       }
 
@@ -68,7 +68,7 @@ model {
 
         style {
           shape cylinder
-          icon https://raw.githubusercontent.com/devicons/devicon/master/icons/dbt/dbt-original.svg
+          icon tech:dbt
         }
       }
 
@@ -101,7 +101,7 @@ model {
       technology 'Prefect 3.9 / Python'
       style {
         shape queue
-        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg
+        icon tech:python
       }
 
       envSentinel = component 'Pre-Flight Hardware Sentinel' {
@@ -178,7 +178,7 @@ model {
       technology 'FastAPI / Pydantic v2 / Uvicorn'
       style {
         shape component
-        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/fastapi/fastapi-original.svg
+        icon tech:fastapi-icon
       }
 
       healthProbe = component 'Diagnostic Health Probe' {
@@ -254,7 +254,7 @@ model {
       technology 'Streamlit / Altair / Python'
       style {
         shape browser
-        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/streamlit/streamlit-original.svg
+        icon tech:streamlit
       }
 
       apiClient = component 'Resilient REST API Client' {
@@ -359,7 +359,7 @@ model {
       technology 'Ruff / Mypy / Evidently AI / GitHub Actions'
       style {
         shape component
-        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg
+        icon tech:github-actions
       }
 
       ruffLinter = component 'Ruff Linter & Formatter' {
@@ -423,7 +423,7 @@ model {
       technology 'Scikit-Learn / NumPy / Python'
       style {
         shape component
-        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/scikitlearn/scikitlearn-original.svg
+        icon tech:pandas
       }
 
       featureContract = component 'Model 2 Feature Contract' {
