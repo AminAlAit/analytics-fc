@@ -3,6 +3,7 @@ views {
   view systemContext of analyticsFC {
     title 'Analytics FC - High-Level System Context'
     description 'Executive overview showing primary actors and platform boundaries.'
+    link https://trello.com/b/6add00820e13a7c7024609e8 'Trello: Analytics FC Master Board'
     autoLayout LeftRight
     include *
   }
@@ -11,6 +12,7 @@ views {
   view containerOverview of analyticsFC {
     title 'Analytics FC - Live Platform Architecture Blueprint'
     description 'Live status map: Green = Built & Verified, Amber = In Progress, Faded Gray = Backlog.'
+    link https://trello.com/b/6add00820e13a7c7024609e8 'Trello: Analytics FC Kanban Board'
     autoLayout LeftRight
     include analyticsFC.*, chiefScout, performanceAnalyst
 
