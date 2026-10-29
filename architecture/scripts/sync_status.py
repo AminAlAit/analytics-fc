@@ -279,6 +279,8 @@ def sync_views_file() -> int:
         "apiService",
         "scoutingTerminal",
         "dataArchitecture",
+        "qualitySuite",
+        "careerModelSuite",
     ]
     for vname in view_names:
         view_pattern = (

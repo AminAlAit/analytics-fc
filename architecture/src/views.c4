@@ -129,6 +129,56 @@ views {
     }
   }
 
+  // Drilldown View: Quality, CI/CD & Drift Monitoring
+  view qualitySuite of analyticsFC.monitoringSuite {
+    title 'Stages 6 & 7: Code Quality, CI/CD & Drift Suite'
+    description 'Static analysis, automated GitHub Actions pipelines, and distribution drift tracking.'
+    link https://trello.com/b/6add00820e13a7c7024609e8 'Trello: Analytics FC Master Board'
+    autoLayout LeftRight
+    include *
+
+    style element.tag = #built {
+      color green
+      opacity 100%
+    }
+
+    style element.tag = #in_progress {
+      color amber
+      opacity 100%
+    }
+
+    style element.tag = #backlog {
+      color gray
+      opacity 45%
+      border dashed
+    }
+  }
+
+  // Drilldown View: Flagship Model 2 (Career Trajectory)
+  view careerModelSuite of analyticsFC.careerModel {
+    title 'Stage 8: Flagship Model 2 (Career Trajectory)'
+    description 'Feature contracts, longitudinal dataset generator, baseline regressor, and evaluation.'
+    link https://trello.com/b/6add00820e13a7c7024609e8 'Trello: Analytics FC Master Board'
+    autoLayout LeftRight
+    include *
+
+    style element.tag = #built {
+      color green
+      opacity 100%
+    }
+
+    style element.tag = #in_progress {
+      color amber
+      opacity 100%
+    }
+
+    style element.tag = #backlog {
+      color gray
+      opacity 45%
+      border dashed
+    }
+  }
+
   // Dynamic View 1: Player Scouting Match Journey
   dynamic view playerScoutingJourney {
     title 'Scouting Workflow: Player Ceiling Discovery Journey'
