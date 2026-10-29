@@ -363,14 +363,14 @@ model {
       }
 
       ruffLinter = component 'Ruff Linter & Formatter' {
-        #in_progress
+        #built
         description 'Fast automated linting and formatting enforcing strict Python standards.'
         technology 'Ruff CLI'
         link https://trello.com/c/0dxCvcED 'Trello: AFC-525'
         metadata {
           ticket 'AFC-525'
           card 'Configure Ruff Linter and Formatter Rules'
-          status 'In Progress'
+          status 'Done'
         }
       }
 
