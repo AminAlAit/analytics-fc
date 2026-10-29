@@ -17,6 +17,7 @@ from pipelines.config import config, configure_ephemeral_prefect
 from pipelines.tasks.dbt_runner import dbt_runner_task
 from pipelines.tasks.gallery import superstar_gallery_task
 from pipelines.tasks.ingest import ingest_raw_data_task
+from pipelines.tasks.test_runner import quality_gate_task
 
 # Ensure purely ephemeral in-process Prefect execution
 configure_ephemeral_prefect()
@@ -61,7 +62,10 @@ def verify_pipeline_environment() -> dict[str, Any]:
 
 
 @flow(name="analytics-fc-master-pipeline", log_prints=True)
-def master_pipeline_flow(dry_run: bool = False) -> dict[str, Any]:
+def master_pipeline_flow(
+    dry_run: bool = False,
+    test_args: list[str] | None = None,
+) -> dict[str, Any]:
     """Top-level orchestrated pipeline flow coordinating data ingestion and serving."""
     logger.info("Starting Analytics FC Master Pipeline flow...")
     start_time = time.perf_counter()
@@ -69,20 +73,21 @@ def master_pipeline_flow(dry_run: bool = False) -> dict[str, Any]:
     # Step 1: Pre-flight environment and hardware boundary check
     env_results = verify_pipeline_environment()
 
-    # Step 2: Ingest and validate raw DVC datasets
+    # Pipeline execution stages
     ingest_results = None
     dbt_results = None
     gallery_results = None
+    gate_results = None
 
     if not dry_run:
+        # Step 2: Ingest and validate raw DVC datasets
         ingest_results = ingest_raw_data_task()
         # Step 3: Execute dbt model transformations and data tests
         dbt_results = dbt_runner_task()
         # Step 4: Compile and export personal peak superstar gallery
         gallery_results = superstar_gallery_task()
-
-    # Downstream task stage (AFC-524) will be plugged into this sequence:
-    # 4. Gate: Execute pytest contract and regression suite
+        # Step 5: Execute automated quality test gate
+        gate_results = quality_gate_task(test_args=test_args)
 
     total_duration = round(time.perf_counter() - start_time, 2)
     summary = {
@@ -94,6 +99,7 @@ def master_pipeline_flow(dry_run: bool = False) -> dict[str, Any]:
         "ingestion": ingest_results,
         "dbt": dbt_results,
         "gallery": gallery_results,
+        "quality_gate": gate_results,
     }
     logger.info(f"Master pipeline flow completed successfully in {total_duration}s.")
     return summary
