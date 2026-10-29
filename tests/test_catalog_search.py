@@ -7,7 +7,6 @@ tactical sector facets, complete skill attribute vectors, and sub-100ms p95 late
 from __future__ import annotations
 
 import time
-from typing import Any
 
 import pytest
 
@@ -131,11 +130,31 @@ def test_complete_player_profile_retrieval(shared_con):
 def test_catalog_search_latency_benchmark_p95(shared_con):
     """Benchmark 100 realistic player queries asserting p95 latency under 100ms."""
     sample_names = [
-        "Haaland", "Mbapp", "Bellingham", "Musiala", "Pedri",
-        "Saka", "Foden", "Kane", "Benzema", "Modri",
-        "Vinicius", "Rodri", "Rice", "Silva", "Dias",
-        "Alisson", "Courtois", "Casemiro", "Kroos", "Griezmann",
-        "Neymar", "Messi", "Ronaldo", "Salah", "Davies",
+        "Haaland",
+        "Mbapp",
+        "Bellingham",
+        "Musiala",
+        "Pedri",
+        "Saka",
+        "Foden",
+        "Kane",
+        "Benzema",
+        "Modri",
+        "Vinicius",
+        "Rodri",
+        "Rice",
+        "Silva",
+        "Dias",
+        "Alisson",
+        "Courtois",
+        "Casemiro",
+        "Kroos",
+        "Griezmann",
+        "Neymar",
+        "Messi",
+        "Ronaldo",
+        "Salah",
+        "Davies",
     ]
     benchmark_queries = (sample_names * 4)[:100]
     durations_ms: list[float] = []
@@ -155,7 +174,9 @@ def test_catalog_search_latency_benchmark_p95(shared_con):
     p95 = durations_ms[int(100 * 0.95)]
     mean_ms = sum(durations_ms) / 100.0
 
-    print(f"\n[BENCHMARK] 100 Catalog Queries: mean={mean_ms:.2f}ms, p50={p50:.2f}ms, p90={p90:.2f}ms, p95={p95:.2f}ms")
+    print(
+        f"\n[BENCHMARK] 100 Catalog Queries: mean={mean_ms:.2f}ms, p50={p50:.2f}ms, p90={p90:.2f}ms, p95={p95:.2f}ms"
+    )
 
     # Strict SLA Assertion: p95 latency must stay strictly below 100ms
     assert p95 < 100.0, f"p95 latency exceeded threshold: {p95:.2f}ms >= 100ms"

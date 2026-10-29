@@ -26,9 +26,7 @@ class PlayerSearchParams(BaseModel):
     max_overall: int | None = Field(
         default=None, ge=40, le=99, description="Maximum overall rating threshold."
     )
-    sector: str | None = Field(
-        default=None, description="Tactical sector filter (e.g. Defenders)."
-    )
+    sector: str | None = Field(default=None, description="Tactical sector filter (e.g. Defenders).")
     limit: int = Field(default=50, ge=1, le=200, description="Page size limit.")
     offset: int = Field(default=0, ge=0, description="Page offset starting index.")
 
@@ -48,7 +46,10 @@ class PlayerSummary(BaseModel):
     league_name: str | None = Field(default=None, description="Domestic league name.")
     positions: str = Field(description="Comma-separated playable positions.")
     primary_pos: str = Field(default="ST", description="Primary tactical pitch position.")
-    tactical_sector: str = Field(default="Center Forwards & Strikers", description="Canonical tactical sector classification.")
+    tactical_sector: str = Field(
+        default="Center Forwards & Strikers",
+        description="Canonical tactical sector classification.",
+    )
     preferred_foot: str | None = Field(default=None, description="Preferred kicking foot.")
     height_cm: int | None = Field(default=None, description="Player height in centimeters.")
     weight_kg: int | None = Field(default=None, description="Player weight in kilograms.")
@@ -73,6 +74,7 @@ class PlayerSummary(BaseModel):
                 data["primary_pos"] = str(positions).split(",")[0].strip().upper()
             if not data.get("tactical_sector") and data.get("primary_pos"):
                 from src.catalog_search import SECTOR_MAP
+
                 data["tactical_sector"] = SECTOR_MAP.get(
                     data["primary_pos"], "Attacking Midfielders & Wingers"
                 )
@@ -163,10 +165,18 @@ class MatchedSuperstar(BaseModel):
     sector: str = Field(description="Superstar primary tactical sector.")
     peak_overall: int = Field(ge=40, le=99, description="Superstar career peak overall rating.")
     peak_age_window: str = Field(description="Career peak age window.")
-    similarity_pct: float = Field(ge=0.0, le=100.0, description="Calibrated Gaussian RBF match percentage.")
-    strengths: list[dict[str, Any]] = Field(default_factory=list, description="Shared core attributes.")
-    growth_needed: list[TraitGap] = Field(default_factory=list, description="Priority growth attributes.")
-    attributes: dict[str, float] = Field(default_factory=dict, description="Benchmark normalized skill values.")
+    similarity_pct: float = Field(
+        ge=0.0, le=100.0, description="Calibrated Gaussian RBF match percentage."
+    )
+    strengths: list[dict[str, Any]] = Field(
+        default_factory=list, description="Shared core attributes."
+    )
+    growth_needed: list[TraitGap] = Field(
+        default_factory=list, description="Priority growth attributes."
+    )
+    attributes: dict[str, float] = Field(
+        default_factory=dict, description="Benchmark normalized skill values."
+    )
 
 
 class MacroRadarDimension(BaseModel):
@@ -186,7 +196,9 @@ class CeilingMatchResponse(BaseModel):
     macro_radar: list[MacroRadarDimension] = Field(
         default_factory=list, description="Hexagonal radar comparison points."
     )
-    kernel: str = Field(default="gaussian_rbf", description="Similarity kernel mathematical formulation.")
+    kernel: str = Field(
+        default="gaussian_rbf", description="Similarity kernel mathematical formulation."
+    )
     inference_time_ms: float = Field(ge=0.0, description="Execution duration in milliseconds.")
 
 

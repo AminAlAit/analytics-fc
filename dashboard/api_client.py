@@ -55,7 +55,11 @@ def search_players(
     include_sector_counts: bool = True,
 ) -> dict[str, Any]:
     """Execute player search via FastAPI endpoint or fallback to local DuckDB engine."""
-    params: dict[str, Any] = {"limit": limit, "offset": offset, "include_sector_counts": str(include_sector_counts).lower()}
+    params: dict[str, Any] = {
+        "limit": limit,
+        "offset": offset,
+        "include_sector_counts": str(include_sector_counts).lower(),
+    }
     if query:
         params["query"] = query
     if edition_year is not None:
@@ -124,11 +128,13 @@ def match_ceiling(
 ) -> dict[str, Any] | None:
     """Compute superstar ceiling similarity via FastAPI or fallback to in-memory math."""
     url = f"{API_BASE_URL}/api/v1/match/ceiling"
-    payload = json.dumps({
-        "player_id": player_id,
-        "fifa_edition_year": edition_year,
-        "top_k": top_k,
-    }).encode("utf-8")
+    payload = json.dumps(
+        {
+            "player_id": player_id,
+            "fifa_edition_year": edition_year,
+            "top_k": top_k,
+        }
+    ).encode("utf-8")
 
     req = urllib.request.Request(
         url,

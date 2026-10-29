@@ -11,8 +11,8 @@ import logging
 import time
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, status
 import numpy as np
+from fastapi import APIRouter, HTTPException, status
 
 from src.api.config import settings
 from src.api.schemas import (
@@ -41,7 +41,11 @@ OUTFIELD_MACRO_DIMENSIONS: dict[str, list[str]] = {
     "Shooting": ["attacking_finishing", "power_shot_power", "power_long_shots"],
     "Passing": ["attacking_short_passing", "skill_long_passing", "mentality_vision"],
     "Dribbling": ["skill_dribbling", "skill_ball_control", "movement_agility"],
-    "Defending": ["defending_standing_tackle", "defending_marking_awareness", "mentality_interceptions"],
+    "Defending": [
+        "defending_standing_tackle",
+        "defending_marking_awareness",
+        "mentality_interceptions",
+    ],
     "Physical": ["power_stamina", "power_strength", "power_jumping"],
 }
 
@@ -63,8 +67,10 @@ def get_gallery() -> list[dict[str, Any]]:
     global _GALLERY_CACHE
     if _GALLERY_CACHE is None:
         if not settings.gallery_path.exists():
-            raise FileNotFoundError(f"Superstar gallery artifact not found at {settings.gallery_path}")
-        with open(settings.gallery_path, "r", encoding="utf-8") as f:
+            raise FileNotFoundError(
+                f"Superstar gallery artifact not found at {settings.gallery_path}"
+            )
+        with open(settings.gallery_path, encoding="utf-8") as f:
             _GALLERY_CACHE = json.load(f)
     return _GALLERY_CACHE
 
@@ -77,15 +83,18 @@ def execute_vector_matching(
     """Execute high-dimensional unit vector projection and Gaussian RBF kernel similarity."""
     primary_pos = str(prospect.get("primary_pos", "ST")).upper()
     sector = prospect.get("tactical_sector", "Center Forwards & Strikers")
-    is_gk = (primary_pos == "GK")
+    is_gk = primary_pos == "GK"
 
-    active_cols = [c for c in ALL_SKILL_COLUMNS if c.startswith("goalkeeping_")] if is_gk else OUTFIELD_SKILL_COLS
+    active_cols = (
+        [c for c in ALL_SKILL_COLUMNS if c.startswith("goalkeeping_")]
+        if is_gk
+        else OUTFIELD_SKILL_COLS
+    )
 
     # 1. Construct and L2-normalize prospect directional unit vector
-    p_vec = np.array([
-        float(prospect[c]) if prospect.get(c) is not None else 50.0
-        for c in active_cols
-    ])
+    p_vec = np.array(
+        [float(prospect[c]) if prospect.get(c) is not None else 50.0 for c in active_cols]
+    )
     p_norm = np.linalg.norm(p_vec)
     p_unit = p_vec / p_norm if p_norm > 0 else p_vec
 
@@ -109,16 +118,20 @@ def execute_vector_matching(
         if not sector_match:
             continue
 
-        s_vec = np.array([
-            float(star["attributes"].get(c, 50.0)) if star["attributes"].get(c) is not None else 50.0
-            for c in active_cols
-        ])
+        s_vec = np.array(
+            [
+                float(star["attributes"].get(c, 50.0))
+                if star["attributes"].get(c) is not None
+                else 50.0
+                for c in active_cols
+            ]
+        )
         s_norm = np.linalg.norm(s_vec)
         s_unit = s_vec / s_norm if s_norm > 0 else s_vec
 
         # Normalized Euclidean distance & Gaussian RBF calibrated percentage
         norm_dist = float(np.linalg.norm(p_unit - s_unit))
-        calibrated_pct = round(float(np.exp(-(norm_dist ** 2) / (2 * (0.28 ** 2))) * 100), 1)
+        calibrated_pct = round(float(np.exp(-(norm_dist**2) / (2 * (0.28**2))) * 100), 1)
 
         # Attribute difference vectors
         trait_deltas: dict[str, float] = {}
@@ -141,24 +154,25 @@ def execute_vector_matching(
 
         peak_window = f"{star.get('peak_age_min', 26)} to {star.get('peak_age_max', 29)}"
 
-        candidates.append({
-            "player_id": int(star["player_id"]),
-            "name": star["short_name"],
-            "sector": star["tactical_sector"],
-            "peak_overall": int(star["peak_overall"]),
-            "peak_age_window": peak_window,
-            "similarity_pct": calibrated_pct,
-            "strengths": strengths_aligned,
-            "growth_needed": top_growth_needed,
-            "attributes": {k: float(v) for k, v in star["attributes"].items()},
-        })
+        candidates.append(
+            {
+                "player_id": int(star["player_id"]),
+                "name": star["short_name"],
+                "sector": star["tactical_sector"],
+                "peak_overall": int(star["peak_overall"]),
+                "peak_age_window": peak_window,
+                "similarity_pct": calibrated_pct,
+                "strengths": strengths_aligned,
+                "growth_needed": top_growth_needed,
+                "attributes": {k: float(v) for k, v in star["attributes"].items()},
+            }
+        )
 
     candidates.sort(key=lambda x: x["similarity_pct"], reverse=True)
     top_candidates = candidates[:top_k]
 
     matches: list[MatchedSuperstar] = [
-        MatchedSuperstar(rank=idx + 1, **cand)
-        for idx, cand in enumerate(top_candidates)
+        MatchedSuperstar(rank=idx + 1, **cand) for idx, cand in enumerate(top_candidates)
     ]
 
     # 3. Compute 6-axis macro tactical radar comparison against top archetype

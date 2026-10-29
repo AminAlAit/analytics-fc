@@ -1,7 +1,9 @@
 import time
+
 import numpy as np
 import pytest
-from scripts.ceiling_matcher import SuperstarCeilingMatcher, SKILL_COLS, OUTFIELD_COLS, SECTOR_MAP
+
+from scripts.ceiling_matcher import OUTFIELD_COLS, SECTOR_MAP, SuperstarCeilingMatcher
 
 
 @pytest.fixture(scope="module")
@@ -20,7 +22,7 @@ def test_vector_similarity_math_identity():
     norm = np.linalg.norm(vec)
     unit = vec / norm
     norm_dist = float(np.linalg.norm(unit - unit))
-    calibrated_pct = round(float(np.exp(-(norm_dist ** 2) / (2 * (0.28 ** 2))) * 100), 1)
+    calibrated_pct = round(float(np.exp(-(norm_dist**2) / (2 * (0.28**2))) * 100), 1)
     assert calibrated_pct == 100.0
 
 
@@ -32,7 +34,7 @@ def test_vector_similarity_bounds_arbitrary():
         u1 = v1 / np.linalg.norm(v1)
         u2 = v2 / np.linalg.norm(v2)
         dist = float(np.linalg.norm(u1 - u2))
-        score = float(np.exp(-(dist ** 2) / (2 * (0.28 ** 2))) * 100)
+        score = float(np.exp(-(dist**2) / (2 * (0.28**2))) * 100)
         assert 0.0 <= score <= 100.0
 
 
@@ -64,7 +66,7 @@ def test_in_memory_matching_latency(matcher):
         s_vec = np.array([star["attributes"].get(c, 50.0) for c in OUTFIELD_COLS])
         s_u = s_vec / np.linalg.norm(s_vec)
         dist = np.linalg.norm(u_dummy - s_u)
-        score = np.exp(-(dist ** 2) / (2 * (0.28 ** 2))) * 100
+        score = np.exp(-(dist**2) / (2 * (0.28**2))) * 100
         scores.append(score)
     elapsed_ms = (time.perf_counter() - t0) * 1000
 

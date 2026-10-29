@@ -1,6 +1,6 @@
 import subprocess
-import sys
 from pathlib import Path
+
 import pytest
 import yaml
 
@@ -14,14 +14,16 @@ PROCESSED_DATA_DIR = BASE_DIR / "data" / "processed"
 
 def test_raw_dvc_pointer_contract():
     assert RAW_DVC_PATH.exists(), f"Missing raw DVC pointer at {RAW_DVC_PATH}"
-    with open(RAW_DVC_PATH, "r", encoding="utf-8") as f:
+    with open(RAW_DVC_PATH, encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
     assert "outs" in data and len(data["outs"]) == 1
     out = data["outs"][0]
     assert out["path"] == "raw"
     assert "md5" in out and out["md5"].endswith(".dir")
-    assert out.get("nfiles", 0) >= 80, f"Expected at least 80 raw files tracked, found {out.get('nfiles')}"
+    assert out.get("nfiles", 0) >= 80, (
+        f"Expected at least 80 raw files tracked, found {out.get('nfiles')}"
+    )
     assert out.get("size", 0) > 2_000_000_000, f"Expected size > 2GB, found {out.get('size')}"
 
     # Verify tracked filesystem assets exist
@@ -32,7 +34,7 @@ def test_raw_dvc_pointer_contract():
 
 def test_processed_dvc_pointer_contract():
     assert PROCESSED_DVC_PATH.exists(), f"Missing processed DVC pointer at {PROCESSED_DVC_PATH}"
-    with open(PROCESSED_DVC_PATH, "r", encoding="utf-8") as f:
+    with open(PROCESSED_DVC_PATH, encoding="utf-8") as f:
         data = yaml.safe_load(f)
 
     assert "outs" in data and len(data["outs"]) == 1
@@ -48,10 +50,12 @@ def test_processed_dvc_pointer_contract():
 
 def test_dvc_configuration_invariants():
     assert DVC_CONFIG_PATH.exists(), f"Missing DVC configuration at {DVC_CONFIG_PATH}"
-    with open(DVC_CONFIG_PATH, "r", encoding="utf-8") as f:
+    with open(DVC_CONFIG_PATH, encoding="utf-8") as f:
         content = f.read()
 
-    assert "type = copy" in content, "DVC cache.type copy must be configured for Windows filesystem safety"
+    assert "type = copy" in content, (
+        "DVC cache.type copy must be configured for Windows filesystem safety"
+    )
     assert "analytics = false" in content, "DVC telemetry must be disabled"
     assert "remote = local_storage" in content, "Default remote local_storage must be set"
 
@@ -62,11 +66,9 @@ def test_dvc_status_clean():
         pytest.skip("dvc executable not found in .venv/Scripts")
 
     proc = subprocess.run(
-        [str(dvc_exe), "status"],
-        cwd=str(BASE_DIR),
-        capture_output=True,
-        text=True,
-        check=False
+        [str(dvc_exe), "status"], cwd=str(BASE_DIR), capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, f"dvc status failed with stderr: {proc.stderr}"
-    assert "Data and pipelines are up to date." in proc.stdout, f"Unexpected dvc status output: {proc.stdout}"
+    assert "Data and pipelines are up to date." in proc.stdout, (
+        f"Unexpected dvc status output: {proc.stdout}"
+    )

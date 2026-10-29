@@ -80,6 +80,7 @@ def get_sector_for_position(position: str | None) -> str:
     primary = get_primary_position(position)
     return SECTOR_MAP.get(primary, "Attacking Midfielders & Wingers")
 
+
 ALL_SKILL_COLUMNS = [
     "attacking_crossing",
     "attacking_finishing",
@@ -145,7 +146,7 @@ def get_catalog_stats(
     try:
         row = active_con.execute(
             """
-            SELECT 
+            SELECT
                 COUNT(*) AS total_rows,
                 COUNT(DISTINCT player_id) AS distinct_players,
                 MIN(fifa_edition_year) AS min_year,
@@ -371,7 +372,7 @@ def search_players_paginated(
         if include_sector_counts:
             base_where = f"WHERE {' AND '.join(base_clauses)}" if base_clauses else ""
             sector_sql = f"""
-                SELECT 
+                SELECT
                     CASE
                         WHEN TRIM(SPLIT_PART(positions, ',', 1)) = 'GK' THEN 'Goalkeepers'
                         WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CB', 'LB', 'RB', 'LWB', 'RWB') THEN 'Defenders'

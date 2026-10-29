@@ -6,7 +6,6 @@ artifact schema contracts, and integration into the master pipeline flow.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from pipelines.config import config
@@ -23,7 +22,9 @@ from src.catalog_search import ALL_SKILL_COLUMNS
 
 def test_query_peak_player_seasons() -> None:
     """Assert SQL extraction retrieves exactly target count of unique superstars."""
-    df, composure_df = query_peak_player_seasons(config.duckdb_path, target_count=GALLERY_TARGET_COUNT)
+    df, composure_df = query_peak_player_seasons(
+        config.duckdb_path, target_count=GALLERY_TARGET_COUNT
+    )
 
     assert df["player_id"].nunique() == GALLERY_TARGET_COUNT
     assert not composure_df.empty

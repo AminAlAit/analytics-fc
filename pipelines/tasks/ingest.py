@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
-from prefect import task
 import yaml
+from prefect import task
 
 from pipelines.config import config
 
@@ -30,7 +30,7 @@ def validate_dvc_raw_artifacts(dvc_path: Path | None = None) -> dict[str, Any]:
     if not target_dvc.exists():
         raise FileNotFoundError(f"Missing raw DVC pointer file at {target_dvc}")
 
-    with open(target_dvc, "r", encoding="utf-8") as f:
+    with open(target_dvc, encoding="utf-8") as f:
         dvc_meta = yaml.safe_load(f)
 
     if "outs" not in dvc_meta or not dvc_meta["outs"]:
@@ -91,7 +91,9 @@ def verify_and_ingest_raw_tables(db_path: Path | str | None = None) -> dict[str,
         has_granular = bool(granular_res and granular_res[0] > 0)
 
         if not has_granular:
-            raise RuntimeError("raw.fifa_granular table missing and requires initial staging build.")
+            raise RuntimeError(
+                "raw.fifa_granular table missing and requires initial staging build."
+            )
 
         # Query and verify verified record counts
         fifatable_count = int(con.execute("SELECT COUNT(*) FROM raw.fifatable;").fetchone()[0])

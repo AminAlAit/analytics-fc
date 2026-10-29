@@ -12,7 +12,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import re
 import sys
 import time
@@ -83,6 +82,7 @@ def set_low_process_priority() -> None:
     try:
         if sys.platform == "win32":
             import ctypes
+
             # BELOW_NORMAL_PRIORITY_CLASS = 0x00004000
             ctypes.windll.kernel32.SetPriorityClass(
                 ctypes.windll.kernel32.GetCurrentProcess(), 0x00004000
@@ -96,7 +96,7 @@ def load_trello_credentials() -> tuple[str, str]:
     if not ENV_FILE.exists():
         raise FileNotFoundError(f"Missing Trello credentials file at {ENV_FILE}")
     env_vars: dict[str, str] = {}
-    with open(ENV_FILE, "r", encoding="utf-8") as f:
+    with open(ENV_FILE, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if "=" in line and not line.startswith("#"):
@@ -206,12 +206,16 @@ def update_element_block(block_body: str, card: TrelloCardInfo, indent: str) -> 
 
     metadata_pattern = r"^\s*metadata\s*\{[^}]*\}"
     if re.search(metadata_pattern, body, flags=re.MULTILINE | re.DOTALL):
-        body = re.sub(metadata_pattern, metadata_block, body, count=1, flags=re.MULTILINE | re.DOTALL)
+        body = re.sub(
+            metadata_pattern, metadata_block, body, count=1, flags=re.MULTILINE | re.DOTALL
+        )
     else:
         # Place before style block or at end of element
         style_pattern = r"(^\s*style\s*\{)"
         if re.search(style_pattern, body, flags=re.MULTILINE):
-            body = re.sub(style_pattern, rf"{metadata_block}\n\n\g<1>", body, count=1, flags=re.MULTILINE)
+            body = re.sub(
+                style_pattern, rf"{metadata_block}\n\n\g<1>", body, count=1, flags=re.MULTILINE
+            )
         else:
             body = body.rstrip() + f"\n\n{metadata_block}\n{indent}"
 
@@ -239,11 +243,11 @@ def sync_likec4_model(dry_run: bool = False) -> tuple[int, dict[str, int]]:
         if brace_start == -1 or brace_end == -1:
             continue
 
-        block_body = content[brace_start + 1:brace_end]
+        block_body = content[brace_start + 1 : brace_end]
         updated_body = update_element_block(block_body, card, indent)
 
         if block_body != updated_body:
-            content = content[:brace_start + 1] + updated_body + content[brace_end:]
+            content = content[: brace_start + 1] + updated_body + content[brace_end:]
             updates_count += 1
             print(f"Synchronized {comp_name} [{ticket_id}] -> {card.status_tag} | {card.short_url}")
 
@@ -255,7 +259,9 @@ def sync_likec4_model(dry_run: bool = False) -> tuple[int, dict[str, int]]:
 
     # Calculate telemetry
     pct = round((counts["done"] / counts["total"] * 100.0), 1) if counts["total"] > 0 else 0.0
-    print(f"Board Progress: {counts['done']}/{counts['total']} Done ({pct}%), {counts['in_progress']} In Progress, {counts['backlog']} Backlog")
+    print(
+        f"Board Progress: {counts['done']}/{counts['total']} Done ({pct}%), {counts['in_progress']} In Progress, {counts['backlog']} Backlog"
+    )
 
     return updates_count, counts
 
@@ -266,10 +272,23 @@ def sync_views_file() -> int:
     board_url = f"https://trello.com/b/{BOARD_ID}"
     updated = content
 
-    view_names = ["systemContext", "containerOverview", "prefectEngine", "apiService", "scoutingTerminal", "dataArchitecture"]
+    view_names = [
+        "systemContext",
+        "containerOverview",
+        "prefectEngine",
+        "apiService",
+        "scoutingTerminal",
+        "dataArchitecture",
+    ]
     for vname in view_names:
-        view_pattern = rf"(view\s+{vname}\s+of\s+\w+\s*\{{\s*title\s+'[^']+'\s*description\s+'[^']+')"
-        if re.search(view_pattern, updated) and f"link {board_url}" not in updated[updated.find(f"view {vname}"):updated.find(f"view {vname}")+400]:
+        view_pattern = (
+            rf"(view\s+{vname}\s+of\s+\w+\s*\{{\s*title\s+'[^']+'\s*description\s+'[^']+')"
+        )
+        if (
+            re.search(view_pattern, updated)
+            and f"link {board_url}"
+            not in updated[updated.find(f"view {vname}") : updated.find(f"view {vname}") + 400]
+        ):
             updated = re.sub(
                 view_pattern,
                 rf"\g<1>\n    link {board_url} 'Trello: Analytics FC Master Board'",
@@ -285,11 +304,20 @@ def sync_views_file() -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Synchronize Trello tickets with LikeC4 architecture.")
-    parser.add_argument("--once", action="store_true", default=True, help="Execute single synchronization run and exit.")
+    parser = argparse.ArgumentParser(
+        description="Synchronize Trello tickets with LikeC4 architecture."
+    )
+    parser.add_argument(
+        "--once",
+        action="store_true",
+        default=True,
+        help="Execute single synchronization run and exit.",
+    )
     parser.add_argument("--watch", action="store_true", help="Continuous polling watcher mode.")
     parser.add_argument("--interval", type=int, default=60, help="Poll interval in seconds.")
-    parser.add_argument("--dry-run", action="store_true", help="Evaluate changes without writing to disk.")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Evaluate changes without writing to disk."
+    )
     args = parser.parse_args()
 
     set_low_process_priority()

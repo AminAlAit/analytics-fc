@@ -85,7 +85,7 @@ def health_probe() -> dict[str, Any]:
     # 2. Verify Superstar Gallery Artifact
     try:
         if settings.gallery_path.exists():
-            with open(settings.gallery_path, "r", encoding="utf-8") as f:
+            with open(settings.gallery_path, encoding="utf-8") as f:
                 gallery = json.load(f)
                 gallery_size = len(gallery)
                 gallery_status = "loaded"

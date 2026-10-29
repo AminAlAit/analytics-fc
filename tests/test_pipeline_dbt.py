@@ -11,7 +11,6 @@ from pipelines.tasks.dbt_runner import (
     dbt_runner_task,
     execute_dbt_command,
     parse_dbt_summary,
-    run_dbt_pipeline,
 )
 
 

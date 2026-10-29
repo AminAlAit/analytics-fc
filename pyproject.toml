@@ -1,0 +1,58 @@
+[project]
+name = "analytics-fc"
+version = "0.1.0"
+description = "Analytics FC: Player valuation and superstar ceiling trajectory intelligence platform."
+authors = [{ name = "Amin Al-Ait", email = "aminalait.de@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.40.0",
+    "duckdb>=1.1.0",
+    "altair>=5.4.0",
+    "numpy>=2.0.0",
+    "pandas>=2.2.0",
+    "scikit-learn>=1.5.0",
+    "fastapi>=0.115.0",
+    "pydantic>=2.10.0",
+    "uvicorn>=0.34.0",
+    "prefect>=3.1.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+exclude = [
+    ".git",
+    ".dvc",
+    ".venv",
+    ".pytest_cache",
+    "__pycache__",
+    "node_modules",
+    "mlruns",
+    "dbt_project/target",
+    "dbt_project/dbt_packages",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "UP",
+]
+ignore = [
+    "E501",  # Line length handled by ruff formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"dashboard/*" = ["E402"]  # Dynamic sys.path insertion for Streamlit execution
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "pipelines", "dashboard", "architecture"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

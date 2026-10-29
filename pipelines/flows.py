@@ -57,7 +57,9 @@ def verify_pipeline_environment() -> dict[str, Any]:
 
     elapsed_ms = round((time.perf_counter() - t0) * 1000.0, 2)
     checks["verification_time_ms"] = elapsed_ms
-    logger.info(f"Environment verification passed in {elapsed_ms}ms ({row_count} catalog rows confirmed).")
+    logger.info(
+        f"Environment verification passed in {elapsed_ms}ms ({row_count} catalog rows confirmed)."
+    )
     return checks
 
 

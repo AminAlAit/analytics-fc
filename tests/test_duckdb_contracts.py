@@ -1,7 +1,9 @@
 import time
 from pathlib import Path
+
 import duckdb
 import pytest
+
 from scripts.ceiling_matcher import SKILL_COLS
 
 DB_PATH = Path(__file__).resolve().parent.parent / "dbt_project" / "analytics_fc.duckdb"
@@ -26,7 +28,9 @@ def test_duckdb_read_only_contract(db_connection):
 def test_stg_fifa_granular_cardinality(db_connection):
     row_count = db_connection.execute("SELECT count(*) FROM stg_fifa_granular;").fetchone()[0]
     # Verified facts: stg_fifa_granular contains over 140,000 player seasons
-    assert row_count >= 140000, f"Expected at least 140,000 rows in stg_fifa_granular, found {row_count}"
+    assert row_count >= 140000, (
+        f"Expected at least 140,000 rows in stg_fifa_granular, found {row_count}"
+    )
 
 
 def test_stg_fifa_granular_schema_columns(db_connection):
@@ -34,8 +38,14 @@ def test_stg_fifa_granular_schema_columns(db_connection):
     existing_cols = set(cols_df["column_name"].str.lower())
 
     mandatory_fields = [
-        "player_id", "short_name", "long_name", "age",
-        "fifa_edition_year", "overall", "potential", "positions"
+        "player_id",
+        "short_name",
+        "long_name",
+        "age",
+        "fifa_edition_year",
+        "overall",
+        "potential",
+        "positions",
     ]
     for field in mandatory_fields:
         assert field in existing_cols, f"Mandatory column '{field}' missing from stg_fifa_granular"
@@ -57,4 +67,6 @@ def test_duckdb_query_latency_budget(db_connection):
     elapsed_ms = (time.perf_counter() - t0) * 1000
 
     assert len(res) == 10
-    assert elapsed_ms < 500.0, f"DuckDB query took {elapsed_ms:.2f}ms, exceeding 500ms latency budget"
+    assert elapsed_ms < 500.0, (
+        f"DuckDB query took {elapsed_ms:.2f}ms, exceeding 500ms latency budget"
+    )

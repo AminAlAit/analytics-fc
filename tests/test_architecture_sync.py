@@ -1,7 +1,6 @@
 """Automated verification suite to prevent architectural drift between LikeC4 and Trello."""
 
 import re
-from pathlib import Path
 
 import pytest
 
@@ -11,7 +10,6 @@ from architecture.scripts.sync_status import (
     MODEL_FILE,
     VIEWS_FILE,
     fetch_trello_cards,
-    load_trello_credentials,
 )
 
 
@@ -31,17 +29,23 @@ def test_mapped_components_in_model():
         assert comp_name in content, f"Component '{comp_name}' missing in model.c4"
 
         # Check tag exists
-        tag_match = re.search(rf"{comp_name}\s*=\s*(?:component|container)\s*'[^']+'\s*\{{\s*(#[a-z_]+)", content)
+        tag_match = re.search(
+            rf"{comp_name}\s*=\s*(?:component|container)\s*'[^']+'\s*\{{\s*(#[a-z_]+)", content
+        )
         assert tag_match is not None, f"Status tag missing for '{comp_name}'"
-        assert tag_match.group(1) in ["#built", "#in_progress", "#backlog"], f"Invalid tag for '{comp_name}'"
+        assert tag_match.group(1) in ["#built", "#in_progress", "#backlog"], (
+            f"Invalid tag for '{comp_name}'"
+        )
 
         # Find block bounds for accurate content inspection
         decl_idx = content.find(f"{comp_name} =")
         assert decl_idx != -1
         # Check link and metadata within the next 500 characters
-        comp_slice = content[decl_idx:decl_idx + 600]
+        comp_slice = content[decl_idx : decl_idx + 600]
         assert "link https://trello.com/c/" in comp_slice, f"Trello link missing for '{comp_name}'"
-        assert f"ticket '{ticket_id}'" in comp_slice, f"Metadata ticket '{ticket_id}' missing for '{comp_name}'"
+        assert f"ticket '{ticket_id}'" in comp_slice, (
+            f"Metadata ticket '{ticket_id}' missing for '{comp_name}'"
+        )
 
 
 def test_view_links_configured():
@@ -65,7 +69,9 @@ def test_trello_live_status_parity():
         if not card:
             continue
 
-        tag_match = re.search(rf"{comp_name}\s*=\s*(?:component|container)\s*'[^']+'\s*\{{\s*(#[a-z_]+)", content)
+        tag_match = re.search(
+            rf"{comp_name}\s*=\s*(?:component|container)\s*'[^']+'\s*\{{\s*(#[a-z_]+)", content
+        )
         if not tag_match:
             discrepancies.append(f"{comp_name} ({ticket_id}): missing tag in model.c4")
             continue

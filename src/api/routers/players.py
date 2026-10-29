@@ -7,9 +7,10 @@ and granular profile retrieval with all 34 skill attributes.
 from __future__ import annotations
 
 import logging
-from typing import Annotated, Any
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path as PathParam, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import Path as PathParam
 
 from src.api.config import settings
 from src.api.schemas import (
@@ -35,9 +36,7 @@ router = APIRouter(prefix="/api/v1/players", tags=["Players"])
     description="Search players by name substring, edition year, overall rating range, and tactical sector with pagination.",
 )
 def search_catalog_players(
-    query: Annotated[
-        str, Query(max_length=100, description="Player search substring.")
-    ] = "",
+    query: Annotated[str, Query(max_length=100, description="Player search substring.")] = "",
     edition_year: Annotated[
         int | None, Query(ge=2015, le=2024, description="FIFA edition year filter.")
     ] = None,
@@ -50,12 +49,8 @@ def search_catalog_players(
     sector: Annotated[
         str | None, Query(description="Tactical sector filter (e.g. Defenders).")
     ] = None,
-    limit: Annotated[
-        int, Query(ge=1, le=200, description="Maximum page size limit.")
-    ] = 50,
-    offset: Annotated[
-        int, Query(ge=0, description="Initial record offset.")
-    ] = 0,
+    limit: Annotated[int, Query(ge=1, le=200, description="Maximum page size limit.")] = 50,
+    offset: Annotated[int, Query(ge=0, description="Initial record offset.")] = 0,
     include_sector_counts: Annotated[
         bool, Query(description="Include tactical sector distribution counts.")
     ] = True,
@@ -108,12 +103,8 @@ def get_catalog_statistics() -> CatalogStatsResponse:
     description="Retrieve complete player profile including all 34 granular skill attributes for a specific edition.",
 )
 def get_player_profile(
-    player_id: Annotated[
-        int, PathParam(description="Canonical unique player identifier.")
-    ],
-    edition_year: Annotated[
-        int, Query(ge=2015, le=2024, description="FIFA edition year.")
-    ] = 2022,
+    player_id: Annotated[int, PathParam(description="Canonical unique player identifier.")],
+    edition_year: Annotated[int, Query(ge=2015, le=2024, description="FIFA edition year.")] = 2022,
 ) -> PlayerDetail:
     """Retrieve full player profile or return 404 if not found."""
     try:

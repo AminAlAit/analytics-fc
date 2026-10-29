@@ -38,7 +38,7 @@ def query_peak_player_seasons(
 
         query = f"""
         WITH player_career_summary AS (
-            SELECT 
+            SELECT
                 player_id,
                 MAX(overall) AS peak_overall,
                 MAX(international_reputation) AS max_rep,
@@ -46,33 +46,33 @@ def query_peak_player_seasons(
             FROM stg_fifa_granular
             GROUP BY player_id
         ),
-        
+
         peak_counts AS (
-            SELECT 
+            SELECT
                 s.player_id,
                 COUNT(*) AS seasons_at_peak
             FROM stg_fifa_granular s
-            INNER JOIN player_career_summary p 
-                ON s.player_id = p.player_id 
+            INNER JOIN player_career_summary p
+                ON s.player_id = p.player_id
                AND s.overall = p.peak_overall
             GROUP BY s.player_id
         ),
-        
+
         ranked_stars AS (
-            SELECT 
-                c.player_id, 
+            SELECT
+                c.player_id,
                 c.peak_overall
             FROM player_career_summary c
             INNER JOIN peak_counts pc ON c.player_id = pc.player_id
-            ORDER BY 
-                c.peak_overall DESC, 
-                pc.seasons_at_peak DESC, 
-                c.max_rep DESC, 
+            ORDER BY
+                c.peak_overall DESC,
+                pc.seasons_at_peak DESC,
+                c.max_rep DESC,
                 c.player_id ASC
             LIMIT {target_count}
         )
-        
-        SELECT 
+
+        SELECT
             s.player_id,
             s.short_name,
             s.long_name,
@@ -86,8 +86,8 @@ def query_peak_player_seasons(
             r.peak_overall,
             {skill_selects}
         FROM stg_fifa_granular s
-        INNER JOIN ranked_stars r 
-            ON s.player_id = r.player_id 
+        INNER JOIN ranked_stars r
+            ON s.player_id = r.player_id
            AND s.overall = r.peak_overall
         ORDER BY r.peak_overall DESC, s.player_id, s.fifa_edition_year;
         """
@@ -127,11 +127,17 @@ def generate_superstar_gallery(
             if not val_series.empty:
                 attributes[col] = round(float(val_series.mean()), 2)
             elif col == "mentality_composure":
-                if player_id in composure_df.index and pd.notna(composure_df.loc[player_id, "career_avg_composure"]):
-                    attributes[col] = round(float(composure_df.loc[player_id, "career_avg_composure"]), 2)
+                if player_id in composure_df.index and pd.notna(
+                    composure_df.loc[player_id, "career_avg_composure"]
+                ):
+                    attributes[col] = round(
+                        float(composure_df.loc[player_id, "career_avg_composure"]), 2
+                    )
                 else:
                     reactions_val = group["movement_reactions"].dropna().mean()
-                    attributes[col] = round(float(reactions_val if pd.notna(reactions_val) else 80.0), 2)
+                    attributes[col] = round(
+                        float(reactions_val if pd.notna(reactions_val) else 80.0), 2
+                    )
             else:
                 attributes[col] = 50.0
 
@@ -169,13 +175,11 @@ def verify_gallery_artifact(gallery_path: Path | None = None) -> dict[str, Any]:
     if not target_path.exists():
         raise FileNotFoundError(f"Superstar gallery artifact missing at {target_path}")
 
-    with open(target_path, "r", encoding="utf-8") as f:
+    with open(target_path, encoding="utf-8") as f:
         gallery = json.load(f)
 
     if len(gallery) != GALLERY_TARGET_COUNT:
-        raise AssertionError(
-            f"Expected {GALLERY_TARGET_COUNT} superstars, found {len(gallery)}"
-        )
+        raise AssertionError(f"Expected {GALLERY_TARGET_COUNT} superstars, found {len(gallery)}")
 
     for star in gallery:
         assert "player_id" in star
