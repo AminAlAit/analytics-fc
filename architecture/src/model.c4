@@ -18,6 +18,7 @@ model {
       description 'DuckDB database and DVC-tracked binary datasets.'
       technology 'DuckDB / DVC / YAML'
       style {
+        shape storage
         icon https://raw.githubusercontent.com/devicons/devicon/master/icons/duckdb/duckdb-original.svg
       }
 
@@ -25,6 +26,9 @@ model {
         #built
         description 'Raw tables: raw.fifatable (43,199 rows) and raw.fifa_granular (142,079 rows).'
         technology 'DuckDB Raw Schema'
+        style {
+          shape cylinder
+        }
       }
 
       dbtSilver = component 'dbt Silver Staging Models' {
@@ -32,6 +36,7 @@ model {
         description 'Cleaned views: stg_fifa_granular and stg_fifatable with schema contract tests.'
         technology 'dbt-duckdb View'
         style {
+          shape cylinder
           icon https://raw.githubusercontent.com/devicons/devicon/master/icons/dbt/dbt-original.svg
         }
       }
@@ -41,6 +46,7 @@ model {
         description 'Aggregated mart tables: mart_pattern_maker and mart_recipe_maker.'
         technology 'dbt-duckdb Table'
         style {
+          shape cylinder
           icon https://raw.githubusercontent.com/devicons/devicon/master/icons/dbt/dbt-original.svg
         }
       }
@@ -49,7 +55,15 @@ model {
         #built
         description 'Cryptographic MD5 hash pointers for raw and processed datasets.'
         technology 'DVC v3'
+        style {
+          shape storage
+        }
       }
+
+      // Intra-container data flow
+      dvcStore -> duckdbBronze 'Validates cryptographic checksums'
+      duckdbBronze -> dbtSilver 'Transformed via dbt SQL views'
+      dbtSilver -> dbtGold 'Aggregated into analytical mart tables'
     }
 
     // Container 2: Workflow Orchestration Engine
@@ -58,6 +72,7 @@ model {
       description 'Ephemeral in-process data pipeline runner with single-thread hardware bounds.'
       technology 'Prefect 3.9 / Python'
       style {
+        shape queue
         icon https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg
       }
 
@@ -90,6 +105,12 @@ model {
         description 'Executes pytest regression and contract test suite as final pipeline boundary.'
         technology 'Prefect Task'
       }
+
+      // Linear pipeline execution sequence
+      envSentinel -> ingestTask 'Enforces 1-thread, 1GB RAM ceilings'
+      ingestTask -> dbtTask 'Hands off verified raw records'
+      dbtTask -> galleryTask 'Triggers superstar peak compilation'
+      galleryTask -> qualityGateTask 'Passes compiled archetypes to test gate'
     }
 
     // Container 3: Serving & Inference Microservice
@@ -98,6 +119,7 @@ model {
       description 'High-throughput REST API serving search queries and vector similarity matching.'
       technology 'FastAPI / Pydantic v2 / Uvicorn'
       style {
+        shape component
         icon https://raw.githubusercontent.com/devicons/devicon/master/icons/fastapi/fastapi-original.svg
       }
 
@@ -130,6 +152,11 @@ model {
         description 'Computes playstyle similarity and 6-axis tactical radar against 100 superstars in < 2.5ms.'
         technology 'POST /api/v1/match/ceiling'
       }
+
+      // Intra-service dispatch dependencies
+      healthProbe -> catalogStats 'Aggregates health and catalog row counts'
+      catalogSearch -> profileLookup 'Provides selected player ID'
+      profileLookup -> vectorMatcher 'Feeds 34-skill tactical vector'
     }
 
     // Container 4: Tactical Command Terminal
@@ -138,6 +165,7 @@ model {
       description 'Executive dark-mode scouting interface with dual-polygon radar comparisons.'
       technology 'Streamlit / Altair / Python'
       style {
+        shape browser
         icon https://raw.githubusercontent.com/devicons/devicon/master/icons/streamlit/streamlit-original.svg
       }
 
@@ -151,24 +179,36 @@ model {
         #built
         description 'Debounced search input with rating sliders and tactical sector filters.'
         technology 'Streamlit Widget'
+        style {
+          shape browser
+        }
       }
 
       archetypeView = component 'Superstar Archetype Pods' {
         #built
         description 'Displays top 3 historical ceiling matches, similarity percentages, and growth gaps.'
         technology 'Custom HTML / CSS'
+        style {
+          shape browser
+        }
       }
 
       tacticalRadar = component 'Hexagonal Altair Radar' {
         #built
         description 'Interactive dual-polygon tactical fingerprint comparison against prime archetype.'
         technology 'Altair Vega-Lite'
+        style {
+          shape browser
+        }
       }
 
       vectorAudit = component 'Granular Vector Audit Expander' {
         #built
         description 'Trait-by-trait audit table analyzing prospect skills against benchmark superstar.'
         technology 'Streamlit Expander'
+        style {
+          shape document
+        }
       }
 
       driftIndicator = component 'Data Drift Visual HUD' {
@@ -176,6 +216,12 @@ model {
         description 'Embedded metrics displaying attribute drift warnings and feature stability.'
         technology 'Streamlit Metrics'
       }
+
+      // Intra-terminal interaction flow
+      catalogSelector -> apiClient 'Dispatches debounced query parameters'
+      apiClient -> archetypeView 'Populates prospect candidate cards'
+      archetypeView -> tacticalRadar 'Feeds selected benchmark & prospect skills'
+      tacticalRadar -> vectorAudit 'Expands trait-by-trait audit delta'
     }
 
     // Container 5: Quality, CI/CD & Drift Monitoring
@@ -184,6 +230,7 @@ model {
       description 'Static analysis, automated GitHub Actions pipelines, and distribution drift tracking.'
       technology 'Ruff / Mypy / Evidently AI / GitHub Actions'
       style {
+        shape component
         icon https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg
       }
 
@@ -210,6 +257,11 @@ model {
         description 'Calculates Kolmogorov-Smirnov and PSI drift metrics across FIFA edition releases.'
         technology 'Evidently AI / HTML Reports'
       }
+
+      // CI and validation flow
+      ruffLinter -> githubActions 'Automated PR lint checks'
+      mypyChecker -> githubActions 'Automated PR type checks'
+      githubActions -> evidentlyDrift 'Triggers post-merge drift calculation'
     }
 
     // Container 6: Flagship Model 2 (Career Trajectory)
@@ -218,6 +270,7 @@ model {
       description 'Machine learning model predicting long-term player rating trajectory and peak potential.'
       technology 'Scikit-Learn / NumPy / Python'
       style {
+        shape component
         icon https://raw.githubusercontent.com/devicons/devicon/master/icons/scikitlearn/scikitlearn-original.svg
       }
 
@@ -244,19 +297,48 @@ model {
         description 'Temporal split cross-validation ensuring zero future leakage across career paths.'
         technology 'Pytest Benchmark'
       }
+
+      // Machine learning development pipeline
+      featureContract -> trajectoryDataset 'Defines schema & window boundaries'
+      trajectoryDataset -> baselineRegressor 'Supplies training career paths'
+      baselineRegressor -> evaluationSuite 'Evaluates walk-forward error'
     }
 
-    // Internal container relationships
-    streamlitDashboard -> fastapiService 'Calls REST endpoints for catalog queries and vector inference'
-    streamlitDashboard -> dataLake 'Local DuckDB fallback when offline'
+    // Inter-container platform relationships
+    streamlitDashboard -[sync]-> fastapiService 'REST Queries & Similarity' {
+      technology 'HTTP / JSON'
+      description 'Catalog filtering, player profile lookups, and Gaussian RBF ceiling matches'
+    }
 
-    fastapiService -> dataLake 'Reads staging views and catalog tables'
+    streamlitDashboard -[fallback]-> dataLake 'In-Memory DuckDB Fallback' {
+      technology 'DuckDB Python API'
+      description 'Automatic local query execution when FastAPI microservice is offline'
+    }
 
-    prefectOrchestrator -> dataLake 'Ingests raw data and executes dbt transformations'
-    prefectOrchestrator -> fastapiService 'Verifies endpoint contracts and performance'
+    fastapiService -[sync]-> dataLake 'Direct Database Reads' {
+      technology 'DuckDB SQL'
+      description 'Reads staging views, catalog tables, and pre-computed gold matrices'
+    }
 
-    monitoringSuite -> dataLake 'Analyzes distribution shifts across seasons'
-    careerModel -> dataLake 'Extracts longitudinal player careers'
+    prefectOrchestrator -[batch]-> dataLake 'Batch Ingestion & dbt Builds' {
+      technology 'DuckDB / dbt CLI'
+      description 'Ingests raw CSVs, compiles models, and executes contract tests'
+    }
+
+    prefectOrchestrator -[sync]-> fastapiService 'Contract & Latency Probes' {
+      technology 'HTTP / GET'
+      description 'Verifies microservice endpoint availability and response benchmarks'
+    }
+
+    monitoringSuite -[batch]-> dataLake 'Distribution Shift Analysis' {
+      technology 'Evidently AI / SQL'
+      description 'Audits statistical drift across consecutive FIFA editions'
+    }
+
+    careerModel -[batch]-> dataLake 'Longitudinal Dataset Extraction' {
+      technology 'DuckDB SQL'
+      description 'Extracts multi-season career progression matrices'
+    }
   }
 
   // External actor relationships

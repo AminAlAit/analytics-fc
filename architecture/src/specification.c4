@@ -9,6 +9,28 @@ specification {
   element container
   element component
 
+  relationship sync {
+    line solid
+    head vee
+  }
+
+  relationship async {
+    line dashed
+    head diamond
+  }
+
+  relationship fallback {
+    line dotted
+    head open
+    color red
+  }
+
+  relationship batch {
+    line dashed
+    head vee
+    color blue
+  }
+
   tag built {
     color green
   }

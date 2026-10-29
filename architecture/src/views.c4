@@ -3,6 +3,7 @@ views {
   view systemContext of analyticsFC {
     title 'Analytics FC - High-Level System Context'
     description 'Executive overview showing primary actors and platform boundaries.'
+    autoLayout LeftRight
     include *
   }
 
@@ -10,6 +11,7 @@ views {
   view containerOverview of analyticsFC {
     title 'Analytics FC - Live Platform Architecture Blueprint'
     description 'Live status map: Green = Built & Verified, Amber = In Progress, Faded Gray = Backlog.'
+    autoLayout LeftRight
     include analyticsFC.*, chiefScout, performanceAnalyst
 
     style element.tag = #built {
@@ -33,6 +35,7 @@ views {
   view prefectEngine of analyticsFC.prefectOrchestrator {
     title 'Stage 5: Prefect Data Pipeline Orchestration'
     description 'Task sequence from environment validation to automated test gating.'
+    autoLayout LeftRight
     include *
 
     style element.tag = #built {
@@ -56,6 +59,7 @@ views {
   view apiService of analyticsFC.fastapiService {
     title 'Stage 4: FastAPI REST Inference Microservice'
     description 'High-throughput endpoints serving search, profiles, and vector similarity.'
+    autoLayout TopBottom
     include *
 
     style element.tag = #built {
@@ -79,6 +83,7 @@ views {
   view scoutingTerminal of analyticsFC.streamlitDashboard {
     title 'Stages 1 & 4: Streamlit Scouting Terminal'
     description 'UI components, Altair radar visualizations, and resilient client routing.'
+    autoLayout TopBottom
     include *
 
     style element.tag = #built {
@@ -102,6 +107,7 @@ views {
   view dataArchitecture of analyticsFC.dataLake {
     title 'Stages 2 & 3: DuckDB Data Lake & dbt Models'
     description 'Raw bronze tables, dbt silver views, and analytical gold marts.'
+    autoLayout LeftRight
     include *
 
     style element.tag = #built {
@@ -119,5 +125,40 @@ views {
       opacity 45%
       border dashed
     }
+  }
+
+  // Dynamic View 1: Player Scouting Match Journey
+  dynamic view playerScoutingJourney {
+    title 'Scouting Workflow: Player Ceiling Discovery Journey'
+    description 'Step-by-step user journey from scout search input to real-time 6-axis tactical radar generation.'
+
+    chiefScout -> analyticsFC.streamlitDashboard.catalogSelector '1. Enters player name & tactical filters'
+    analyticsFC.streamlitDashboard.catalogSelector -> analyticsFC.streamlitDashboard.apiClient '2. Dispatches query request'
+    analyticsFC.streamlitDashboard.apiClient -> analyticsFC.fastapiService.catalogSearch '3. GET /api/v1/players/search'
+    analyticsFC.fastapiService.catalogSearch -> analyticsFC.dataLake.dbtSilver '4. Queries clean player catalog (stg_fifatable)'
+    analyticsFC.dataLake.dbtSilver -> analyticsFC.fastapiService.catalogSearch '5. Returns matched player records'
+    analyticsFC.fastapiService.catalogSearch -> analyticsFC.streamlitDashboard.apiClient '6. Returns paginated prospects JSON'
+    analyticsFC.streamlitDashboard.apiClient -> analyticsFC.streamlitDashboard.catalogSelector '7. Displays candidates to scout'
+    chiefScout -> analyticsFC.streamlitDashboard.archetypeView '8. Selects target prospect for ceiling projection'
+    analyticsFC.streamlitDashboard.archetypeView -> analyticsFC.fastapiService.vectorMatcher '9. POST /api/v1/match/ceiling (34 skills vector)'
+    analyticsFC.fastapiService.vectorMatcher -> analyticsFC.fastapiService.vectorMatcher '10. Computes Gaussian RBF similarity against 100 superstars (< 2.5ms)'
+    analyticsFC.fastapiService.vectorMatcher -> analyticsFC.streamlitDashboard.tacticalRadar '11. Returns top archetypes & 6-axis polygon scores'
+    analyticsFC.streamlitDashboard.tacticalRadar -> chiefScout '12. Renders dual-polygon radar comparison'
+  }
+
+  // Dynamic View 2: Master Pipeline Execution Flow
+  dynamic view masterPipelineFlow {
+    title 'Pipeline Workflow: Ingestion, dbt Marts & Superstar Compilation'
+    description 'Step-by-step execution flow of the single-thread Prefect batch pipeline.'
+
+    performanceAnalyst -> analyticsFC.prefectOrchestrator.envSentinel '1. Triggers master pipeline execution'
+    analyticsFC.prefectOrchestrator.envSentinel -> analyticsFC.prefectOrchestrator.ingestTask '2. Enforces 1-thread, 1GB RAM ceilings'
+    analyticsFC.prefectOrchestrator.ingestTask -> analyticsFC.dataLake.dvcStore '3. Verifies DVC MD5 checksums'
+    analyticsFC.prefectOrchestrator.ingestTask -> analyticsFC.dataLake.duckdbBronze '4. Validates 142k and 43k raw record cardinalities'
+    analyticsFC.prefectOrchestrator.dbtTask -> analyticsFC.dataLake.dbtSilver '5. Compiles and executes staging models & schema contracts'
+    analyticsFC.prefectOrchestrator.dbtTask -> analyticsFC.dataLake.dbtGold '6. Builds analytical mart tables (pattern & recipe makers)'
+    analyticsFC.prefectOrchestrator.galleryTask -> analyticsFC.dataLake.dbtGold '7. Reads gold mart records'
+    analyticsFC.prefectOrchestrator.galleryTask -> analyticsFC.prefectOrchestrator.galleryTask '8. Compiles 100 personal peak archetypes (34 traits + composure)'
+    analyticsFC.prefectOrchestrator.qualityGateTask -> analyticsFC.prefectOrchestrator.qualityGateTask '9. Executes pytest regression & contract suite'
   }
 }
