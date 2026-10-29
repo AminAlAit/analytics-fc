@@ -17,6 +17,9 @@ model {
       #built
       description 'DuckDB database and DVC-tracked binary datasets.'
       technology 'DuckDB / DVC / YAML'
+      style {
+        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/duckdb/duckdb-original.svg
+      }
 
       duckdbBronze = component 'DuckDB Bronze Raw Tables' {
         #built
@@ -28,12 +31,18 @@ model {
         #built
         description 'Cleaned views: stg_fifa_granular and stg_fifatable with schema contract tests.'
         technology 'dbt-duckdb View'
+        style {
+          icon https://raw.githubusercontent.com/devicons/devicon/master/icons/dbt/dbt-original.svg
+        }
       }
 
       dbtGold = component 'dbt Gold Analytical Marts' {
         #built
         description 'Aggregated mart tables: mart_pattern_maker and mart_recipe_maker.'
         technology 'dbt-duckdb Table'
+        style {
+          icon https://raw.githubusercontent.com/devicons/devicon/master/icons/dbt/dbt-original.svg
+        }
       }
 
       dvcStore = component 'DVC Hash Tracking' {
@@ -48,6 +57,9 @@ model {
       #built
       description 'Ephemeral in-process data pipeline runner with single-thread hardware bounds.'
       technology 'Prefect 3.9 / Python'
+      style {
+        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg
+      }
 
       envSentinel = component 'Pre-Flight Hardware Sentinel' {
         #built
@@ -85,6 +97,9 @@ model {
       #built
       description 'High-throughput REST API serving search queries and vector similarity matching.'
       technology 'FastAPI / Pydantic v2 / Uvicorn'
+      style {
+        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/fastapi/fastapi-original.svg
+      }
 
       healthProbe = component 'Diagnostic Health Probe' {
         #built
@@ -122,6 +137,9 @@ model {
       #built
       description 'Executive dark-mode scouting interface with dual-polygon radar comparisons.'
       technology 'Streamlit / Altair / Python'
+      style {
+        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/streamlit/streamlit-original.svg
+      }
 
       apiClient = component 'Resilient REST API Client' {
         #built
@@ -165,6 +183,9 @@ model {
       #backlog
       description 'Static analysis, automated GitHub Actions pipelines, and distribution drift tracking.'
       technology 'Ruff / Mypy / Evidently AI / GitHub Actions'
+      style {
+        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg
+      }
 
       ruffLinter = component 'Ruff Linter & Formatter' {
         #backlog
@@ -196,6 +217,9 @@ model {
       #backlog
       description 'Machine learning model predicting long-term player rating trajectory and peak potential.'
       technology 'Scikit-Learn / NumPy / Python'
+      style {
+        icon https://raw.githubusercontent.com/devicons/devicon/master/icons/scikitlearn/scikitlearn-original.svg
+      }
 
       featureContract = component 'Model 2 Feature Contract' {
         #backlog
