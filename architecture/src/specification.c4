@@ -1,0 +1,23 @@
+specification {
+  element actor {
+    style {
+      shape person
+    }
+  }
+
+  element system
+  element container
+  element component
+
+  tag built {
+    color green
+  }
+
+  tag in_progress {
+    color amber
+  }
+
+  tag backlog {
+    color gray
+  }
+}

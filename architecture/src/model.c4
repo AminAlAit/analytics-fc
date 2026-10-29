@@ -1,0 +1,242 @@
+model {
+  // Actors
+  chiefScout = actor 'Chief Scout & Sporting Director' {
+    description 'Reviews prospective talent, evaluates archetype ceiling projections, and inspects tactical radars.'
+  }
+
+  performanceAnalyst = actor 'Performance & ML Engineer' {
+    description 'Oversees pipeline orchestration, validates data drift telemetry, and manages statistical models.'
+  }
+
+  // Analytics FC Platform
+  analyticsFC = system 'Analytics FC Platform' {
+    description 'Tactical scouting intelligence platform and superstar ceiling projection engine.'
+
+    // Container 1: Data Storage & Versioned Data Lake
+    dataLake = container 'Data Lake & Versioned Storage' {
+      #built
+      description 'DuckDB database and DVC-tracked binary datasets.'
+      technology 'DuckDB / DVC / YAML'
+
+      duckdbBronze = component 'DuckDB Bronze Raw Tables' {
+        #built
+        description 'Raw tables: raw.fifatable (43,199 rows) and raw.fifa_granular (142,079 rows).'
+        technology 'DuckDB Raw Schema'
+      }
+
+      dbtSilver = component 'dbt Silver Staging Models' {
+        #built
+        description 'Cleaned views: stg_fifa_granular and stg_fifatable with schema contract tests.'
+        technology 'dbt-duckdb View'
+      }
+
+      dbtGold = component 'dbt Gold Analytical Marts' {
+        #built
+        description 'Aggregated mart tables: mart_pattern_maker and mart_recipe_maker.'
+        technology 'dbt-duckdb Table'
+      }
+
+      dvcStore = component 'DVC Hash Tracking' {
+        #built
+        description 'Cryptographic MD5 hash pointers for raw and processed datasets.'
+        technology 'DVC v3'
+      }
+    }
+
+    // Container 2: Workflow Orchestration Engine
+    prefectOrchestrator = container 'Prefect Workflow Orchestrator' {
+      #built
+      description 'Ephemeral in-process data pipeline runner with single-thread hardware bounds.'
+      technology 'Prefect 3.9 / Python'
+
+      envSentinel = component 'Pre-Flight Hardware Sentinel' {
+        #built
+        description 'Validates execution environment and enforces 1 thread, 1GB RAM ceilings.'
+        technology 'Prefect Task'
+      }
+
+      ingestTask = component 'Data Ingestion & DVC Validator' {
+        #built
+        description 'Verifies DVC hashes and validates 142k and 43k raw record cardinalities.'
+        technology 'Prefect Task'
+      }
+
+      dbtTask = component 'dbt Model & Test Runner' {
+        #built
+        description 'Compiles 6 dbt models and executes schema data contract tests.'
+        technology 'Prefect Task'
+      }
+
+      galleryTask = component 'Superstar Gallery Compiler' {
+        #built
+        description 'Generates 100 personal peak archetypes with 34 complete traits and composure imputation.'
+        technology 'Prefect Task'
+      }
+
+      qualityGateTask = component 'Automated Quality Test Gate' {
+        #in_progress
+        description 'Executes pytest regression and contract test suite as final pipeline boundary.'
+        technology 'Prefect Task'
+      }
+    }
+
+    // Container 3: Serving & Inference Microservice
+    fastapiService = container 'FastAPI Inference Microservice' {
+      #built
+      description 'High-throughput REST API serving search queries and vector similarity matching.'
+      technology 'FastAPI / Pydantic v2 / Uvicorn'
+
+      healthProbe = component 'Diagnostic Health Probe' {
+        #built
+        description 'Reports service status, catalog totals, and hardware constraint telemetry.'
+        technology 'GET /health'
+      }
+
+      catalogSearch = component 'Catalog Search Engine' {
+        #built
+        description 'Faceted query filtering and deterministic pagination across 142,079 player-seasons.'
+        technology 'GET /api/v1/players/search'
+      }
+
+      profileLookup = component '34-Skill Profile Lookup' {
+        #built
+        description 'Extracts complete player tactical profiles with position and sector derivation.'
+        technology 'GET /api/v1/players/{id}'
+      }
+
+      catalogStats = component 'Catalog Metrics API' {
+        #built
+        description 'Aggregates verified database row counts and edition year boundaries.'
+        technology 'GET /api/v1/players/stats/catalog'
+      }
+
+      vectorMatcher = component 'Gaussian RBF Ceiling Matcher' {
+        #built
+        description 'Computes playstyle similarity and 6-axis tactical radar against 100 superstars in < 2.5ms.'
+        technology 'POST /api/v1/match/ceiling'
+      }
+    }
+
+    // Container 4: Tactical Command Terminal
+    streamlitDashboard = container 'Tactical Command Terminal' {
+      #built
+      description 'Executive dark-mode scouting interface with dual-polygon radar comparisons.'
+      technology 'Streamlit / Altair / Python'
+
+      apiClient = component 'Resilient REST API Client' {
+        #built
+        description 'Communicates over HTTP with automatic in-memory DuckDB fallback when offline.'
+        technology 'Python urllib / JSON'
+      }
+
+      catalogSelector = component 'Catalog Prospect Explorer' {
+        #built
+        description 'Debounced search input with rating sliders and tactical sector filters.'
+        technology 'Streamlit Widget'
+      }
+
+      archetypeView = component 'Superstar Archetype Pods' {
+        #built
+        description 'Displays top 3 historical ceiling matches, similarity percentages, and growth gaps.'
+        technology 'Custom HTML / CSS'
+      }
+
+      tacticalRadar = component 'Hexagonal Altair Radar' {
+        #built
+        description 'Interactive dual-polygon tactical fingerprint comparison against prime archetype.'
+        technology 'Altair Vega-Lite'
+      }
+
+      vectorAudit = component 'Granular Vector Audit Expander' {
+        #built
+        description 'Trait-by-trait audit table analyzing prospect skills against benchmark superstar.'
+        technology 'Streamlit Expander'
+      }
+
+      driftIndicator = component 'Data Drift Visual HUD' {
+        #backlog
+        description 'Embedded metrics displaying attribute drift warnings and feature stability.'
+        technology 'Streamlit Metrics'
+      }
+    }
+
+    // Container 5: Quality, CI/CD & Drift Monitoring
+    monitoringSuite = container 'Quality, CI/CD & Drift Suite' {
+      #backlog
+      description 'Static analysis, automated GitHub Actions pipelines, and distribution drift tracking.'
+      technology 'Ruff / Mypy / Evidently AI / GitHub Actions'
+
+      ruffLinter = component 'Ruff Linter & Formatter' {
+        #backlog
+        description 'Fast automated linting and formatting enforcing strict Python standards.'
+        technology 'Ruff CLI'
+      }
+
+      mypyChecker = component 'Mypy Static Typing' {
+        #backlog
+        description 'Strict type checking across API schemas, search functions, and pipeline tasks.'
+        technology 'Mypy Daemon'
+      }
+
+      githubActions = component 'Automated GitHub CI Gate' {
+        #backlog
+        description 'Automated continuous integration executing pytest and dbt test on every pull request.'
+        technology 'GitHub Actions Workflow'
+      }
+
+      evidentlyDrift = component 'Evidently AI Drift Engine' {
+        #backlog
+        description 'Calculates Kolmogorov-Smirnov and PSI drift metrics across FIFA edition releases.'
+        technology 'Evidently AI / HTML Reports'
+      }
+    }
+
+    // Container 6: Flagship Model 2 (Career Trajectory)
+    careerModel = container 'Career Trajectory Regressor' {
+      #backlog
+      description 'Machine learning model predicting long-term player rating trajectory and peak potential.'
+      technology 'Scikit-Learn / NumPy / Python'
+
+      featureContract = component 'Model 2 Feature Contract' {
+        #backlog
+        description 'Defines input schema, historical lag windows, and target trajectory boundaries.'
+        technology 'Pydantic Contract'
+      }
+
+      trajectoryDataset = component 'Longitudinal Dataset Generator' {
+        #backlog
+        description 'Builds cross-season multi-year player aging trajectories from historical data.'
+        technology 'DuckDB SQL Generator'
+      }
+
+      baselineRegressor = component 'Baseline Trajectory Regressor' {
+        #backlog
+        description 'Statistical regression baseline forecasting overall rating growth curves.'
+        technology 'Scikit-Learn Regressor'
+      }
+
+      evaluationSuite = component 'Leak-Free Cross-Validation' {
+        #backlog
+        description 'Temporal split cross-validation ensuring zero future leakage across career paths.'
+        technology 'Pytest Benchmark'
+      }
+    }
+
+    // Internal container relationships
+    streamlitDashboard -> fastapiService 'Calls REST endpoints for catalog queries and vector inference'
+    streamlitDashboard -> dataLake 'Local DuckDB fallback when offline'
+
+    fastapiService -> dataLake 'Reads staging views and catalog tables'
+
+    prefectOrchestrator -> dataLake 'Ingests raw data and executes dbt transformations'
+    prefectOrchestrator -> fastapiService 'Verifies endpoint contracts and performance'
+
+    monitoringSuite -> dataLake 'Analyzes distribution shifts across seasons'
+    careerModel -> dataLake 'Extracts longitudinal player careers'
+  }
+
+  // External actor relationships
+  chiefScout -> analyticsFC.streamlitDashboard 'Interacts with scouting terminal'
+  performanceAnalyst -> analyticsFC.prefectOrchestrator 'Triggers and monitors automated workflows'
+  performanceAnalyst -> analyticsFC.monitoringSuite 'Audits data drift and model stability'
+}

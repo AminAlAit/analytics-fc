@@ -16,3 +16,4 @@ mlruns/
 !/data/**/.gitignore
 *.zip
 mlflow.db
+architecture/dist/

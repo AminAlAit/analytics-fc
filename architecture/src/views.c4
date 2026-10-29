@@ -1,0 +1,123 @@
+views {
+  // Top-Level System Context View
+  view systemContext of analyticsFC {
+    title 'Analytics FC - High-Level System Context'
+    description 'Executive overview showing primary actors and platform boundaries.'
+    include *
+  }
+
+  // Container Landscape View
+  view containerOverview of analyticsFC {
+    title 'Analytics FC - Live Platform Architecture Blueprint'
+    description 'Live status map: Green = Built & Verified, Amber = In Progress, Faded Gray = Backlog.'
+    include analyticsFC.*, chiefScout, performanceAnalyst
+
+    style element.tag = #built {
+      color green
+      opacity 100%
+    }
+
+    style element.tag = #in_progress {
+      color amber
+      opacity 100%
+    }
+
+    style element.tag = #backlog {
+      color gray
+      opacity 45%
+      border dashed
+    }
+  }
+
+  // Drilldown View: Prefect Orchestration Engine
+  view prefectEngine of analyticsFC.prefectOrchestrator {
+    title 'Stage 5: Prefect Data Pipeline Orchestration'
+    description 'Task sequence from environment validation to automated test gating.'
+    include *
+
+    style element.tag = #built {
+      color green
+      opacity 100%
+    }
+
+    style element.tag = #in_progress {
+      color amber
+      opacity 100%
+    }
+
+    style element.tag = #backlog {
+      color gray
+      opacity 45%
+      border dashed
+    }
+  }
+
+  // Drilldown View: FastAPI Inference Service
+  view apiService of analyticsFC.fastapiService {
+    title 'Stage 4: FastAPI REST Inference Microservice'
+    description 'High-throughput endpoints serving search, profiles, and vector similarity.'
+    include *
+
+    style element.tag = #built {
+      color green
+      opacity 100%
+    }
+
+    style element.tag = #in_progress {
+      color amber
+      opacity 100%
+    }
+
+    style element.tag = #backlog {
+      color gray
+      opacity 45%
+      border dashed
+    }
+  }
+
+  // Drilldown View: Tactical Command Terminal
+  view scoutingTerminal of analyticsFC.streamlitDashboard {
+    title 'Stages 1 & 4: Streamlit Scouting Terminal'
+    description 'UI components, Altair radar visualizations, and resilient client routing.'
+    include *
+
+    style element.tag = #built {
+      color green
+      opacity 100%
+    }
+
+    style element.tag = #in_progress {
+      color amber
+      opacity 100%
+    }
+
+    style element.tag = #backlog {
+      color gray
+      opacity 45%
+      border dashed
+    }
+  }
+
+  // Drilldown View: Data Lake & Staging Models
+  view dataArchitecture of analyticsFC.dataLake {
+    title 'Stages 2 & 3: DuckDB Data Lake & dbt Models'
+    description 'Raw bronze tables, dbt silver views, and analytical gold marts.'
+    include *
+
+    style element.tag = #built {
+      color green
+      opacity 100%
+    }
+
+    style element.tag = #in_progress {
+      color amber
+      opacity 100%
+    }
+
+    style element.tag = #backlog {
+      color gray
+      opacity 45%
+      border dashed
+    }
+  }
+}
