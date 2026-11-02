@@ -33,7 +33,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install ruff mypy pytest httpx dbt-duckdb dvc prefect pyyaml
+          pip install ruff mypy pytest httpx dbt-duckdb dvc prefect pyyaml evidently
 
       - name: Run Ruff Lint Checks
         run: |
@@ -61,4 +61,4 @@ jobs:
 
       - name: Run Automated Test Suite
         run: |
-          pytest -v tests/test_ruff_config.py tests/test_mypy_config.py tests/test_ci_workflow.py tests/test_architecture_sync.py tests/test_pipeline_gate.py
+          pytest -v tests/test_ruff_config.py tests/test_mypy_config.py tests/test_ci_workflow.py tests/test_architecture_sync.py tests/test_pipeline_gate.py tests/test_drift_config.py
