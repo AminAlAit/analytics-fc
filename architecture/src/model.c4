@@ -415,14 +415,14 @@ model {
       }
 
       evidentlyDrift = component 'Evidently AI Drift Engine' {
-        #backlog
+        #built
         description 'Calculates Kolmogorov-Smirnov and PSI drift metrics across FIFA edition releases.'
         technology 'Evidently AI / HTML Reports'
         link https://trello.com/c/URbit93m 'Trello: AFC-529'
         metadata {
           ticket 'AFC-529'
           card 'Install and Configure Evidently AI Drift Framework'
-          status 'Backlog'
+          status 'Done'
         }
       }
 
