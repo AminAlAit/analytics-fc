@@ -1,8 +1,12 @@
 """Unit tests verifying GitHub Actions CI workflow configuration and schema validity."""
 
+import tempfile
 from pathlib import Path
 
+import duckdb
 import yaml
+
+from scripts.seed_ci_fixtures import seed_ci_fixtures
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 CI_WORKFLOW_PATH = BASE_DIR / ".github" / "workflows" / "ci.yml"
@@ -36,7 +40,7 @@ def test_ci_workflow_triggers():
 
 
 def test_ci_workflow_quality_gate_job():
-    """Verify CI workflow contains required linting, typing, and test execution steps."""
+    """Verify CI workflow contains required linting, typing, dbt, and test execution steps."""
     content = CI_WORKFLOW_PATH.read_text(encoding="utf-8")
     data = yaml.safe_load(content)
 
@@ -52,4 +56,25 @@ def test_ci_workflow_quality_gate_job():
     assert "ruff check" in step_runs, "Missing ruff check step in CI workflow"
     assert "ruff format --check" in step_runs, "Missing ruff format check step in CI workflow"
     assert "mypy" in step_runs, "Missing mypy step in CI workflow"
+    assert "seed_ci_fixtures.py" in step_runs, "Missing seed_ci_fixtures step in CI workflow"
+    assert "dbt run" in step_runs, "Missing dbt run step in CI workflow"
+    assert "dbt test" in step_runs, "Missing dbt test step in CI workflow"
     assert "pytest" in step_runs, "Missing pytest step in CI workflow"
+
+
+def test_seed_ci_fixtures_execution():
+    """Verify seed_ci_fixtures script produces valid raw schemas and seed tables."""
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_db = Path(tmp_dir) / "test_seed.duckdb"
+        seed_ci_fixtures(db_path=tmp_db)
+
+        assert tmp_db.exists(), "Target database not created by seed script"
+
+        con = duckdb.connect(str(tmp_db), read_only=True)
+        try:
+            fifatable_count = con.execute("SELECT count(*) FROM raw.fifatable;").fetchone()[0]
+            granular_count = con.execute("SELECT count(*) FROM raw.fifa_granular;").fetchone()[0]
+            assert fifatable_count == 8, f"Expected 8 fifatable rows, found {fifatable_count}"
+            assert granular_count == 1, f"Expected 1 granular row, found {granular_count}"
+        finally:
+            con.close()

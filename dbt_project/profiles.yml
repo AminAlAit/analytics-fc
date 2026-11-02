@@ -1,6 +1,6 @@
-﻿analytics_fc:
+analytics_fc:
   target: dev
   outputs:
     dev:
       type: duckdb
-      path: 'analytics_fc.duckdb'
+      path: "{{ env_var('DBT_DUCKDB_PATH', 'analytics_fc.duckdb') }}"

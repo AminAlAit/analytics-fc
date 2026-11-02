@@ -47,6 +47,18 @@ jobs:
         run: |
           mypy
 
+      - name: Seed CI Test Fixtures
+        run: |
+          python scripts/seed_ci_fixtures.py
+
+      - name: Run dbt Model Build
+        run: |
+          dbt run --project-dir dbt_project --profiles-dir dbt_project --threads 1
+
+      - name: Run dbt Data Quality Tests
+        run: |
+          dbt test --project-dir dbt_project --profiles-dir dbt_project --threads 1
+
       - name: Run Automated Test Suite
         run: |
           pytest -v tests/test_ruff_config.py tests/test_mypy_config.py tests/test_ci_workflow.py tests/test_architecture_sync.py tests/test_pipeline_gate.py
