@@ -398,6 +398,22 @@ model {
         }
       }
 
+      dbtTestGate = component 'dbt CI Data Test Gate' {
+        #built
+        description 'Automated dbt compile and contract data tests validating schema integrity.'
+        technology 'dbt-duckdb / Test Suite'
+        link https://trello.com/c/ZBr6UMVO 'Trello: AFC-528'
+        metadata {
+          ticket 'AFC-528'
+          card 'Add DBT Test and Data Quality GitHub Action Gate'
+          status 'Done'
+        }
+        style {
+          shape cylinder
+          icon tech:dbt
+        }
+      }
+
       evidentlyDrift = component 'Evidently AI Drift Engine' {
         #backlog
         description 'Calculates Kolmogorov-Smirnov and PSI drift metrics across FIFA edition releases.'
@@ -413,7 +429,8 @@ model {
       // CI and validation flow
       ruffLinter -> githubActions 'Automated PR lint checks'
       mypyChecker -> githubActions 'Automated PR type checks'
-      githubActions -> evidentlyDrift 'Triggers post-merge drift calculation'
+      githubActions -> dbtTestGate 'Executes dbt test suite on PR'
+      dbtTestGate -> evidentlyDrift 'Passes verified schema'
     }
 
     // Container 6: Flagship Model 2 (Career Trajectory)

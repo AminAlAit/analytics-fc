@@ -58,6 +58,7 @@ COMPONENT_TICKET_MAP = {
     "ruffLinter": "AFC-525",
     "mypyChecker": "AFC-526",
     "githubActions": "AFC-527",
+    "dbtTestGate": "AFC-528",
     # Stage 7: Evidently AI & Drift
     "evidentlyDrift": "AFC-529",
     # Stage 8: Flagship Model 2 (Career Trajectory)
