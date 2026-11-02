@@ -387,14 +387,14 @@ model {
       }
 
       githubActions = component 'Automated GitHub CI Gate' {
-        #backlog
+        #in_progress
         description 'Automated continuous integration executing pytest and dbt test on every pull request.'
         technology 'GitHub Actions Workflow'
         link https://trello.com/c/Bst5lGWR 'Trello: AFC-527'
         metadata {
           ticket 'AFC-527'
           card 'Implement GitHub Actions Automated CI Pipeline'
-          status 'Backlog'
+          status 'In Progress'
         }
       }
 
