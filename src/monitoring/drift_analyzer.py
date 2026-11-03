@@ -7,6 +7,7 @@ and Population Stability Index (PSI) across historical FIFA player editions.
 
 from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,8 @@ from typing import Any
 import duckdb
 import numpy as np
 import pandas as pd
+from evidently import Report
+from evidently.presets import DataDriftPreset
 from scipy.stats import ks_2samp, wasserstein_distance
 
 from src.monitoring.config import (
@@ -233,3 +236,141 @@ def run_attribute_drift_pipeline(
         "dataset_drift_detected": dataset_drift,
         "features": feature_metrics,
     }
+
+
+def export_drift_metrics_json(
+    metrics: dict[str, Any],
+    output_path: Path | str | None = None,
+) -> Path:
+    """Export calculated drift metrics dictionary to a formatted JSON file."""
+    target_path = Path(output_path) if output_path else DriftMonitoringConfig().metrics_output_path
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(target_path, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2, sort_keys=True)
+        f.write("\n")
+
+    logger.info("Exported drift summary metrics to %s", target_path)
+    return target_path
+
+
+def generate_evidently_html_report(
+    df_reference: pd.DataFrame,
+    df_current: pd.DataFrame,
+    output_path: Path | str | None = None,
+    columns: list[str] | None = None,
+) -> Path:
+    """Generate standalone Evidently AI HTML data drift audit report."""
+    target_path = (
+        Path(output_path)
+        if output_path
+        else DriftMonitoringConfig().report_output_dir / "drift_report.html"
+    )
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if columns:
+        valid_cols = [c for c in columns if c in df_reference.columns and c in df_current.columns]
+        ref_data = df_reference[valid_cols]
+        curr_data = df_current[valid_cols]
+    else:
+        ref_data = df_reference
+        curr_data = df_current
+
+    logger.info(
+        "Compiling Evidently HTML drift report (%d features, ref=%d rows, curr=%d rows)",
+        len(ref_data.columns),
+        len(ref_data),
+        len(curr_data),
+    )
+
+    report = Report(metrics=[DataDriftPreset()])
+    snapshot = report.run(reference_data=ref_data, current_data=curr_data)
+    snapshot.save_html(str(target_path))
+
+    logger.info("Saved standalone Evidently drift report to %s", target_path)
+    return target_path
+
+
+def run_drift_monitoring_suite(
+    config: DriftMonitoringConfig | None = None,
+    sample_size: int = 10000,
+    export_json: bool = True,
+    export_html: bool = True,
+) -> dict[str, Any]:
+    """Execute end-to-end drift pipeline and export JSON metrics snapshot and HTML report."""
+    cfg = config or DriftMonitoringConfig()
+
+    ref_year = normalize_edition_year(cfg.reference_edition)
+    target_year = normalize_edition_year(cfg.target_edition)
+
+    logger.info(
+        "Running drift monitoring suite: FIFA %d vs FIFA %d (sample ceiling: %d)",
+        ref_year,
+        target_year,
+        sample_size,
+    )
+
+    df_ref = load_edition_data(
+        edition_year=ref_year,
+        db_path=cfg.duckdb_path,
+        sample_size=sample_size,
+        columns=["player_id", "positions", *cfg.monitored_features],
+    )
+
+    df_target = load_edition_data(
+        edition_year=target_year,
+        db_path=cfg.duckdb_path,
+        sample_size=sample_size,
+        columns=["player_id", "positions", *cfg.monitored_features],
+    )
+
+    feature_metrics: dict[str, dict[str, Any]] = {}
+    drifted_count = 0
+
+    for feature in cfg.monitored_features:
+        if feature in df_ref.columns and feature in df_target.columns:
+            metrics = calculate_feature_drift(
+                reference_series=df_ref[feature],
+                current_series=df_target[feature],
+                ks_threshold=cfg.ks_p_value_threshold,
+                psi_threshold=cfg.psi_threshold,
+            )
+            feature_metrics[feature] = metrics
+            if metrics["drift_detected"]:
+                drifted_count += 1
+
+    total_evaluated = len(feature_metrics)
+    drifted_share = round(drifted_count / total_evaluated, 4) if total_evaluated > 0 else 0.0
+    dataset_drift = bool(drifted_share >= 0.25)
+
+    summary: dict[str, Any] = {
+        "reference_edition": ref_year,
+        "target_edition": target_year,
+        "reference_sample_size": len(df_ref),
+        "target_sample_size": len(df_target),
+        "total_features_evaluated": total_evaluated,
+        "drifted_features_count": drifted_count,
+        "drifted_features_share": drifted_share,
+        "dataset_drift_detected": dataset_drift,
+        "features": feature_metrics,
+    }
+
+    if export_json:
+        json_path = export_drift_metrics_json(
+            metrics=summary,
+            output_path=cfg.metrics_output_path,
+        )
+        summary["metrics_json_path"] = str(json_path)
+
+    if export_html:
+        html_filename = f"drift_report_fifa{ref_year}_vs_fifa{target_year}.html"
+        html_target = cfg.report_output_dir / html_filename
+        html_path = generate_evidently_html_report(
+            df_reference=df_ref,
+            df_current=df_target,
+            output_path=html_target,
+            columns=cfg.monitored_features,
+        )
+        summary["html_report_path"] = str(html_path)
+
+    return summary

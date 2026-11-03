@@ -29,6 +29,8 @@ def test_drift_monitoring_config_defaults():
     assert config.duckdb_path.name == "analytics_fc.duckdb"
     assert isinstance(config.report_output_dir, Path)
     assert config.report_output_dir.name == "drift"
+    assert isinstance(config.metrics_output_path, Path)
+    assert config.metrics_output_path.name == "drift_metrics.json"
 
 
 def test_feature_grouping_membership_and_integrity():
