@@ -1,6 +1,7 @@
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
@@ -364,6 +365,7 @@ st.markdown(
 
 DUCKDB_PATH = BASE_DIR / "dbt_project" / "analytics_fc.duckdb"
 GALLERY_PATH = BASE_DIR / "data" / "processed" / "superstar_gallery.json"
+DRIFT_METRICS_PATH = BASE_DIR / "data" / "monitoring" / "drift_metrics.json"
 
 SECTOR_MAP_LEGACY = {
     "GK": "Goalkeepers",
@@ -431,6 +433,19 @@ def load_gallery():
         return []
     with open(GALLERY_PATH, encoding="utf-8") as f:
         return json.load(f)
+
+
+@st.cache_data
+def load_drift_metrics(path: Path | str | None = None) -> dict[str, Any] | None:
+    """Load exported drift metrics JSON snapshot for dashboard display."""
+    target = Path(path) if path else DRIFT_METRICS_PATH
+    if not target.exists():
+        return None
+    try:
+        with open(target, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
 
 
 @st.cache_data
@@ -1095,3 +1110,124 @@ with tab_audit:
     """,
         unsafe_allow_html=True,
     )
+
+    st.markdown(
+        """
+    <div class="section-header-hud" style="margin-top:2rem;">
+        <span class="section-prefix">// 04</span>
+        <span>PRODUCTION DATA DRIFT & ATTRIBUTE STABILITY MONITORING</span>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    drift_data = load_drift_metrics()
+
+    if not drift_data:
+        st.info(
+            "Drift telemetry snapshot (data/monitoring/drift_metrics.json) not found. "
+            "Execute the monitoring pipeline to generate live drift indicators."
+        )
+    else:
+        ref_year = drift_data.get("reference_edition", 2021)
+        target_year = drift_data.get("target_edition", 2022)
+        ref_sample = drift_data.get("reference_sample_size", 0)
+        target_sample = drift_data.get("target_sample_size", 0)
+        total_feats = drift_data.get("total_features_evaluated", 0)
+        drifted_count = drift_data.get("drifted_features_count", 0)
+        drifted_share = drift_data.get("drifted_features_share", 0.0)
+        is_drifted = drift_data.get("dataset_drift_detected", False)
+
+        status_text = "DRIFT DETECTED" if is_drifted else "HEALTHY (NO DATASET DRIFT)"
+        status_color = "#EF4444" if is_drifted else "#10B981"
+        status_bg = "rgba(239, 68, 68, 0.12)" if is_drifted else "rgba(16, 185, 129, 0.12)"
+        status_border = "#EF4444" if is_drifted else "#10B981"
+
+        kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
+
+        with kpi_col1:
+            st.markdown(
+                f"""
+                <div style="background:{status_bg}; border:1px solid {status_border}; border-radius:6px; padding:0.9rem; text-align:center;">
+                    <div style="font-size:0.75rem; color:#94A3B8; font-family:'JetBrains Mono', monospace; letter-spacing:0.05em;">DATASET DRIFT STATUS</div>
+                    <div style="font-size:1.05rem; font-weight:800; color:{status_color}; margin-top:0.3rem; font-family:'JetBrains Mono', monospace;">● {status_text}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with kpi_col2:
+            st.markdown(
+                f"""
+                <div style="background:#0F172A; border:1px solid #1E293B; border-radius:6px; padding:0.9rem; text-align:center;">
+                    <div style="font-size:0.75rem; color:#94A3B8; font-family:'JetBrains Mono', monospace; letter-spacing:0.05em;">EDITIONS COMPARED</div>
+                    <div style="font-size:1.1rem; font-weight:700; color:#F8FAFC; margin-top:0.3rem; font-family:'JetBrains Mono', monospace;">FIFA {ref_year} → FIFA {target_year}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with kpi_col3:
+            st.markdown(
+                f"""
+                <div style="background:#0F172A; border:1px solid #1E293B; border-radius:6px; padding:0.9rem; text-align:center;">
+                    <div style="font-size:0.75rem; color:#94A3B8; font-family:'JetBrains Mono', monospace; letter-spacing:0.05em;">DRIFTED ATTRIBUTES</div>
+                    <div style="font-size:1.1rem; font-weight:700; color:{status_color}; margin-top:0.3rem; font-family:'JetBrains Mono', monospace;">{drifted_count} / {total_feats} ({drifted_share * 100:.1f}%)</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        with kpi_col4:
+            st.markdown(
+                f"""
+                <div style="background:#0F172A; border:1px solid #1E293B; border-radius:6px; padding:0.9rem; text-align:center;">
+                    <div style="font-size:0.75rem; color:#94A3B8; font-family:'JetBrains Mono', monospace; letter-spacing:0.05em;">SAMPLE STRATIFICATION</div>
+                    <div style="font-size:1.1rem; font-weight:700; color:#F8FAFC; margin-top:0.3rem; font-family:'JetBrains Mono', monospace;">{ref_sample:,} vs {target_sample:,}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.markdown(
+            """
+            <div style="background:#090D16; border:1px solid #1E293B; border-left:3px solid #3B82F6; border-radius:4px; padding:0.6rem 0.9rem; margin-top:1rem; margin-bottom:1rem; font-family:'JetBrains Mono', monospace; font-size:0.78rem; color:#94A3B8;">
+                <span style="color:#60A5FA; font-weight:600;">STATISTICAL TEST SPECIFICATIONS:</span> Two-sample Kolmogorov-Smirnov test (significance threshold: p &lt; 0.05) &amp; Population Stability Index (drift threshold: PSI &gt; 0.10). Dataset-level drift triggers when &ge; 25.0% of monitored features drift.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        features_dict = drift_data.get("features", {})
+        if features_dict:
+            filter_col1, _ = st.columns([1.5, 3.5])
+            with filter_col1:
+                show_drifted_only = st.checkbox("Show Drifted Attributes Only", value=False)
+
+            table_rows = []
+            for feat_name, m in features_dict.items():
+                is_feat_drifted = m.get("drift_detected", False)
+                if show_drifted_only and not is_feat_drifted:
+                    continue
+                ref_mean = m.get("reference_mean", 0.0)
+                curr_mean = m.get("current_mean", 0.0)
+                net_shift = round(curr_mean - ref_mean, 2)
+                table_rows.append(
+                    {
+                        "Attribute": feat_name,
+                        "Status": "DRIFTED" if is_feat_drifted else "STABLE",
+                        "KS p-value": f"{m.get('ks_p_value', 1.0):.4f}",
+                        "KS Statistic": f"{m.get('ks_statistic', 0.0):.4f}",
+                        "Wasserstein Distance": f"{m.get('wasserstein_distance', 0.0):.4f}",
+                        "PSI": f"{m.get('psi', 0.0):.4f}",
+                        f"Ref (FIFA {ref_year}) Mean": f"{ref_mean:.2f}",
+                        f"Target (FIFA {target_year}) Mean": f"{curr_mean:.2f}",
+                        "Mean Shift": f"{net_shift:+.2f}",
+                    }
+                )
+
+            if table_rows:
+                df_drift_display = pd.DataFrame(table_rows)
+                st.dataframe(df_drift_display, use_container_width=True, hide_index=True)
+            else:
+                st.info("No attributes matching current filter.")
