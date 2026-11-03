@@ -334,14 +334,14 @@ model {
       }
 
       driftIndicator = component 'Data Drift Visual HUD' {
-        #backlog
+        #in_progress
         description 'Embedded metrics displaying attribute drift warnings and feature stability.'
         technology 'Streamlit Metrics'
         link https://trello.com/c/YTqpmr34 'Trello: AFC-532'
         metadata {
           ticket 'AFC-532'
           card 'Embed Telemetry and Drift Indicators in Dashboard'
-          status 'Backlog'
+          status 'In Progress'
         }
       }
 
