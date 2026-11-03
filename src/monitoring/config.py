@@ -15,6 +15,8 @@ from pathlib import Path
 BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
 DEFAULT_DUCKDB_PATH: Path = BASE_DIR / "dbt_project" / "analytics_fc.duckdb"
 DEFAULT_REPORT_DIR: Path = BASE_DIR / "reports" / "drift"
+DEFAULT_METRICS_PATH: Path = BASE_DIR / "data" / "monitoring" / "drift_metrics.json"
+
 
 # Feature groupings for stg_fifa_granular
 HEADLINE_NUMERICAL_FEATURES: list[str] = [
@@ -107,3 +109,5 @@ class DriftMonitoringConfig:
     categorical_features: list[str] = field(default_factory=lambda: list(CATEGORICAL_FEATURES))
     duckdb_path: Path = DEFAULT_DUCKDB_PATH
     report_output_dir: Path = DEFAULT_REPORT_DIR
+
+    metrics_output_path: Path = DEFAULT_METRICS_PATH
