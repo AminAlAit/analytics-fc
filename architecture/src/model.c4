@@ -456,14 +456,14 @@ model {
       }
 
       trajectoryDataset = component 'Longitudinal Dataset Generator' {
-        #in_progress
+        #built
         description 'Builds cross-season multi-year player aging trajectories from historical data.'
         technology 'DuckDB SQL Generator'
         link https://trello.com/c/MlDpUjhA 'Trello: AFC-534'
         metadata {
           ticket 'AFC-534'
           card 'Build Longitudinal Career Trajectory Dataset Generator'
-          status 'In Progress'
+          status 'Done'
         }
       }
 
