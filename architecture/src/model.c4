@@ -444,26 +444,26 @@ model {
       }
 
       featureContract = component 'Model 2 Feature Contract' {
-        #in_progress
+        #built
         description 'Defines input schema, historical lag windows, and target trajectory boundaries.'
         technology 'Pydantic Contract'
         link https://trello.com/c/AdbZdq3w 'Trello: AFC-533'
         metadata {
           ticket 'AFC-533'
           card 'Define Model 2 Interface and Feature Contract'
-          status 'In Progress'
+          status 'Done'
         }
       }
 
       trajectoryDataset = component 'Longitudinal Dataset Generator' {
-        #backlog
+        #in_progress
         description 'Builds cross-season multi-year player aging trajectories from historical data.'
         technology 'DuckDB SQL Generator'
         link https://trello.com/c/MlDpUjhA 'Trello: AFC-534'
         metadata {
           ticket 'AFC-534'
           card 'Build Longitudinal Career Trajectory Dataset Generator'
-          status 'Backlog'
+          status 'In Progress'
         }
       }
 
