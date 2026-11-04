@@ -444,14 +444,14 @@ model {
       }
 
       featureContract = component 'Model 2 Feature Contract' {
-        #backlog
+        #in_progress
         description 'Defines input schema, historical lag windows, and target trajectory boundaries.'
         technology 'Pydantic Contract'
         link https://trello.com/c/AdbZdq3w 'Trello: AFC-533'
         metadata {
           ticket 'AFC-533'
           card 'Define Model 2 Interface and Feature Contract'
-          status 'Backlog'
+          status 'In Progress'
         }
       }
 
