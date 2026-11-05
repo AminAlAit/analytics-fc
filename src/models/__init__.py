@@ -3,6 +3,8 @@
 from src.models.trajectory_predictor import (
     BaseTrajectoryPredictor,
     FeatureContractError,
+    HistGradientBoostingTrajectoryRegressor,
+    RidgeTrajectoryRegressor,
     TrajectoryFeatureContract,
     TrajectoryFeatureRecord,
     TrajectoryPrediction,
@@ -11,6 +13,8 @@ from src.models.trajectory_predictor import (
 __all__ = [
     "BaseTrajectoryPredictor",
     "FeatureContractError",
+    "HistGradientBoostingTrajectoryRegressor",
+    "RidgeTrajectoryRegressor",
     "TrajectoryFeatureContract",
     "TrajectoryFeatureRecord",
     "TrajectoryPrediction",

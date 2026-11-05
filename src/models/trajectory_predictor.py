@@ -10,12 +10,15 @@ Establishes:
 from __future__ import annotations
 
 import logging
+import time
 from abc import ABC, abstractmethod
 from typing import Any
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.linear_model import Ridge
 
 logger = logging.getLogger("analytics_fc.models.trajectory_predictor")
 
@@ -233,9 +236,120 @@ class BaseTrajectoryPredictor(ABC):
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         """Predict expected future growth deltas for input feature matrix X."""
 
-    @abstractmethod
     def predict_trajectory(
         self,
         features: pd.DataFrame,
     ) -> list[TrajectoryPrediction]:
         """Generate structured trajectory predictions for input records."""
+        TrajectoryFeatureContract.validate_features(features)
+        deltas = self.predict(features)
+        predictions: list[TrajectoryPrediction] = []
+        for i, row in features.reset_index(drop=True).iterrows():
+            growth = float(deltas[i])
+            curr_ovr = float(row["overall"])
+            pred_ovr = float(np.clip(curr_ovr + growth, 35.0, 99.0))
+            predictions.append(
+                TrajectoryPrediction(
+                    player_id=int(row.get("player_id", i)),
+                    current_age=int(row["age"]),
+                    current_overall=curr_ovr,
+                    target_edition_year=int(
+                        row.get("target_edition_year", int(row.get("edition_year", 2021)) + 1)
+                    ),
+                    predicted_growth=round(growth, 2),
+                    predicted_overall=round(pred_ovr, 2),
+                    model_version=self.model_version,
+                )
+            )
+        return predictions
+
+
+class RidgeTrajectoryRegressor(BaseTrajectoryPredictor):
+    """L2 regularized linear regression baseline for rating growth trajectory."""
+
+    def __init__(
+        self,
+        alpha: float = 1.0,
+        random_state: int = 42,
+        model_version: str = "0.1.0-ridge",
+    ) -> None:
+        super().__init__(model_version=model_version)
+        self.alpha = alpha
+        self.random_state = random_state
+        self.estimator = Ridge(alpha=self.alpha, random_state=self.random_state)
+        self.training_duration_seconds: float = 0.0
+
+    def fit(self, X: pd.DataFrame, y: pd.Series[Any] | np.ndarray) -> RidgeTrajectoryRegressor:
+        """Fit Ridge regression on validated longitudinal feature matrix."""
+        TrajectoryFeatureContract.validate_features(X)
+        X_mat = TrajectoryFeatureContract.extract_feature_matrix(X)
+        t0 = time.perf_counter()
+        self.estimator.fit(X_mat, y)
+        self.training_duration_seconds = time.perf_counter() - t0
+        self._is_fitted = True
+        return self
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        """Predict expected future growth deltas using fitted Ridge weights."""
+        if not self.is_fitted:
+            raise RuntimeError(
+                "RidgeTrajectoryRegressor is not fitted. Call fit() before predict()."
+            )
+        TrajectoryFeatureContract.validate_features(X)
+        X_mat = TrajectoryFeatureContract.extract_feature_matrix(X)
+        preds = self.estimator.predict(X_mat)
+        return np.asarray(preds, dtype=float)
+
+
+class HistGradientBoostingTrajectoryRegressor(BaseTrajectoryPredictor):
+    """Histogram-based gradient boosting baseline for non-linear growth curves."""
+
+    def __init__(
+        self,
+        max_iter: int = 100,
+        learning_rate: float = 0.1,
+        max_leaf_nodes: int = 31,
+        min_samples_leaf: int = 20,
+        l2_regularization: float = 0.0,
+        random_state: int = 42,
+        model_version: str = "0.1.0-hgb",
+    ) -> None:
+        super().__init__(model_version=model_version)
+        self.max_iter = max_iter
+        self.learning_rate = learning_rate
+        self.max_leaf_nodes = max_leaf_nodes
+        self.min_samples_leaf = min_samples_leaf
+        self.l2_regularization = l2_regularization
+        self.random_state = random_state
+        self.estimator = HistGradientBoostingRegressor(
+            max_iter=self.max_iter,
+            learning_rate=self.learning_rate,
+            max_leaf_nodes=self.max_leaf_nodes,
+            min_samples_leaf=self.min_samples_leaf,
+            l2_regularization=self.l2_regularization,
+            random_state=self.random_state,
+        )
+        self.training_duration_seconds: float = 0.0
+
+    def fit(
+        self, X: pd.DataFrame, y: pd.Series[Any] | np.ndarray
+    ) -> HistGradientBoostingTrajectoryRegressor:
+        """Fit histogram GBDT regression on validated longitudinal feature matrix."""
+        TrajectoryFeatureContract.validate_features(X)
+        X_mat = TrajectoryFeatureContract.extract_feature_matrix(X)
+        t0 = time.perf_counter()
+        self.estimator.fit(X_mat, y)
+        self.training_duration_seconds = time.perf_counter() - t0
+        self._is_fitted = True
+        return self
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        """Predict expected future growth deltas using fitted GBDT trees."""
+        if not self.is_fitted:
+            raise RuntimeError(
+                "HistGradientBoostingTrajectoryRegressor is not fitted. Call fit() before predict()."
+            )
+        TrajectoryFeatureContract.validate_features(X)
+        X_mat = TrajectoryFeatureContract.extract_feature_matrix(X)
+        preds = self.estimator.predict(X_mat)
+        return np.asarray(preds, dtype=float)
