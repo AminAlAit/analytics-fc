@@ -468,14 +468,14 @@ model {
       }
 
       baselineRegressor = component 'Baseline Trajectory Regressor' {
-        #backlog
+        #built
         description 'Statistical regression baseline forecasting overall rating growth curves.'
         technology 'Scikit-Learn Regressor'
         link https://trello.com/c/L1EgyVvI 'Trello: AFC-535'
         metadata {
           ticket 'AFC-535'
           card 'Implement Baseline Trajectory Regressor Scaffolding'
-          status 'Backlog'
+          status 'Done'
         }
       }
 
