@@ -8,6 +8,8 @@ from src.models.trajectory_predictor import (
     TrajectoryFeatureContract,
     TrajectoryFeatureRecord,
     TrajectoryPrediction,
+    evaluate_trajectory_cv,
+    evaluate_trajectory_walk_forward,
 )
 
 __all__ = [
@@ -18,4 +20,6 @@ __all__ = [
     "TrajectoryFeatureContract",
     "TrajectoryFeatureRecord",
     "TrajectoryPrediction",
+    "evaluate_trajectory_cv",
+    "evaluate_trajectory_walk_forward",
 ]

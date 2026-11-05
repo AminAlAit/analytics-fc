@@ -9,6 +9,7 @@ Establishes:
 
 from __future__ import annotations
 
+import copy
 import logging
 import time
 from abc import ABC, abstractmethod
@@ -19,6 +20,8 @@ import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_absolute_error, r2_score, root_mean_squared_error
+from sklearn.model_selection import GroupKFold
 
 logger = logging.getLogger("analytics_fc.models.trajectory_predictor")
 
@@ -353,3 +356,162 @@ class HistGradientBoostingTrajectoryRegressor(BaseTrajectoryPredictor):
         X_mat = TrajectoryFeatureContract.extract_feature_matrix(X)
         preds = self.estimator.predict(X_mat)
         return np.asarray(preds, dtype=float)
+
+
+def evaluate_trajectory_cv(
+    model: BaseTrajectoryPredictor,
+    df: pd.DataFrame,
+    n_splits: int = 5,
+    group_col: str = "player_id",
+) -> dict[str, Any]:
+    """Run leak-free GroupKFold cross-validation grouped by player_id.
+
+    Verifies that all multi-season career records of any given player are
+    isolated strictly within either train or test splits.
+    """
+    TrajectoryFeatureContract.validate_features(df, require_target=True)
+    if group_col not in df.columns:
+        raise FeatureContractError(f"Missing group column '{group_col}' for grouped CV.")
+
+    y = TrajectoryFeatureContract.extract_target_vector(df)
+    groups = df[group_col]
+
+    gkf = GroupKFold(n_splits=n_splits)
+    folds: list[dict[str, Any]] = []
+
+    for fold_idx, (train_idx, test_idx) in enumerate(gkf.split(df, y, groups=groups)):
+        train_players = set(groups.iloc[train_idx])
+        test_players = set(groups.iloc[test_idx])
+        overlap = len(train_players.intersection(test_players))
+        if overlap > 0:
+            raise RuntimeError(
+                f"Data leakage detected in fold {fold_idx}: {overlap} players present in both splits."
+            )
+
+        fold_model = copy.deepcopy(model)
+        fold_model._is_fitted = False
+
+        fold_model.fit(df.iloc[train_idx], y.iloc[train_idx])
+        preds = fold_model.predict(df.iloc[test_idx])
+        y_test = y.iloc[test_idx].to_numpy()
+
+        mae = float(mean_absolute_error(y_test, preds))
+        rmse = float(root_mean_squared_error(y_test, preds))
+        r2 = float(r2_score(y_test, preds))
+
+        folds.append(
+            {
+                "fold": fold_idx,
+                "train_records": len(train_idx),
+                "test_records": len(test_idx),
+                "train_players": len(train_players),
+                "test_players": len(test_players),
+                "player_overlap": overlap,
+                "mae": round(mae, 4),
+                "rmse": round(rmse, 4),
+                "r2": round(r2, 4),
+            }
+        )
+
+    mae_list = [f["mae"] for f in folds]
+    rmse_list = [f["rmse"] for f in folds]
+    r2_list = [f["r2"] for f in folds]
+
+    return {
+        "model_type": model.__class__.__name__,
+        "n_splits": n_splits,
+        "total_records": len(df),
+        "unique_players": int(groups.nunique()),
+        "folds": folds,
+        "mean_mae": round(float(np.mean(mae_list)), 4),
+        "std_mae": round(float(np.std(mae_list)), 4),
+        "mean_rmse": round(float(np.mean(rmse_list)), 4),
+        "std_rmse": round(float(np.std(rmse_list)), 4),
+        "mean_r2": round(float(np.mean(r2_list)), 4),
+        "std_r2": round(float(np.std(r2_list)), 4),
+    }
+
+
+def evaluate_trajectory_walk_forward(
+    model: BaseTrajectoryPredictor,
+    df: pd.DataFrame,
+    start_eval_year: int = 2019,
+    reference_year_col: str = "edition_year",
+    target_year_col: str = "target_edition_year",
+) -> dict[str, Any]:
+    """Run temporal walk-forward evaluation across sequential FIFA editions.
+
+    Ensures zero lookahead leakage by training strictly on reference editions
+    prior to each evaluation edition.
+    """
+    TrajectoryFeatureContract.validate_features(df, require_target=True)
+    if reference_year_col not in df.columns or target_year_col not in df.columns:
+        raise FeatureContractError("Missing edition columns for temporal walk-forward evaluation.")
+
+    y = TrajectoryFeatureContract.extract_target_vector(df)
+    target_years = sorted([int(yr) for yr in df[target_year_col].unique() if yr >= start_eval_year])
+
+    if not target_years:
+        raise FeatureContractError(
+            f"No target editions found greater than or equal to start_eval_year ({start_eval_year})."
+        )
+
+    folds: list[dict[str, Any]] = []
+
+    for eval_year in target_years:
+        train_mask = (df[reference_year_col] < eval_year) & (df[target_year_col] <= eval_year)
+        test_mask = df[target_year_col] == eval_year
+
+        train_indices = np.where(train_mask)[0]
+        test_indices = np.where(test_mask)[0]
+
+        if len(train_indices) == 0 or len(test_indices) == 0:
+            continue
+
+        max_train_ref = int(df[reference_year_col].iloc[train_indices].max())
+        min_test_target = int(df[target_year_col].iloc[test_indices].min())
+
+        if max_train_ref >= min_test_target:
+            raise RuntimeError(
+                f"Temporal leakage in walk-forward evaluation: max train edition ({max_train_ref}) "
+                f"must strictly precede test edition ({min_test_target})."
+            )
+
+        fold_model = copy.deepcopy(model)
+        fold_model._is_fitted = False
+
+        fold_model.fit(df.iloc[train_indices], y.iloc[train_indices])
+        preds = fold_model.predict(df.iloc[test_indices])
+        y_test = y.iloc[test_indices].to_numpy()
+
+        mae = float(mean_absolute_error(y_test, preds))
+        rmse = float(root_mean_squared_error(y_test, preds))
+        r2 = float(r2_score(y_test, preds))
+
+        folds.append(
+            {
+                "eval_target_year": eval_year,
+                "train_records": len(train_indices),
+                "test_records": len(test_indices),
+                "max_train_edition": max_train_ref,
+                "mae": round(mae, 4),
+                "rmse": round(rmse, 4),
+                "r2": round(r2, 4),
+            }
+        )
+
+    mae_list = [f["mae"] for f in folds]
+    rmse_list = [f["rmse"] for f in folds]
+    r2_list = [f["r2"] for f in folds]
+
+    return {
+        "model_type": model.__class__.__name__,
+        "evaluation_years": [f["eval_target_year"] for f in folds],
+        "folds": folds,
+        "mean_mae": round(float(np.mean(mae_list)), 4) if mae_list else 0.0,
+        "std_mae": round(float(np.std(mae_list)), 4) if mae_list else 0.0,
+        "mean_rmse": round(float(np.mean(rmse_list)), 4) if rmse_list else 0.0,
+        "std_rmse": round(float(np.std(rmse_list)), 4) if rmse_list else 0.0,
+        "mean_r2": round(float(np.mean(r2_list)), 4) if r2_list else 0.0,
+        "std_r2": round(float(np.std(r2_list)), 4) if r2_list else 0.0,
+    }

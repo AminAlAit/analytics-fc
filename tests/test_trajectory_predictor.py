@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.model_selection import GroupKFold
 
 from src.models.trajectory_predictor import (
     BaseTrajectoryPredictor,
     FeatureContractError,
+    HistGradientBoostingTrajectoryRegressor,
+    RidgeTrajectoryRegressor,
     TrajectoryFeatureContract,
     TrajectoryFeatureRecord,
     TrajectoryPrediction,
+    evaluate_trajectory_cv,
+    evaluate_trajectory_walk_forward,
 )
 
 
@@ -197,7 +204,7 @@ class DummyTrajectoryPredictor(BaseTrajectoryPredictor):
         TrajectoryFeatureContract.validate_features(X)
         # Simple heuristic growth: fraction of potential headroom
         headroom = X["potential_diff"].to_numpy(dtype=float)
-        return np.maximum(0.0, headroom * 0.3)
+        return np.asarray(np.maximum(0.0, headroom * 0.3), dtype=float)
 
     def predict_trajectory(self, features: pd.DataFrame) -> list[TrajectoryPrediction]:
         TrajectoryFeatureContract.validate_features(features)
@@ -242,3 +249,137 @@ def test_base_trajectory_predictor_protocol():
     assert isinstance(trajectories[0], TrajectoryPrediction)
     assert trajectories[0].player_id == 101
     assert trajectories[0].predicted_overall > trajectories[0].current_overall
+
+
+def make_longitudinal_test_dataframe() -> pd.DataFrame:
+    """Construct multi-season player career records with shared player IDs."""
+    records = []
+    # 6 players across 4 editions (2018 to 2021)
+    for p_id in range(101, 107):
+        base_ovr = 70.0 + (p_id % 10)
+        for yr in [2018, 2019, 2020]:
+            ovr = base_ovr + (yr - 2018) * 2.0
+            pot = 85.0
+            records.append(
+                {
+                    "player_id": p_id,
+                    "edition_year": yr,
+                    "target_edition_year": yr + 1,
+                    "age": 20 + (yr - 2018),
+                    "overall": ovr,
+                    "potential": pot,
+                    "potential_diff": pot - ovr,
+                    "pace": 75.0,
+                    "shooting": 70.0,
+                    "passing": 72.0,
+                    "dribbling": 74.0,
+                    "defending": 50.0,
+                    "physic": 65.0,
+                    "growth_rate_1y": 2.0,
+                    "target_growth": 2.0,
+                }
+            )
+    return pd.DataFrame(records)
+
+
+def test_group_kfold_player_id_zero_leakage():
+    """Verify GroupKFold grouped by player_id strictly enforces zero player overlap."""
+    df = make_longitudinal_test_dataframe()
+    gkf = GroupKFold(n_splits=3)
+    groups = df["player_id"]
+    y = df["target_growth"]
+
+    for fold_idx, (train_idx, test_idx) in enumerate(gkf.split(df, y, groups=groups)):
+        train_players = set(groups.iloc[train_idx])
+        test_players = set(groups.iloc[test_idx])
+        overlap = train_players.intersection(test_players)
+        assert len(overlap) == 0, f"Fold {fold_idx} leaked player IDs: {overlap}"
+        assert len(train_players) > 0
+        assert len(test_players) > 0
+
+
+def test_evaluate_trajectory_cv_ridge():
+    """Verify evaluate_trajectory_cv with Ridge regressor reports zero overlap and valid metrics."""
+    df = make_longitudinal_test_dataframe()
+    model = RidgeTrajectoryRegressor(alpha=1.0)
+    results = evaluate_trajectory_cv(model, df, n_splits=3, group_col="player_id")
+
+    assert results["model_type"] == "RidgeTrajectoryRegressor"
+    assert results["n_splits"] == 3
+    assert results["unique_players"] == 6
+    assert len(results["folds"]) == 3
+
+    for fold in results["folds"]:
+        assert fold["player_overlap"] == 0
+        assert fold["mae"] >= 0.0
+        assert fold["rmse"] >= 0.0
+
+    assert results["mean_mae"] >= 0.0
+    assert results["mean_rmse"] >= 0.0
+
+
+def test_evaluate_trajectory_cv_hgb():
+    """Verify evaluate_trajectory_cv with HistGradientBoosting regressor reports zero overlap."""
+    df = make_longitudinal_test_dataframe()
+    model = HistGradientBoostingTrajectoryRegressor(max_iter=20, min_samples_leaf=2)
+    results = evaluate_trajectory_cv(model, df, n_splits=3, group_col="player_id")
+
+    assert results["model_type"] == "HistGradientBoostingTrajectoryRegressor"
+    assert len(results["folds"]) == 3
+    for fold in results["folds"]:
+        assert fold["player_overlap"] == 0
+        assert fold["mae"] >= 0.0
+
+
+def test_evaluate_trajectory_cv_missing_group_col():
+    """Verify evaluate_trajectory_cv raises FeatureContractError when group_col is absent."""
+    df = make_longitudinal_test_dataframe().drop(columns=["player_id"])
+    model = RidgeTrajectoryRegressor()
+    with pytest.raises(FeatureContractError, match="Missing group column"):
+        evaluate_trajectory_cv(model, df, n_splits=2, group_col="player_id")
+
+
+def test_evaluate_trajectory_walk_forward_zero_lookahead():
+    """Verify walk-forward temporal evaluation strictly prevents future edition leakage."""
+    df = make_longitudinal_test_dataframe()
+    model = RidgeTrajectoryRegressor()
+    results = evaluate_trajectory_walk_forward(model, df, start_eval_year=2020)
+
+    assert results["model_type"] == "RidgeTrajectoryRegressor"
+    assert len(results["folds"]) >= 2
+    for fold in results["folds"]:
+        assert fold["max_train_edition"] < fold["eval_target_year"]
+        assert fold["mae"] >= 0.0
+
+
+def test_evaluate_trajectory_walk_forward_validation_errors():
+    """Verify walk-forward evaluation catches missing columns or invalid target years."""
+    df = make_longitudinal_test_dataframe()
+    model = RidgeTrajectoryRegressor()
+
+    # Out of range start year
+    with pytest.raises(FeatureContractError, match="No target editions found"):
+        evaluate_trajectory_walk_forward(model, df, start_eval_year=2030)
+
+    # Missing target year col
+    df_missing = df.drop(columns=["target_edition_year"])
+    with pytest.raises(FeatureContractError, match="Missing edition columns"):
+        evaluate_trajectory_walk_forward(model, df_missing)
+
+
+def test_group_kfold_on_full_longitudinal_dataset():
+    """Verify GroupKFold across all 58,146 observations guarantees zero player leakage."""
+    parquet_path = Path("data/processed/trajectory_training.parquet")
+    if not parquet_path.exists():
+        pytest.skip(f"Longitudinal dataset {parquet_path} not found.")
+
+    df = pd.read_parquet(parquet_path)
+    gkf = GroupKFold(n_splits=5)
+    groups = df["player_id"]
+    y = df["target_growth"]
+
+    for fold_idx, (train_idx, test_idx) in enumerate(gkf.split(df, y, groups=groups)):
+        train_players = set(groups.iloc[train_idx])
+        test_players = set(groups.iloc[test_idx])
+        overlap = train_players.intersection(test_players)
+        assert len(overlap) == 0, f"Full dataset fold {fold_idx} leaked player IDs"
