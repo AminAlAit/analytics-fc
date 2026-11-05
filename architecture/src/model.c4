@@ -480,14 +480,14 @@ model {
       }
 
       evaluationSuite = component 'Leak-Free Cross-Validation' {
-        #backlog
+        #built
         description 'Temporal split cross-validation ensuring zero future leakage across career paths.'
         technology 'Pytest Benchmark'
         link https://trello.com/c/dgJIrgzv 'Trello: AFC-536'
         metadata {
           ticket 'AFC-536'
           card 'Add Leak-Free Cross-Validation and Unit Tests'
-          status 'Backlog'
+          status 'Done'
         }
       }
 
