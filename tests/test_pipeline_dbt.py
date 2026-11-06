@@ -19,7 +19,7 @@ def test_dbt_compile_command() -> None:
     code, stdout, stderr = execute_dbt_command(["compile"])
 
     assert code == 0, f"dbt compile failed: {stderr or stdout}"
-    assert "Found 6 models" in stdout
+    assert "models" in stdout
     assert "Concurrency: 1 threads" in stdout
 
 

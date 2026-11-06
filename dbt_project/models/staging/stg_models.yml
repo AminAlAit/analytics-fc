@@ -20,3 +20,23 @@ models:
       - name: fifa_edition_year
         tests:
           - not_null
+
+  - name: stg_modern_players
+    description: "Standardized modern player season attributes covering FIFA 15 to FC 24 with 180,021 records."
+    columns:
+      - name: player_id
+        description: "Primary player unique identifier."
+        tests:
+          - not_null
+      - name: fifa_edition_year
+        description: "Standardized four digit FIFA/FC release year."
+        tests:
+          - not_null
+      - name: overall
+        description: "Overall player rating."
+        tests:
+          - not_null
+      - name: potential
+        description: "Potential player rating."
+        tests:
+          - not_null

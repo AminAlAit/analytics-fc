@@ -6,5 +6,7 @@ sources:
     tables:
       - name: fifatable
       - name: fifa_granular
+      - name: granular_15_24
+        description: "Modern granular player dataset covering FIFA 15 through FC 24 with 180,021 seasonal records."
       - name: tm_stats
       - name: tm_trophies
