@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: dim_players
+    description: "Gold dimensional master table for player entities covering 53,111 unique player profiles."
+    columns:
+      - name: player_id
+        description: "Primary key identifying the player."
+        tests:
+          - not_null
+          - unique
+      - name: short_name
+        description: "Canonical display short name."
+        tests:
+          - not_null
+      - name: rookie_edition_year
+        description: "Initial FIFA/FC edition year observed for player."
+        tests:
+          - not_null
+      - name: career_peak_overall
+        description: "Highest overall rating achieved across recorded career."
+        tests:
+          - not_null
+
+  - name: fct_player_seasons
+    description: "Gold fact table storing longitudinal player season telemetry across 180,021 seasonal records."
+    columns:
+      - name: player_id
+        description: "Foreign key referencing dim_players.player_id."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_players')
+                field: player_id
+      - name: fifa_edition_year
+        description: "Standardized four digit season release year."
+        tests:
+          - not_null
+      - name: overall
+        description: "Current overall rating."
+        tests:
+          - not_null
+      - name: potential
+        description: "Current potential rating."
+        tests:
+          - not_null
