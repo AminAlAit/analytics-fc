@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: int_player_growth_curves
+    description: "Longitudinal player growth curves, annual rating deltas, developmental velocity, and career trajectory stages computed across 180,021 seasonal records."
+    columns:
+      - name: player_id
+        description: "Primary player unique identifier."
+        tests:
+          - not_null
+      - name: fifa_edition_year
+        description: "Four digit release calendar year."
+        tests:
+          - not_null
+      - name: career_season_index
+        description: "Sequential 1-based chronological career season index per player."
+        tests:
+          - not_null
+      - name: overall
+        description: "Current overall rating."
+        tests:
+          - not_null

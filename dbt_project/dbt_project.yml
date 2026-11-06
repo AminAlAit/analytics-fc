@@ -1,4 +1,4 @@
-﻿name: 'analytics_fc'
+name: 'analytics_fc'
 version: '1.0.0'
 config-version: 2
 
@@ -17,6 +17,8 @@ clean-targets:
 models:
   analytics_fc:
     staging:
+      +materialized: view
+    intermediate:
       +materialized: view
     marts:
       +materialized: table
