@@ -22,16 +22,17 @@ from fastapi import Path as PathParam
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.api.v2.dependencies import (
+    DuckDBSessionManager,
     ModelRegistry,
     get_archetype_indexer,
     get_conformal_predictor,
     get_db_session,
     get_model_registry,
     get_quantile_regressor,
+    get_session_manager,
 )
 from src.catalog_search import (
     ALL_SKILL_COLUMNS,
-    SECTOR_MAP,
     SECTOR_ORDER,
     get_primary_position,
     get_sector_for_position,
@@ -211,6 +212,7 @@ class ComprehensiveScoutResponseV2(BaseModel):
     profile: PlayerSearchItemV2
     trajectory: TrajectoryForecastResponseV2
     archetypes: ArchetypeMatchResponseV2
+    db_query_time_ms: float = Field(ge=0.0)
     total_inference_time_ms: float = Field(ge=0.0)
 
 
@@ -455,31 +457,54 @@ def _execute_modern_search(
         base_clauses.append("overall <= ?")
         base_params.append(max_overall)
 
-    item_clauses = list(base_clauses)
-    item_params = list(base_params)
-
-    if sector is not None:
-        sector_positions = [
-            pos for pos, sec in SECTOR_MAP.items() if sec.lower() == sector.strip().lower()
-        ]
-        if sector_positions:
-            placeholders = ", ".join(["?" for _ in sector_positions])
-            item_clauses.append(f"TRIM(SPLIT_PART(positions, ',', 1)) IN ({placeholders})")
-            item_params.extend(sector_positions)
-
-    where_sql = f"WHERE {' AND '.join(item_clauses)}" if item_clauses else ""
+    base_where = f"WHERE {' AND '.join(base_clauses)}" if base_clauses else ""
     select_cols = ", ".join(SEARCH_COLUMNS_V2)
 
-    sql = f"""
-        SELECT {select_cols}, COUNT(*) OVER() AS total_matching
-        FROM main.fct_player_seasons
-        {where_sql}
-        ORDER BY overall DESC, potential DESC, fifa_edition_year DESC, player_id ASC
-        LIMIT ? OFFSET ?;
-    """
+    sector_filter_sql = ""
+    item_params = list(base_params)
+    if sector is not None:
+        canonical_sector = next(
+            (s for s in SECTOR_ORDER if s.lower() == sector.strip().lower()), None
+        )
+        if canonical_sector is not None:
+            sector_filter_sql = "WHERE tactical_sector = ?"
+            item_params.append(canonical_sector)
+
     safe_limit = max(1, limit)
     safe_offset = max(0, offset)
     item_params.extend([safe_limit, safe_offset])
+
+    # Single-scan CTE computes sector totals across base_clauses prior to sector filter
+    sql = f"""
+        WITH base AS (
+            SELECT {select_cols},
+                   TRIM(SPLIT_PART(positions, ',', 1)) AS primary_pos,
+                   CASE
+                       WHEN TRIM(SPLIT_PART(positions, ',', 1)) = 'GK' THEN 'Goalkeepers'
+                       WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CB', 'LB', 'RB', 'LWB', 'RWB') THEN 'Defenders'
+                       WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CDM', 'CM') THEN 'Defensive & Central Midfielders'
+                       WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CAM', 'LM', 'RM', 'LW', 'RW') THEN 'Attacking Midfielders & Wingers'
+                       WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CF', 'ST') THEN 'Center Forwards & Strikers'
+                       ELSE 'Other'
+                   END AS tactical_sector
+            FROM main.fct_player_seasons
+            {base_where}
+        ),
+        with_sector_counts AS (
+            SELECT *,
+                   SUM(CASE WHEN tactical_sector = 'Goalkeepers' THEN 1 ELSE 0 END) OVER() AS cnt_gk,
+                   SUM(CASE WHEN tactical_sector = 'Defenders' THEN 1 ELSE 0 END) OVER() AS cnt_def,
+                   SUM(CASE WHEN tactical_sector = 'Defensive & Central Midfielders' THEN 1 ELSE 0 END) OVER() AS cnt_mid,
+                   SUM(CASE WHEN tactical_sector = 'Attacking Midfielders & Wingers' THEN 1 ELSE 0 END) OVER() AS cnt_am,
+                   SUM(CASE WHEN tactical_sector = 'Center Forwards & Strikers' THEN 1 ELSE 0 END) OVER() AS cnt_st
+            FROM base
+        )
+        SELECT *, COUNT(*) OVER() AS total_matching
+        FROM with_sector_counts
+        {sector_filter_sql}
+        ORDER BY overall DESC, potential DESC, fifa_edition_year DESC, player_id ASC
+        LIMIT ? OFFSET ?;
+    """
 
     cursor = con.execute(sql, item_params)
     col_names = [desc[0] for desc in cursor.description]
@@ -487,43 +512,54 @@ def _execute_modern_search(
 
     items: list[dict[str, Any]] = []
     total_matching = 0
+    sector_counts: dict[str, int] = {sec: 0 for sec in SECTOR_ORDER}
 
     for row in raw_rows:
         rec = dict(zip(col_names, row))
         total_matching = int(rec.pop("total_matching", 0))
-        rec["primary_pos"] = get_primary_position(rec.get("positions"))
-        rec["tactical_sector"] = get_sector_for_position(rec.get("positions"))
+        cnt_gk = int(rec.pop("cnt_gk", 0))
+        cnt_def = int(rec.pop("cnt_def", 0))
+        cnt_mid = int(rec.pop("cnt_mid", 0))
+        cnt_am = int(rec.pop("cnt_am", 0))
+        cnt_st = int(rec.pop("cnt_st", 0))
+        if include_sector_counts and not items:
+            sector_counts = {
+                "Goalkeepers": cnt_gk,
+                "Defenders": cnt_def,
+                "Defensive & Central Midfielders": cnt_mid,
+                "Attacking Midfielders & Wingers": cnt_am,
+                "Center Forwards & Strikers": cnt_st,
+            }
         items.append(rec)
 
-    if not items and safe_offset > 0:
-        count_where = f"WHERE {' AND '.join(item_clauses)}" if item_clauses else ""
-        count_res = con.execute(
-            f"SELECT COUNT(*) FROM main.fct_player_seasons {count_where};",
-            item_params[:-2],
-        ).fetchone()
-        total_matching = int(count_res[0]) if count_res else 0
-
-    sector_counts: dict[str, int] = {sec: 0 for sec in SECTOR_ORDER}
-    if include_sector_counts:
-        base_where = f"WHERE {' AND '.join(base_clauses)}" if base_clauses else ""
-        sector_sql = f"""
-            SELECT
-                CASE
-                    WHEN TRIM(SPLIT_PART(positions, ',', 1)) = 'GK' THEN 'Goalkeepers'
-                    WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CB', 'LB', 'RB', 'LWB', 'RWB') THEN 'Defenders'
-                    WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CDM', 'CM') THEN 'Defensive & Central Midfielders'
-                    WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CAM', 'LM', 'RM', 'LW', 'RW') THEN 'Attacking Midfielders & Wingers'
-                    WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CF', 'ST') THEN 'Center Forwards & Strikers'
-                    ELSE 'Other'
-                END AS sector,
-                COUNT(*) AS cnt
-            FROM main.fct_player_seasons
-            {base_where}
-            GROUP BY sector;
-        """
-        for sec, cnt in con.execute(sector_sql, base_params).fetchall():
-            if sec in sector_counts:
-                sector_counts[sec] = int(cnt)
+    if not items and (safe_offset > 0 or include_sector_counts):
+        if include_sector_counts:
+            sector_sql = f"""
+                SELECT
+                    CASE
+                        WHEN TRIM(SPLIT_PART(positions, ',', 1)) = 'GK' THEN 'Goalkeepers'
+                        WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CB', 'LB', 'RB', 'LWB', 'RWB') THEN 'Defenders'
+                        WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CDM', 'CM') THEN 'Defensive & Central Midfielders'
+                        WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CAM', 'LM', 'RM', 'LW', 'RW') THEN 'Attacking Midfielders & Wingers'
+                        WHEN TRIM(SPLIT_PART(positions, ',', 1)) IN ('CF', 'ST') THEN 'Center Forwards & Strikers'
+                        ELSE 'Other'
+                    END AS sec,
+                    COUNT(*) AS cnt
+                FROM main.fct_player_seasons
+                {base_where}
+                GROUP BY sec;
+            """
+            for sec, cnt in con.execute(sector_sql, base_params).fetchall():
+                if sec in sector_counts:
+                    sector_counts[sec] = int(cnt)
+        if safe_offset > 0:
+            if sector is not None:
+                canonical_sector = next(
+                    (s for s in SECTOR_ORDER if s.lower() == sector.strip().lower()), None
+                )
+                total_matching = sector_counts.get(canonical_sector or "", 0)
+            else:
+                total_matching = sum(sector_counts.values())
 
     return {
         "items": items,
@@ -546,25 +582,29 @@ def _execute_modern_search(
     summary="API v2 Diagnostics Probe",
 )
 async def health_check_v2(
-    con: Annotated[duckdb.DuckDBPyConnection, Depends(get_db_session)],
+    session_manager: Annotated[DuckDBSessionManager, Depends(get_session_manager)],
     registry: Annotated[ModelRegistry, Depends(get_model_registry)],
 ) -> HealthStatusV2:
     """Verify DuckDB connectivity, model registry warmup, and hardware limits."""
     t0 = time.perf_counter()
 
     def _run_diag() -> tuple[int, int, int, int, dict[str, Any]]:
-        row = con.execute(
-            """
-            SELECT
-                COUNT(*) AS total_rows,
-                COUNT(DISTINCT player_id) AS distinct_players,
-                MIN(fifa_edition_year) AS min_year,
-                MAX(fifa_edition_year) AS max_year
-            FROM main.fct_player_seasons;
-            """
-        ).fetchone()
-        if row is None:
-            raise RuntimeError("fct_player_seasons table returned empty telemetry.")
+        con = session_manager.get_connection()
+        try:
+            row = con.execute(
+                """
+                SELECT
+                    COUNT(*) AS total_rows,
+                    COUNT(DISTINCT player_id) AS distinct_players,
+                    MIN(fifa_edition_year) AS min_year,
+                    MAX(fifa_edition_year) AS max_year
+                FROM main.fct_player_seasons;
+                """
+            ).fetchone()
+            if row is None:
+                raise RuntimeError("fct_player_seasons table returned empty telemetry.")
+        finally:
+            con.close()
 
         registry.warmup()
         q_reg = registry.get_quantile_regressor()
@@ -686,7 +726,15 @@ async def forecast_trajectory_v2(
             conformal_model=conformal_model if payload.include_conformal else None,
         )
 
-    result = await asyncio.to_thread(_compute)
+    try:
+        result = await asyncio.to_thread(_compute)
+    except Exception as exc:
+        logger.error("Trajectory forecast failed for player %s: %s", payload.player_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Trajectory inference error: {exc}",
+        ) from exc
+
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -722,7 +770,15 @@ async def match_archetype_v2(
             indexer=indexer,
         )
 
-    result = await asyncio.to_thread(_compute)
+    try:
+        result = await asyncio.to_thread(_compute)
+    except Exception as exc:
+        logger.error("Archetype matching failed for player %s: %s", payload.player_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Archetype matching error: {exc}",
+        ) from exc
+
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -747,7 +803,7 @@ async def comprehensive_scout_v2(
     """Retrieve complete player profile, 3-year trajectory, and superstar matches."""
 
     def _compute() -> ComprehensiveScoutResponseV2 | None:
-        t0 = time.perf_counter()
+        t_db = time.perf_counter()
         record, growth_1y = _fetch_player_with_velocity(
             con,
             player_id,
@@ -756,6 +812,7 @@ async def comprehensive_scout_v2(
         )
         if record is None:
             return None
+        db_ms = round((time.perf_counter() - t_db) * 1000.0, 2)
 
         quantile_model = registry.get_quantile_regressor()
         conformal_model = registry.get_conformal_predictor()
@@ -776,15 +833,24 @@ async def comprehensive_scout_v2(
             indexer=indexer,
         )
 
-        total_ms = round((time.perf_counter() - t0) * 1000.0, 2)
+        total_inf_ms = round(traj_resp.inference_time_ms + arch_resp.inference_time_ms, 2)
         return ComprehensiveScoutResponseV2(
             profile=profile_item,
             trajectory=traj_resp,
             archetypes=arch_resp,
-            total_inference_time_ms=total_ms,
+            db_query_time_ms=db_ms,
+            total_inference_time_ms=total_inf_ms,
         )
 
-    result = await asyncio.to_thread(_compute)
+    try:
+        result = await asyncio.to_thread(_compute)
+    except Exception as exc:
+        logger.error("Comprehensive scout failed for player %s: %s", player_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Scouting dossier error: {exc}",
+        ) from exc
+
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

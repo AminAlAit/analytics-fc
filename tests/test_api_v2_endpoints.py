@@ -10,11 +10,19 @@ Validates:
 
 from __future__ import annotations
 
+import asyncio
+from pathlib import Path
+
+import httpx
 import pytest
 from starlette.testclient import TestClient
 
 from src.api.main import app
-from src.api.v2.dependencies import get_db_session
+from src.api.v2.dependencies import (
+    DuckDBSessionManager,
+    get_db_session,
+    get_session_manager,
+)
 
 HAALAND_ID = 239085
 HAALAND_YEAR = 2022
@@ -205,8 +213,13 @@ def test_v2_comprehensive_scout_dossier(client: TestClient) -> None:
     assert data["profile"]["overall"] == 91
     assert len(data["trajectory"]["forecast"]) == 3
     assert len(data["archetypes"]["matches"]) == 3
+    assert data["db_query_time_ms"] >= 0.0
     assert data["total_inference_time_ms"] < 30.0, (
-        f"Comprehensive scout dossier took {data['total_inference_time_ms']}ms, exceeding 30ms gate."
+        f"Comprehensive scout inference took {data['total_inference_time_ms']}ms, exceeding 30ms gate."
+    )
+    total_compute = data["db_query_time_ms"] + data["total_inference_time_ms"]
+    assert total_compute < 30.0, (
+        f"Comprehensive scout total compute took {total_compute:.2f}ms, exceeding 30ms gate."
     )
 
 
@@ -226,3 +239,35 @@ def test_v2_not_found_and_validation_errors(client: TestClient) -> None:
         json={"player_id": HAALAND_ID, "edition_year": 2022, "horizon_years": 10},
     )
     assert resp_422.status_code == 422
+
+
+def test_v2_health_returns_503_when_db_missing(tmp_path: Path) -> None:
+    """Verify /api/v2/health catches FileNotFoundError and returns HTTP 503."""
+    missing_db = tmp_path / "nonexistent.duckdb"
+    app.dependency_overrides[get_session_manager] = lambda: DuckDBSessionManager(db_path=missing_db)
+    try:
+        local_client = TestClient(app)
+        resp = local_client.get("/api/v2/health")
+        assert resp.status_code == 503
+        assert "unavailable" in resp.json()["detail"].lower()
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_v1_and_v2_concurrent_duckdb_config_parity() -> None:
+    """Verify concurrent v1 and v2 ASGI requests share identical DuckDB configuration."""
+
+    async def _run_concurrent() -> list[int]:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as ac:
+            tasks = [
+                ac.get("/api/v1/players/search?limit=5"),
+                ac.get("/api/v2/players/search?edition_year=2024&min_overall=88&limit=5"),
+                ac.get(f"/api/v1/players/{HAALAND_ID}?edition_year={HAALAND_YEAR}"),
+                ac.get(f"/api/v2/scout/{HAALAND_ID}?edition_year=2024&horizon_years=1&top_k=3"),
+            ]
+            responses = await asyncio.gather(*tasks)
+            return [r.status_code for r in responses]
+
+    statuses = asyncio.run(_run_concurrent())
+    assert statuses == [200, 200, 200, 200], f"Concurrent v1+v2 failure: {statuses}"

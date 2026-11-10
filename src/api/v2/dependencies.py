@@ -37,18 +37,14 @@ class DuckDBSessionManager:
         self.memory_limit = memory_limit
 
     def get_connection(self) -> duckdb.DuckDBPyConnection:
-        """Open a single-threaded read-only DuckDB connection."""
+        """Open a single-threaded read-only DuckDB connection matching v1 config."""
         if not self.db_path.exists():
             raise FileNotFoundError(f"DuckDB database not found at {self.db_path}")
 
-        return duckdb.connect(
-            str(self.db_path),
-            read_only=True,
-            config={
-                "threads": self.threads,
-                "memory_limit": self.memory_limit,
-            },
-        )
+        con = duckdb.connect(str(self.db_path), read_only=True)
+        con.execute(f"SET threads = {int(self.threads)};")
+        con.execute(f"SET memory_limit = '{self.memory_limit}';")
+        return con
 
     def session(self) -> Generator[duckdb.DuckDBPyConnection, None, None]:
         """Yield a managed DuckDB connection and ensure deterministic teardown."""
