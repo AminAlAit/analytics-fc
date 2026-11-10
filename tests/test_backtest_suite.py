@@ -141,7 +141,9 @@ def test_verification_gate_zero_leakage_on_training_dataset():
 
     # Verification Gate: zero player overlap
     assert metrics["zero_leakage_verified"] is True, "Data leakage detected in GroupKFold!"
-    assert metrics["total_player_overlaps"] == 0, f"Found {metrics['total_player_overlaps']} overlaps."
+    assert metrics["total_player_overlaps"] == 0, (
+        f"Found {metrics['total_player_overlaps']} overlaps."
+    )
     assert duration < 30.0, f"Audit took {duration:.2f}s, exceeding 30s hardware budget."
 
     # Export canonical model evaluation report
