@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.config import settings
 from src.api.routers.matcher import router as matcher_router
 from src.api.routers.players import router as players_router
+from src.api.v2.router import router as v2_router
 from src.catalog_search import get_catalog_stats, get_connection
 
 logging.basicConfig(
@@ -44,6 +45,7 @@ app.add_middleware(
 # Register API Sub-Routers
 app.include_router(players_router)
 app.include_router(matcher_router)
+app.include_router(v2_router)
 
 
 @app.get("/", tags=["Diagnostic"])
