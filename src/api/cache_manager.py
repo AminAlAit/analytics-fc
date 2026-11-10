@@ -199,8 +199,12 @@ class DuckDBConnectionPool:
         for attempt in range(self.max_retries + 1):
             try:
                 con = duckdb.connect(str(self.db_path), read_only=True)
-                con.execute(f"SET threads = {self.threads};")
-                con.execute(f"SET memory_limit = '{self.memory_limit}';")
+                try:
+                    con.execute(f"SET threads = {self.threads};")
+                    con.execute(f"SET memory_limit = '{self.memory_limit}';")
+                except Exception:
+                    con.close()
+                    raise
                 return con
             except duckdb.IOException as exc:
                 last_exc = exc
@@ -228,11 +232,13 @@ class DuckDBConnectionPool:
             )
 
         con: duckdb.DuckDBPyConnection | None = None
+        lease_registered = False
         try:
             with self._lock:
                 if self._closed:
                     raise RuntimeError("DuckDBConnectionPool has been closed.")
                 self._active_leases += 1
+                lease_registered = True
                 if self.reuse_connections and self._idle_connections:
                     con = self._idle_connections.pop()
 
@@ -260,8 +266,9 @@ class DuckDBConnectionPool:
                         with self._lock:
                             self._total_closed += 1
             finally:
-                with self._lock:
-                    self._active_leases = max(0, self._active_leases - 1)
+                if lease_registered:
+                    with self._lock:
+                        self._active_leases = max(0, self._active_leases - 1)
                 self._semaphore.release()
 
     def close_all(self) -> None:

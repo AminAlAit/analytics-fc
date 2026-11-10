@@ -12,6 +12,7 @@ Validates:
 from __future__ import annotations
 
 import concurrent.futures
+import threading
 import time
 from pathlib import Path
 
@@ -53,6 +54,16 @@ def test_lru_cache_eviction_and_metrics() -> None:
     assert cache.invalidate("k1") is True
     assert cache.invalidate("k1") is False
     assert cache.get("k1") is None
+
+    # clear() purges entries and resets all telemetry counters
+    cache.clear()
+    cleared = cache.stats()
+    assert cleared["size"] == 0
+    assert cleared["hits"] == 0
+    assert cleared["misses"] == 0
+    assert cleared["evictions"] == 0
+    assert cleared["expirations"] == 0
+    assert cleared["hit_rate"] == 0.0
 
 
 def test_lru_cache_ttl_expiration() -> None:
@@ -102,6 +113,7 @@ def test_duckdb_pool_enforces_readonly_and_hardware_caps() -> None:
         ).fetchone()
         assert settings_row is not None
         assert int(settings_row[0]) == 1
+        assert "953.6" in str(settings_row[1]) or "1" in str(settings_row[1])
         assert "read_only" in str(settings_row[2]).lower()
 
         # Verify write attempts are rejected by read-only enforcement
@@ -188,16 +200,126 @@ def test_reusable_pool_closes_all_handles_on_exit(tmp_path: Path) -> None:
     rw2.close()
 
 
+def test_duckdb_pool_semaphore_timeout_on_saturation(tmp_path: Path) -> None:
+    """Verify pool raises TimeoutError when max_connections is saturated."""
+    temp_db = tmp_path / "saturated_pool.duckdb"
+    rw = duckdb.connect(str(temp_db))
+    rw.execute("CREATE TABLE t (x INT);")
+    rw.close()
+
+    pool = DuckDBConnectionPool(db_path=temp_db, max_connections=1, reuse_connections=False)
+    entered = threading.Event()
+    release = threading.Event()
+
+    def holder() -> None:
+        with pool.acquire():
+            entered.set()
+            release.wait(timeout=2.0)
+
+    thread = threading.Thread(target=holder)
+    thread.start()
+    try:
+        assert entered.wait(timeout=2.0)
+        with pytest.raises(TimeoutError, match="Timed out waiting"):
+            with pool.acquire(timeout=0.05):
+                pass
+    finally:
+        release.set()
+        thread.join(timeout=2.0)
+        pool.close_all()
+
+    assert pool.stats()["active_leases"] == 0
+
+
+def test_duckdb_pool_concurrent_close_all_active_lease_accounting(tmp_path: Path) -> None:
+    """Verify close_all() while a third thread waits never corrupts active_leases."""
+    temp_db = tmp_path / "close_race.duckdb"
+    rw = duckdb.connect(str(temp_db))
+    rw.execute("CREATE TABLE t (x INT);")
+    rw.close()
+
+    pool = DuckDBConnectionPool(db_path=temp_db, max_connections=2, reuse_connections=False)
+    t1_ready = threading.Event()
+    t2_ready = threading.Event()
+    t1_release = threading.Event()
+    t2_release = threading.Event()
+    waiter_error: list[Exception] = []
+
+    def hold_1() -> None:
+        with pool.acquire():
+            t1_ready.set()
+            t1_release.wait(timeout=2.0)
+
+    def hold_2() -> None:
+        with pool.acquire():
+            t2_ready.set()
+            t2_release.wait(timeout=2.0)
+
+    def waiter_3() -> None:
+        try:
+            with pool.acquire(timeout=2.0):
+                pass
+        except Exception as exc:
+            waiter_error.append(exc)
+
+    th1 = threading.Thread(target=hold_1)
+    th2 = threading.Thread(target=hold_2)
+    th3 = threading.Thread(target=waiter_3)
+
+    th1.start()
+    th2.start()
+    assert t1_ready.wait(timeout=2.0)
+    assert t2_ready.wait(timeout=2.0)
+    assert pool.stats()["active_leases"] == 2
+
+    # Start third thread blocked on semaphore
+    th3.start()
+    time.sleep(0.05)
+
+    # Close pool while Thread 3 is blocked waiting and Threads 1 & 2 hold leases
+    pool.close_all()
+    t1_release.set()
+    th1.join(timeout=2.0)
+    th3.join(timeout=2.0)
+
+    # Thread 3 failed cleanly with RuntimeError; Thread 2 still holds 1 active lease
+    assert len(waiter_error) == 1
+    assert isinstance(waiter_error[0], RuntimeError)
+    assert pool.stats()["active_leases"] == 1
+
+    # Releasing Thread 2 brings active_leases strictly to 0
+    t2_release.set()
+    th2.join(timeout=2.0)
+    assert pool.stats()["active_leases"] == 0
+
+
 def test_atomic_artifact_slot_zero_downtime_swap() -> None:
-    """Verify AtomicArtifactSlot swaps versions safely across threads."""
+    """Verify AtomicArtifactSlot swaps versions safely across concurrent reader threads."""
     slot: AtomicArtifactSlot[list[str]] = AtomicArtifactSlot(["Cristiano Ronaldo"])
     assert slot.version == 0
     assert slot.get() == ["Cristiano Ronaldo"]
 
-    new_ver = slot.swap(["Cristiano Ronaldo", "E. Haaland", "J. Bellingham"])
-    assert new_ver == 1
-    assert slot.version == 1
-    assert len(slot.get() or []) == 3
+    stop_event = threading.Event()
+    read_lengths: list[int] = []
+
+    def reader() -> None:
+        while not stop_event.is_set():
+            val = slot.get()
+            assert val is not None and len(val) >= 1
+            read_lengths.append(len(val))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = [executor.submit(reader) for _ in range(4)]
+        for i in range(1, 26):
+            new_ver = slot.swap(["Cristiano Ronaldo", *[f"Star_{j}" for j in range(i)]])
+            assert new_ver == i
+        stop_event.set()
+        for f in futures:
+            f.result()
+
+    assert slot.version == 25
+    assert len(slot.get() or []) == 26
+    assert len(read_lengths) > 0
 
 
 def test_verification_gate_sub_2ms_cache_hits() -> None:
