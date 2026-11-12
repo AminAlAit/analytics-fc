@@ -1,17 +1,19 @@
 # Analytics FC: Tactical Intelligence and Player Trajectory Platform
 
-Analytics FC is a high-performance sports analytics and scouting intelligence platform. The platform benchmarks young prospects against the historical prime peaks of modern football icons using multidimensional playstyle geometry.
+Analytics FC is a sports data engineering and machine learning platform for youth player scouting and career trajectory forecasting. It pairs multidimensional playstyle geometry against prime superstar benchmarks (Model 1) with quantile and conformal career growth forecasting (Model 2), backed by a DuckDB and dbt lakehouse, FastAPI v1/v2 serving layers, Prefect pipelines, and a Streamlit terminal.
 
 ---
 
-## The Problem: Beyond Generic Wonderkid Scouting
+## Core Intelligence Models
 
-Traditional football scouting relies heavily on scalar potential metrics (such as FIFA Potential 88 or Scout Rating A). While scalar metrics indicate that a 19-year-old talent has high potential, they provide zero insight into:
-1. **Playstyle Identity:** What specific tactical role and physical archetype does this prospect naturally fit?
-2. **Historical Blueprint:** Which world-class superstar followed an identical developmental geometry in their youth?
-3. **Developmental Gaps:** Which exact technical and cognitive attributes must improve to reach that superstar ceiling?
+Traditional scouting often relies on scalar potential numbers (for example FIFA Potential 88), which hide both **playstyle fit** and **forecast uncertainty**. Analytics FC solves both problems with two production modules:
 
-Analytics FC answers these questions through **The Superstar Ceiling Matcher** (Flagship Model 1).
+1. **Superstar Ceiling Matcher (Model 1, `src/models/archetype_indexer.py`, `scripts/ceiling_matcher.py`):** Projects 29 outfield (or 5 goalkeeper) normalized skill vectors onto a unit hypersphere within 5 tactical sectors and ranks historical prime archetypes (ages 26 to 29, peak overall 85 to 94) using Euclidean distance and a Gaussian RBF kernel ($\sigma = 0.28$), surfacing attribute growth gaps.
+2. **Career Trajectory Forecaster (Model 2, `src/models/`):**
+   - `feature_store.py`: Longitudinal lag/lead feature generator across `58,146` historical career paths (`19,035` distinct players).
+   - `trajectory_regressor.py`: Quantile trajectory regressor (`P10`, `P50`, `P90` growth horizons).
+   - `conformal_predictor.py`: Distribution-free conformal uncertainty calibration for trajectory bands.
+   - `backtest_suite.py`: Leak-free walk-forward and `GroupKFold` evaluation across `player_id` cohorts.
 
 ---
 
@@ -19,131 +21,74 @@ Analytics FC answers these questions through **The Superstar Ceiling Matcher** (
 
 ```mermaid
 flowchart TD
-    A["Raw FIFA Datasets (FIFA 15 to FC 24)"] --> B["dbt Transformations & Data Staging"]
-    B --> C["stg_fifa_granular (180,021 Player Seasons)"]
-    C --> D["Superstar Gallery Builder"]
-    D --> E["superstar_gallery.json (Top 100 Prime Archetypes)"]
-    
-    F["Young Prospect Query (Age <= 21)"] --> G["DuckDB Staging Query"]
-    G --> H["Positional Partitioning (5 Tactical Sectors)"]
-    H --> I["L2 Directional Normalization (Unit Vector Space)"]
-    E --> I
-    I --> J["Gaussian RBF Kernel Calibration (sigma = 0.28)"]
-    J --> K["Top 3 Prime Archetype Twins & Trait Gap Telemetry"]
-    K --> L["Tactical Scouting Dashboard (Streamlit & Altair)"]
+    A["Raw Archives (FIFA 07 to FC 24 + Transfermarkt)"] --> B["Python Ingestion & Contracts (src/data/)"]
+    B --> C["DVC Bronze Parquet (180,021 Seasons, 53,111 Players)"]
+    C --> D["dbt Lakehouse & DuckDB Marts (dbt_project/)"]
+    D --> E["Model 1: Archetype Index & Superstar Gallery (100 Profiles)"]
+    D --> F["Model 2: Quantile + Conformal Trajectory Engine"]
+    E & F --> G["FastAPI v1/v2 + LRU Cache & DuckDB Pool (src/api/)"]
+    G --> H["Streamlit Terminal (dashboard/app.py)"]
+    I["Prefect Flows & Drift Monitor (pipelines/, src/monitoring/)"] --> D
 ```
 
 ---
 
-## Data Foundation and Staging
+## Data Foundation and Lakehouse (`dbt_project/analytics_fc.duckdb`)
 
-The platform is backed by a local OLAP DuckDB instance configured for thread-capped, read-only analytical execution:
-- **`stg_fifa_granular`**: 180,021 player-seasons covering FIFA 15 through FC 24, with 34 granular technical, physical, and cognitive skill attributes.
-- **Top 100 Superstar Gallery (`data/processed/superstar_gallery.json`)**: Curated historical peak profiles of modern football legends evaluated during their prime seasons (ages 26 to 29, peak overall 85 to 94).
-- **Tactical Sector Partitioning**:
-  - Goalkeepers (5 GK attributes)
-  - Defenders (29 outfield attributes)
-  - Defensive and Central Midfielders (29 outfield attributes)
-  - Attacking Midfielders and Wingers (29 outfield attributes)
-  - Center Forwards and Strikers (29 outfield attributes)
+DuckDB runs in thread-capped execution (`threads=1`, `memory_limit='1GB'`), wrapped on the serving path by `DuckDBConnectionPool` and `LRUProfileCache` (`src/api/cache_manager.py`) to avoid Windows file locking conflicts:
+
+- **`raw.granular_15_24` / `main.fct_player_seasons`**: `180,021` player-seasons (FIFA 15 to FC 24) covering `53,111` distinct players in `main.dim_players`.
+- **`raw.fifa_granular` / `main.stg_fifa_granular`**: `142,079` historical granular records.
+- **`raw.fifatable` / `main.stg_fifatable`**: `43,199` longitudinal wonderkid tracking rows (FIFA 07 to FIFA 21) linked with `raw.tm_stats` (`3,505` rows) and `raw.tm_trophies` (`215` rows).
+- **Processed Artifacts (`data/processed/`)**: `superstar_gallery.json` (`100` prime archetypes) and `trajectory_training.parquet` (`58,146` career trajectories).
 
 ---
 
-## Mathematical and Algorithmic Framework
+## Serving APIs (`src/api/`)
 
-### 1. Directional Normalization (Playstyle Geometry)
-Raw attributes for young prospects (age 18 to 21) are systematically lower than mature superstars (age 26 to 29). To eliminate magnitude bias and evaluate pure playstyle shape, attribute vectors are projected onto the unit hypersphere:
-
-$$\mathbf{u} = \frac{\mathbf{v}}{\|\mathbf{v}\|_2}$$
-
-Where $\mathbf{v} \in \mathbb{R}^{29}$ represents the granular skill vector.
-
-### 2. Normalized Euclidean Distance
-The playstyle divergence between prospect unit vector $\mathbf{u}_p$ and archetype unit vector $\mathbf{u}_s$ is computed via Euclidean distance:
-
-$$d(\mathbf{u}_p, \mathbf{u}_s) = \|\mathbf{u}_p - \mathbf{u}_s\|_2$$
-
-### 3. Calibrated Similarity Kernel (Gaussian RBF)
-To map geometric distance into a calibrated similarity percentage, we apply a Gaussian Radial Basis Function kernel:
-
-$$S(\mathbf{u}_p, \mathbf{u}_s) = \exp\left(-\frac{d(\mathbf{u}_p, \mathbf{u}_s)^2}{2\sigma^2}\right) \times 100$$
-
-With bandwidth parameter $\sigma = 0.28$:
-- An identical vector profile scores exactly 100.0%.
-- Elite tactical twins typically score between 80.0% and 94.0%.
-- Dissimilar tactical styles decay toward 0.0%.
-
-### 4. Trait Gap and Growth Telemetry
-For each matched archetype, the engine calculates the attribute delta across all active skill traits:
-
-$$\Delta_i = A_{\text{superstar}, i} - A_{\text{prospect}, i}$$
-
-The system surfaces:
-- **Closest Matching Traits:** Attributes where difference is minimal (core natural strengths).
-- **Growth Priorities:** Attributes with the largest positive delta (developmental milestones required to fulfill potential).
-
----
-
-## Performance and Reliability Standards
-
-- **In-Memory Matching Latency:** Less than 15ms across all 100 archetypes.
-- **DuckDB Query Performance:** Less than 100ms on indexed analytical lookups.
-- **Resource Constraints:** DuckDB strictly throttled to single-thread read-only mode with a 1GB memory cap.
-- **Automated Test Coverage:** 17 unit and contract tests in `tests/` validating data schemas, vector mathematics, positional isolation, and negative edge cases.
+Run via Uvicorn on port `8000` (`http://127.0.0.1:8000/docs`):
+- **API v1:** `GET /health`, `GET /api/v1/players/search`, `GET /api/v1/players/{id}/{year}`, `GET /api/v1/stats`, `POST /api/v1/match/ceiling`.
+- **API v2 (`src/api/v2/router.py`):** `GET /api/v2/health`, `GET /api/v2/players/search`, `POST /api/v2/trajectories/forecast`, `POST /api/v2/archetypes/match`, `GET /api/v2/scout/{player_id}`.
+- **In-Memory Cache & Reload Hook (`src/api/cache_manager.py`):** `LRUProfileCache` for warm profile reads, bounded `DuckDBConnectionPool`, and `AtomicArtifactSlot` for zero-downtime artifact swaps.
 
 ---
 
 ## Quickstart Guide
 
-### Option 1: Local Environment
+Execute commands from inside `analytics-fc` using the project virtual environment:
 
-1. Clone the repository and enter the project folder:
-   ```bash
-   cd analytics-fc
-   ```
+```powershell
+cd analytics-fc
+$env:PYTHONPATH = "."
 
-2. Create and activate a Python virtual environment:
-   ```bash
-   python -m venv .venv
-   # Windows PowerShell:
-   .\.venv\Scripts\Activate.ps1
-   # Linux/macOS:
-   source .venv/bin/activate
-   ```
+# Launch FastAPI v1/v2 Microservice (port 8000)
+.\.venv\Scripts\uvicorn.exe src.api.main:app --host 127.0.0.1 --port 8000
 
-3. Install required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Launch Tactical Scouting Dashboard (port 8501)
+.\.venv\Scripts\streamlit.exe run dashboard/app.py --server.port 8501
 
-4. Run the automated test suite:
-   ```bash
-   pytest tests -v
-   ```
-
-5. Launch the Tactical Scouting Dashboard:
-   ```bash
-   streamlit run dashboard/app.py
-   ```
-   Open `http://localhost:8501` in your browser.
+# Run Master Prefect Pipeline
+.\.venv\Scripts\python.exe pipelines/flows.py
+```
 
 ---
 
-### Option 2: Docker Container
+## Quality Checks & Known Environment Notes
 
-The platform is packaged in a self-contained, resource-capped Docker container:
+```powershell
+cd analytics-fc
+$env:PYTHONPATH = "."
 
-1. Build the Docker image:
-   ```bash
-   docker build -t analytics-fc .
-   ```
+.\.venv\Scripts\ruff.exe check .
+.\.venv\Scripts\ruff.exe format --check .
+.\.venv\Scripts\mypy.exe
 
-2. Run the container:
-   ```bash
-   docker run -p 8501:8501 --memory="1g" --cpus="1.0" analytics-fc
-   ```
+# Runnable pytest suite (excludes drift tests while pandas 3.1.1 / evidently 0.7.23 mismatch is open)
+.\.venv\Scripts\python.exe -m pytest --ignore=tests/test_drift_config.py --ignore=tests/test_drift_analyzer.py -v
+```
 
-3. Navigate to `http://localhost:8501` to access the dashboard.
+- **Linter & Static Typing:** `ruff check .`, `ruff format --check .` (`89` files), and `mypy` (`46` source files) pass with zero errors.
+- **Evidently / Pandas Compatibility Note:** `.venv` currently runs `pandas 3.1.1` with `evidently 0.7.23`, causing an `ImportError` (`infer_dtype_from_object`) when importing `tests/test_drift_config.py` and `tests/test_drift_analyzer.py`. Ignoring those two files collects `191` tests across the remaining `33` test files.
 
 ---
 
@@ -151,34 +96,18 @@ The platform is packaged in a self-contained, resource-capped Docker container:
 
 ```text
 analytics-fc/
-├── dashboard/
-│   └── app.py                     # Tactical command Streamlit dashboard
-├── data/
-│   ├── processed/
-│   │   └── superstar_gallery.json # Top 100 prime archetype benchmarks
-│   └── raw/                       # Raw source datasets
-├── dbt_project/
-│   ├── models/                    # Staging and marts SQL transformations
-│   └── analytics_fc.duckdb        # DuckDB OLAP database
-├── docs/
-│   ├── architecture_blueprint.md  # High-level architecture design
-│   └── methodology-charter.md     # Mathematical & research charter
-├── scripts/
-│   ├── build_superstar_gallery.py # Curates Top 100 peak archetypes
-│   └── ceiling_matcher.py         # Vector similarity and gap analysis engine
-├── tests/
-│   ├── test_ceiling_matcher.py    # Unit tests for vector math & routing
-│   ├── test_duckdb_contracts.py   # DuckDB safety & schema tests
-│   └── test_gallery_integrity.py  # Gallery cardinality & bounds tests
-├── Dockerfile                     # Container deployment definition
-├── requirements.txt               # Locked project dependencies
-└── README.md                      # Platform documentation
+├── dashboard/                   # Streamlit scouting UI & fallback API client
+├── data/                        # DVC descriptors, raw archives, processed parquet/JSON, drift metrics
+├── dbt_project/                 # DuckDB database, staging/intermediate/marts SQL, singular tests
+├── pipelines/                   # Prefect orchestration flows and hardware-capped task runners
+├── scripts/                     # Gallery builder, ceiling matcher, fixture seeding, Trello sync
+├── src/
+│   ├── api/                     # FastAPI v1/v2 routers, schemas, dependencies, cache_manager.py
+│   ├── data/                    # Modern ingestion connector, contracts, entity resolution
+│   ├── models/                  # Feature store, Model 1 indexer, Model 2 quantile/conformal/backtest
+│   └── monitoring/              # Drift analyzer and monitoring configuration
+├── architecture/                # LikeC4 system blueprints and Trello sync checks
+├── tests/                       # 35 test modules covering ingestion, dbt, ML, API, CI, and architecture
+├── pyproject.toml               # Dependencies, Ruff, and Mypy configuration
+└── README.md                    # Platform documentation
 ```
-
----
-
-## Verification and Sign-Off
-
-- **Test Suite Status:** 17 of 17 tests passing (`tests/`).
-- **Data Integrity:** 100 unique superstar archetypes verified with zero null values across 34 granular attributes.
-- **Engine Verification:** Backtested against historical youth profiles (Pedri, Erling Haaland, Kylian Mbappe, Gianluigi Donnarumma).
