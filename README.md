@@ -8,9 +8,9 @@ Analytics FC is a sports data engineering and machine learning platform for yout
 
 Traditional scouting often relies on scalar potential numbers (for example FIFA Potential 88), which hide both **playstyle fit** and **forecast uncertainty**. Analytics FC solves both problems with two production modules:
 
-1. **Superstar Ceiling Matcher (Model 1, `src/models/archetype_indexer.py`, `scripts/ceiling_matcher.py`):** Projects 29 outfield (or 5 goalkeeper) normalized skill vectors onto a unit hypersphere within 5 tactical sectors and ranks historical prime archetypes (ages 26 to 29, peak overall 85 to 94) using Euclidean distance and a Gaussian RBF kernel ($\sigma = 0.28$), surfacing attribute growth gaps.
+1. **Superstar Ceiling Matcher (Model 1, `src/models/archetype_indexer.py`, `scripts/ceiling_matcher.py`):** Projects 29 outfield (or 5 goalkeeper) normalized skill vectors onto a unit hypersphere within 5 tactical sectors and ranks 100 personal peak historical archetypes (peak overall 87 to 94) using Euclidean distance and a Gaussian RBF kernel ($\sigma = 0.28$), surfacing attribute growth gaps.
 2. **Career Trajectory Forecaster (Model 2, `src/models/`):**
-   - `feature_store.py`: Longitudinal lag/lead feature generator across `58,146` historical career paths (`19,035` distinct players).
+   - `feature_store.py`: Longitudinal lag/lead feature generator producing `78,171` training rows across `22,715` distinct players (`data/processed/trajectory_training.parquet`).
    - `trajectory_regressor.py`: Quantile trajectory regressor (`P10`, `P50`, `P90` growth horizons).
    - `conformal_predictor.py`: Distribution-free conformal uncertainty calibration for trajectory bands.
    - `backtest_suite.py`: Leak-free walk-forward and `GroupKFold` evaluation across `player_id` cohorts.
@@ -40,14 +40,14 @@ DuckDB runs in thread-capped execution (`threads=1`, `memory_limit='1GB'`), wrap
 - **`raw.granular_15_24` / `main.fct_player_seasons`**: `180,021` player-seasons (FIFA 15 to FC 24) covering `53,111` distinct players in `main.dim_players`.
 - **`raw.fifa_granular` / `main.stg_fifa_granular`**: `142,079` historical granular records.
 - **`raw.fifatable` / `main.stg_fifatable`**: `43,199` longitudinal wonderkid tracking rows (FIFA 07 to FIFA 21) linked with `raw.tm_stats` (`3,505` rows) and `raw.tm_trophies` (`215` rows).
-- **Processed Artifacts (`data/processed/`)**: `superstar_gallery.json` (`100` prime archetypes) and `trajectory_training.parquet` (`58,146` career trajectories).
+- **Processed Artifacts (`data/processed/`)**: `superstar_gallery.json` (`100` peak archetypes, peak overall 87 to 94) and `trajectory_training.parquet` (`78,171` trajectory rows across `22,715` distinct players).
 
 ---
 
 ## Serving APIs (`src/api/`)
 
 Run via Uvicorn on port `8000` (`http://127.0.0.1:8000/docs`):
-- **API v1:** `GET /health`, `GET /api/v1/players/search`, `GET /api/v1/players/{id}/{year}`, `GET /api/v1/stats`, `POST /api/v1/match/ceiling`.
+- **API v1:** `GET /health`, `GET /api/v1/players/search`, `GET /api/v1/players/{player_id}?edition_year=2022`, `GET /api/v1/players/stats/catalog`, `POST /api/v1/match/ceiling`.
 - **API v2 (`src/api/v2/router.py`):** `GET /api/v2/health`, `GET /api/v2/players/search`, `POST /api/v2/trajectories/forecast`, `POST /api/v2/archetypes/match`, `GET /api/v2/scout/{player_id}`.
 - **In-Memory Cache & Reload Hook (`src/api/cache_manager.py`):** `LRUProfileCache` for warm profile reads, bounded `DuckDBConnectionPool`, and `AtomicArtifactSlot` for zero-downtime artifact swaps.
 
