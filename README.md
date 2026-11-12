@@ -35,7 +35,7 @@ flowchart TD
 
 ## Data Foundation and Lakehouse (`dbt_project/analytics_fc.duckdb`)
 
-DuckDB runs in thread-capped execution (`threads=1`, `memory_limit='1GB'`), wrapped on the serving path by `DuckDBConnectionPool` and `LRUProfileCache` (`src/api/cache_manager.py`) to avoid Windows file locking conflicts:
+DuckDB runs in thread-capped execution (`threads=1`, `memory_limit='1GB'`), managed in API v2 via `DuckDBSessionManager` (`src/api/v2/dependencies.py`) with deterministic teardown to avoid Windows file locking conflicts:
 
 - **`raw.granular_15_24` / `main.fct_player_seasons`**: `180,021` player-seasons (FIFA 15 to FC 24) covering `53,111` distinct players in `main.dim_players`.
 - **`raw.fifa_granular` / `main.stg_fifa_granular`**: `142,079` historical granular records.
@@ -49,7 +49,7 @@ DuckDB runs in thread-capped execution (`threads=1`, `memory_limit='1GB'`), wrap
 Run via Uvicorn on port `8000` (`http://127.0.0.1:8000/docs`):
 - **API v1:** `GET /health`, `GET /api/v1/players/search`, `GET /api/v1/players/{player_id}?edition_year=2022`, `GET /api/v1/players/stats/catalog`, `POST /api/v1/match/ceiling`.
 - **API v2 (`src/api/v2/router.py`):** `GET /api/v2/health`, `GET /api/v2/players/search`, `POST /api/v2/trajectories/forecast`, `POST /api/v2/archetypes/match`, `GET /api/v2/scout/{player_id}`.
-- **In-Memory Cache & Reload Hook (`src/api/cache_manager.py`):** `LRUProfileCache` for warm profile reads, bounded `DuckDBConnectionPool`, and `AtomicArtifactSlot` for zero-downtime artifact swaps.
+- **In-Memory Cache & Reload Module (`src/api/cache_manager.py`):** Unit-tested `LRUProfileCache`, bounded `DuckDBConnectionPool`, `PlayerProfileCacheManager`, and `AtomicArtifactSlot` built for zero-downtime artifact reloads (`AFC-631`).
 
 ---
 
