@@ -1,13 +1,19 @@
 import json
+import os
 import sys
 import urllib.parse
 import urllib.request
+from pathlib import Path
 
-ENV_FILE = r"C:\Users\AminE\.secrets\trello.env"
+ENV_FILE = Path(os.environ.get("TRELLO_ENV_FILE") or (Path.home() / ".secrets" / "trello.env"))
 BOARD_ID = "6add00820e13a7c7024609e8"
 
 
 def load_credentials():
+    env_key = os.environ.get("TRELLO_KEY")
+    env_token = os.environ.get("TRELLO_TOKEN")
+    if env_key and env_token:
+        return env_key, env_token
     env_vars = {}
     with open(ENV_FILE, encoding="utf-8") as f:
         for line in f:

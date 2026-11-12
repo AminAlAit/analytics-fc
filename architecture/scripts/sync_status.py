@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import re
 import sys
 import time
@@ -22,7 +23,7 @@ from pathlib import Path
 
 logger = logging.getLogger("analytics_fc.architecture.sync")
 
-ENV_FILE = Path(r"C:\Users\AminE\.secrets\trello.env")
+ENV_FILE = Path(os.environ.get("TRELLO_ENV_FILE") or (Path.home() / ".secrets" / "trello.env"))
 BOARD_ID = "6add00820e13a7c7024609e8"
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MODEL_FILE = BASE_DIR / "architecture" / "src" / "model.c4"

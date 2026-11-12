@@ -4,10 +4,10 @@ __pycache__/
 .DS_Store
 *.db
 *.duckdb
+*.duckdb.wal
 dbt_project/target/
 dbt_project/logs/
 dbt_project/dbt_packages/
-
 mlruns/
 # Data binaries tracked via DVC
 /data/raw
@@ -17,3 +17,10 @@ mlruns/
 *.zip
 mlflow.db
 architecture/dist/
+dist/
+uv.lock
+.env
+.env.*
+.secrets/
+*.joblib
+/models/
