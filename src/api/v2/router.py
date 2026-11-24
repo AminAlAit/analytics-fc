@@ -41,6 +41,7 @@ from src.models.archetype_indexer import ArchetypeVectorIndex
 from src.models.conformal_predictor import ConformalTrajectoryPredictor
 from src.models.trajectory_predictor import TrajectoryFeatureContract
 from src.models.trajectory_regressor import QuantileTrajectoryRegressor
+from src.monitoring.observability import TelemetrySnapshot, get_telemetry_snapshot
 
 logger = logging.getLogger("analytics_fc.api.v2.router")
 
@@ -642,6 +643,16 @@ async def health_check_v2(
         hardware_limits={"threads": 1, "memory_limit": "1GB"},
         response_time_ms=elapsed_ms,
     )
+
+
+@router.get(
+    "/telemetry",
+    response_model=TelemetrySnapshot,
+    summary="Runtime Observability and PSI Drift Telemetry",
+)
+async def telemetry_v2() -> TelemetrySnapshot:
+    """Return runtime latency percentiles, RSS memory status, and PSI drift alerts."""
+    return get_telemetry_snapshot()
 
 
 @router.get(
