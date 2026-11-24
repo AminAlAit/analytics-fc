@@ -74,6 +74,15 @@ def test_router_health_reads_status() -> None:
         copy_engine.urllib.request.urlopen = original
 
 
+def test_env_token_skips_the_secrets_file(monkeypatch: pytest.MonkeyPatch) -> None:
+    """HETZNER_ROUTER_TOKEN is used before any token file is opened."""
+    monkeypatch.setenv("HETZNER_ROUTER_TOKEN", "env-token")
+    monkeypatch.setenv("HETZNER_ROUTER_TOKEN_FILE", "missing-token-file.txt")
+    from src.publisher.copy_engine import load_router_token
+
+    assert load_router_token() == "env-token"
+
+
 def test_complete_copy_posts_json(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     captured: dict[str, object] = {}
 
@@ -98,7 +107,8 @@ def test_complete_copy_posts_json(monkeypatch: pytest.MonkeyPatch, tmp_path) -> 
     monkeypatch.setattr("src.publisher.copy_engine.urllib.request.urlopen", _open)
     token_file = tmp_path / "token.txt"
     token_file.write_text("secret-token\n", encoding="utf-8")
-    monkeypatch.setattr("src.publisher.copy_engine.TOKEN_PATH", token_file)
+    monkeypatch.delenv("HETZNER_ROUTER_TOKEN", raising=False)
+    monkeypatch.setenv("HETZNER_ROUTER_TOKEN_FILE", str(token_file))
     from src.publisher.copy_engine import complete_copy
 
     text = complete_copy("hello", model="hetzner-flash")

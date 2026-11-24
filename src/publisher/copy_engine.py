@@ -7,6 +7,7 @@ are not hyphens, and rejected when it contains a number that was not supplied.
 from __future__ import annotations
 
 import json
+import os
 import re
 import urllib.error
 import urllib.request
@@ -15,8 +16,15 @@ from typing import Any
 
 DEFAULT_BASE_URL = "http://100.116.103.104:8080/v1"
 DEFAULT_MODEL = "hetzner-flash"
-TOKEN_PATH = Path(r"C:\Users\AminE\.secrets\hetzner-router-token.txt")
 _NUMBER = re.compile(r"\d+(?:\.\d+)?")
+
+
+def resolve_token_path() -> Path:
+    """Token file from HETZNER_ROUTER_TOKEN_FILE, otherwise ~/.secrets."""
+    return Path(
+        os.environ.get("HETZNER_ROUTER_TOKEN_FILE")
+        or (Path.home() / ".secrets" / "hetzner-router-token.txt")
+    )
 
 
 def scrub_copy(text: str) -> str:
@@ -54,8 +62,14 @@ def build_prompt(stats: dict[str, Any]) -> str:
 
 
 def load_router_token(path: Path | str | None = None) -> str:
-    """Read the router bearer token from the secrets file."""
-    token_path = Path(path) if path is not None else TOKEN_PATH
+    """Read the bearer token from the environment or the secrets file."""
+    if path is None:
+        env_token = os.environ.get("HETZNER_ROUTER_TOKEN", "").strip()
+        if env_token:
+            return env_token
+        token_path = resolve_token_path()
+    else:
+        token_path = Path(path)
     return token_path.read_text(encoding="utf-8").strip()
 
 

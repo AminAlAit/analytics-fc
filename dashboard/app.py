@@ -31,30 +31,19 @@ from dashboard.components.tactical_radar import (
     normalize_macro_radar,
 )
 from dashboard.components.trajectory_view import (
-    build_trajectory_fan_chart as _build_trajectory_fan_chart,
-)
-from dashboard.components.trajectory_view import (
-    build_trajectory_fan_data as _build_trajectory_fan_data,
-)
-from dashboard.components.trajectory_view import (
+    build_trajectory_fan_chart,
+    build_trajectory_fan_data,
     render_trajectory_forecaster,
 )
-
-
-def build_trajectory_fan_data(forecast_resp: dict[str, Any]) -> pd.DataFrame:
-    """Re-export the fan frame builder used by dashboard tests."""
-    return _build_trajectory_fan_data(forecast_resp)
-
-
-def build_trajectory_fan_chart(forecast_resp: dict[str, Any]):
-    """Re-export the fan chart builder used by the forecaster tab and tests."""
-    return _build_trajectory_fan_chart(forecast_resp)
-
-
 from src.catalog_search import (
     SECTOR_MAP,
     SECTOR_ORDER,
 )
+
+__all__ = [
+    "build_trajectory_fan_chart",
+    "build_trajectory_fan_data",
+]
 
 
 def _configure_page() -> None:
