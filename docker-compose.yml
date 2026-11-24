@@ -1,18 +1,76 @@
+x-stack-limits: &stack_limits
+  cpus: "1.0"
+  memory: "1.5G"
+
 services:
-  terminal:
+  api:
     build:
       context: .
       dockerfile: Dockerfile
-    image: analytics-fc-terminal:latest
-    container_name: analytics-fc-terminal
+    image: analytics-fc-api:latest
+    container_name: analytics-fc-api
+    command: ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
     ports:
-      - "8501:8501"
+      - "8000:8000"
+    environment:
+      PYTHONPATH: "/app"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      DUCKDB_THREADS: "1"
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: 1.5G
+          cpus: "0.50"
+          memory: 768M
     volumes:
       - ./dbt_project/analytics_fc.duckdb:/app/dbt_project/analytics_fc.duckdb:ro
       - ./data/processed:/app/data/processed:ro
+      - ./data/monitoring:/app/data/monitoring:ro
+      - ./models:/app/models:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: analytics-fc-dashboard:latest
+    container_name: analytics-fc-dashboard
+    command: ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    ports:
+      - "8501:8501"
+    environment:
+      PYTHONPATH: "/app"
+      AFC_API_URL: "http://api:8000"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      DUCKDB_THREADS: "1"
+    depends_on:
+      api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 768M
+    volumes:
+      - ./dbt_project/analytics_fc.duckdb:/app/dbt_project/analytics_fc.duckdb:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./data/monitoring:/app/data/monitoring:ro
+      - ./models:/app/models:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
