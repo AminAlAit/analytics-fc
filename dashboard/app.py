@@ -27,6 +27,11 @@ from dashboard.components.layout import (
     query_hud_counts,
     render_terminal_bar,
 )
+from dashboard.components.tactical_radar import (
+    build_tactical_radar_altair,
+    finite_score,
+    normalize_macro_radar,
+)
 from src.catalog_search import (
     SECTOR_MAP,
     SECTOR_ORDER,
@@ -341,149 +346,6 @@ def format_currency_eur(val):
     return f"€{int(val)}"
 
 
-# ==============================================================================
-# ALTAIR HEXAGONAL RADAR BUILDER
-# ==============================================================================
-def build_tactical_radar_altair(
-    categories, p_vals, s_vals, p_name="Prospect", s_name="Prime Benchmark"
-):
-    n = len(categories)
-    angles = [i * 2 * np.pi / n - np.pi / 2 for i in range(n)]
-
-    # 1. Concentric Hexagonal Grid Lines (20, 40, 60, 80, 100)
-    grid_rows = []
-    for level in [20, 40, 60, 80, 100]:
-        for ang in angles:
-            grid_rows.append(
-                {"x": level * np.cos(ang), "y": level * np.sin(ang), "level": str(level)}
-            )
-        grid_rows.append(
-            {"x": level * np.cos(angles[0]), "y": level * np.sin(angles[0]), "level": str(level)}
-        )
-    df_grid = pd.DataFrame(grid_rows)
-
-    grid_chart = (
-        alt.Chart(df_grid)
-        .mark_line(color="#223147", strokeWidth=1, strokeDash=[3, 3])
-        .encode(
-            x=alt.X("x:Q", axis=None, scale=alt.Scale(domain=[-150, 150])),
-            y=alt.Y("y:Q", axis=None, scale=alt.Scale(domain=[-150, 150])),
-            detail="level:N",
-        )
-    )
-
-    # 2. Axis Spokes
-    spoke_rows = []
-    for i, ang in enumerate(angles):
-        spoke_rows.append({"x": 0, "y": 0, "spoke": str(i)})
-        spoke_rows.append({"x": 100 * np.cos(ang), "y": 100 * np.sin(ang), "spoke": str(i)})
-    df_spokes = pd.DataFrame(spoke_rows)
-
-    spoke_chart = (
-        alt.Chart(df_spokes)
-        .mark_line(color="#1E293B", strokeWidth=1)
-        .encode(x="x:Q", y="y:Q", detail="spoke:N")
-    )
-
-    # 3. Prospect Polygon (Emerald #10B981)
-    p_rows = [
-        {
-            "x": v * np.cos(ang),
-            "y": v * np.sin(ang),
-            "entity": p_name,
-            "order": i,
-            "val": v,
-            "dimension": c,
-        }
-        for i, (c, v, ang) in enumerate(zip(categories, p_vals, angles))
-    ]
-    p_rows.append(
-        {
-            "x": p_vals[0] * np.cos(angles[0]),
-            "y": p_vals[0] * np.sin(angles[0]),
-            "entity": p_name,
-            "order": n,
-            "val": p_vals[0],
-            "dimension": categories[0],
-        }
-    )
-    df_p = pd.DataFrame(p_rows)
-
-    p_line = (
-        alt.Chart(df_p)
-        .mark_line(color="#10B981", strokeWidth=3)
-        .encode(x="x:Q", y="y:Q", order="order:Q")
-    )
-    p_points = (
-        alt.Chart(df_p)
-        .mark_circle(color="#10B981", size=60)
-        .encode(x="x:Q", y="y:Q", tooltip=["dimension:N", "val:Q"])
-    )
-
-    # 4. Prime Superstar Archetype Polygon (Cyan #06B6D4)
-    s_rows = [
-        {
-            "x": v * np.cos(ang),
-            "y": v * np.sin(ang),
-            "entity": s_name,
-            "order": i,
-            "val": v,
-            "dimension": c,
-        }
-        for i, (c, v, ang) in enumerate(zip(categories, s_vals, angles))
-    ]
-    s_rows.append(
-        {
-            "x": s_vals[0] * np.cos(angles[0]),
-            "y": s_vals[0] * np.sin(angles[0]),
-            "entity": s_name,
-            "order": n,
-            "val": s_vals[0],
-            "dimension": categories[0],
-        }
-    )
-    df_s = pd.DataFrame(s_rows)
-
-    s_line = (
-        alt.Chart(df_s)
-        .mark_line(color="#06B6D4", strokeWidth=2.5, strokeDash=[4, 4])
-        .encode(x="x:Q", y="y:Q", order="order:Q")
-    )
-    s_points = (
-        alt.Chart(df_s)
-        .mark_circle(color="#06B6D4", size=50)
-        .encode(x="x:Q", y="y:Q", tooltip=["dimension:N", "val:Q"])
-    )
-
-    # 5. Dimension Perimeter Labels
-    label_rows = []
-    for cat, p, s, ang in zip(categories, p_vals, s_vals, angles):
-        p_clean = 50.0 if (pd.isna(p) or np.isnan(p)) else p
-        s_clean = 50.0 if (pd.isna(s) or np.isnan(s)) else s
-        label_rows.append(
-            {
-                "x": 122 * np.cos(ang),
-                "y": 122 * np.sin(ang),
-                "label": f"{cat}: {int(round(p_clean))} | {int(round(s_clean))}",
-            }
-        )
-    df_labels = pd.DataFrame(label_rows)
-
-    labels_chart = (
-        alt.Chart(df_labels)
-        .mark_text(color="#94A3B8", fontSize=11, fontWeight=700)
-        .encode(x="x:Q", y="y:Q", text="label:N")
-    )
-
-    combined_chart = (
-        (grid_chart + spoke_chart + p_line + p_points + s_line + s_points + labels_chart)
-        .properties(height=420)
-        .configure_view(strokeWidth=0)
-        .configure(background="#0A0E17")
-    )
-    return combined_chart
-
-
 def _render_prospect_dossier_and_matcher(cand_selected: dict[str, Any]) -> dict[str, Any]:
     """Render the selected player dossier, top-3 archetypes, radar, and trait audit."""
     prospect_full = cached_get_player_profile(
@@ -673,18 +535,7 @@ def _render_prospect_dossier_and_matcher(cand_selected: dict[str, Any]) -> dict[
         }
 
     if macro_radar_dims:
-        radar_cats = [r["dimension"] for r in macro_radar_dims]
-        p_vals = [float(r["prospect_value"]) for r in macro_radar_dims]
-        s_vals = [float(r["benchmark_value"]) for r in macro_radar_dims]
-        comparison_rows = [
-            {
-                "dimension": r["dimension"],
-                "p_val": round(r["prospect_value"], 1),
-                "s_val": round(r["benchmark_value"], 1),
-                "delta": round(r["gap"], 1),
-            }
-            for r in macro_radar_dims
-        ]
+        radar_cats, p_vals, s_vals, comparison_rows = normalize_macro_radar(macro_radar_dims)
     else:
         radar_cats = list(macro_dimensions.keys())
         p_vals = []
@@ -692,10 +543,10 @@ def _render_prospect_dossier_and_matcher(cand_selected: dict[str, Any]) -> dict[
         comparison_rows = []
 
         for dim, subcols in macro_dimensions.items():
-            valid_p = [float(prospect[c]) for c in subcols if pd.notna(prospect[c])]
+            valid_p = [finite_score(prospect.get(c)) for c in subcols if pd.notna(prospect.get(c))]
             p_mean = float(np.mean(valid_p)) if valid_p else 50.0
             valid_s = [
-                float(best_star["attributes"].get(c, 50.0))
+                finite_score(best_star["attributes"].get(c))
                 for c in subcols
                 if pd.notna(best_star["attributes"].get(c))
             ]
