@@ -1,0 +1,339 @@
+/* Pitch-dark institutional design tokens */
+:root {
+    --afc-bg: #0A0E17;
+    --afc-ink: #F8FAFC;
+    --afc-muted: #94A3B8;
+    --afc-faint: #64748B;
+    --afc-surface: #111827;
+    --afc-surface-2: #161F30;
+    --afc-chip: #0F172A;
+    --afc-line: #1E293B;
+    --afc-line-strong: #23324A;
+    --afc-accent: #10B981;
+    --afc-accent-2: #06B6D4;
+    --afc-warn: #F59E0B;
+    --afc-audit: #0B111D;
+    --afc-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --afc-mono: "JetBrains Mono", "Roboto Mono", monospace;
+    --afc-frame: 1400px;
+}
+
+/* Global base and pitch-dark canvas */
+.stApp {
+    background-color: var(--afc-bg);
+    color: var(--afc-ink);
+    font-family: var(--afc-font);
+}
+
+/* Streamlit chrome overrides */
+header[data-testid="stHeader"] {
+    background-color: transparent !important;
+}
+.block-container {
+    padding-top: 1.15rem;
+    padding-bottom: 2.5rem;
+    max-width: var(--afc-frame);
+}
+
+/* High-density executive frame */
+.institutional-frame {
+    margin-bottom: 0.85rem;
+}
+
+/* Executive telemetry HUD */
+.terminal-bar {
+    background: linear-gradient(90deg, var(--afc-surface) 0%, var(--afc-surface-2) 100%);
+    border: 1px solid var(--afc-line);
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.45rem;
+}
+.brand-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--afc-ink);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+.brand-accent {
+    color: var(--afc-accent);
+    font-family: var(--afc-mono);
+}
+.telemetry-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+.telemetry-chip {
+    font-family: var(--afc-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.18rem 0.5rem;
+    border-radius: 4px;
+    background-color: var(--afc-chip);
+    border: 1px solid var(--afc-line);
+    color: var(--afc-muted);
+    letter-spacing: 0.04em;
+}
+.telemetry-chip.live {
+    border-color: rgba(16, 185, 129, 0.4);
+    color: var(--afc-accent);
+}
+
+/* Tactical dossier card */
+.dossier-card {
+    background-color: #111827;
+    border: 1px solid #1E293B;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.dossier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #1E293B;
+    padding-bottom: 0.85rem;
+}
+.player-name-display {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #F8FAFC;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.2;
+}
+.player-sub-meta {
+    color: #94A3B8;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+.meta-tag {
+    background: #1E293B;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    color: #CBD5E1;
+    font-size: 0.75rem;
+}
+
+/* KPI pods */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+.kpi-pod {
+    background-color: #161F30;
+    border: 1px solid #23324A;
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    text-align: left;
+}
+.kpi-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+}
+.kpi-val {
+    font-family: "JetBrains Mono", "Roboto Mono", monospace;
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.kpi-val.emerald {
+    color: #10B981;
+}
+.kpi-val.cyan {
+    color: #06B6D4;
+}
+.kpi-val.amber {
+    color: #F59E0B;
+}
+.kpi-sub {
+    font-size: 0.75rem;
+    color: #94A3B8;
+    margin-top: 0.35rem;
+    font-family: "JetBrains Mono", monospace;
+}
+
+/* Section subheadings */
+.section-header-hud {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #F8FAFC;
+    margin-top: 1.5rem;
+    margin-bottom: 0.85rem;
+    letter-spacing: -0.01em;
+}
+.section-prefix {
+    color: #10B981;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.9rem;
+}
+
+/* Archetype pods */
+.archetype-card-dark {
+    background-color: #111827;
+    border: 1px solid #1E293B;
+    border-top: 3px solid #10B981;
+    border-radius: 8px;
+    padding: 1.15rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.archetype-card-dark.rank-2 {
+    border-top: 3px solid #06B6D4;
+}
+.archetype-card-dark.rank-3 {
+    border-top: 3px solid #64748B;
+}
+.pod-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.65rem;
+}
+.pod-tier-chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: #1E293B;
+    color: #94A3B8;
+}
+.pod-pct-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #10B981;
+    font-variant-numeric: tabular-nums;
+}
+.pod-pct-badge.cyan {
+    color: #06B6D4;
+}
+.confidence-meter-track {
+    width: 100%;
+    height: 5px;
+    background-color: #1E293B;
+    border-radius: 999px;
+    margin-bottom: 0.85rem;
+    overflow: hidden;
+}
+.confidence-meter-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #10B981, #06B6D4);
+}
+.star-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #F8FAFC;
+    margin: 0 0 0.25rem 0;
+}
+.star-meta {
+    font-size: 0.8rem;
+    color: #94A3B8;
+    margin-bottom: 0.85rem;
+}
+.trait-badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+.trait-pill-aligned {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+}
+.trait-pill-growth {
+    font-size: 0.72rem;
+    font-weight: 600;
+    background-color: rgba(245, 158, 11, 0.12);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Tactical gap telemetry table */
+.gap-metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.75rem;
+    background-color: #161F30;
+    border: 1px solid #1E293B;
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+}
+.gap-val-p {
+    color: #10B981;
+    font-weight: 700;
+}
+.gap-val-s {
+    color: #06B6D4;
+    font-weight: 700;
+}
+.gap-delta {
+    font-weight: 700;
+}
+.gap-delta.pos {
+    color: #10B981;
+}
+.gap-delta.neg {
+    color: #F59E0B;
+}
+
+/* Audit terminal box */
+.audit-terminal-box {
+    background-color: #0B111D;
+    border: 1px solid #1E293B;
+    border-left: 3px solid #F59E0B;
+    border-radius: 6px;
+    padding: 1.25rem;
+    font-family: "JetBrains Mono", "Roboto Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #CBD5E1;
+}
+
+/* Tab custom styling */
+button[data-baseweb="tab"] {
+    color: #94A3B8 !important;
+    font-weight: 600 !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #10B981 !important;
+    border-bottom-color: #10B981 !important;
+}

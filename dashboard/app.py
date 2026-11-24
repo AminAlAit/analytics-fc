@@ -22,331 +22,15 @@ from dashboard.api_client import (
     search_players,
 )
 from dashboard.bootstrap import ensure_serving_assets
+from dashboard.components.layout import (
+    load_institutional_css,
+    query_hud_counts,
+    render_terminal_bar,
+)
 from src.catalog_search import (
     SECTOR_MAP,
     SECTOR_ORDER,
 )
-
-# Injected Custom CSS: Tactical Command Dark Design System
-DARK_CSS = """
-<style>
-    /* Global Base and Pitch Dark Canvas */
-    .stApp {
-        background-color: #0A0E17;
-        color: #F8FAFC;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    /* Streamlit Chrome Overrides */
-    header[data-testid="stHeader"] {
-        background-color: transparent !important;
-    }
-    .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 3rem;
-        max-width: 1400px;
-    }
-
-    /* Executive Hero Status Bar */
-    .terminal-bar {
-        background: linear-gradient(90deg, #111827 0%, #161F30 100%);
-        border: 1px solid #1E293B;
-        border-radius: 8px;
-        padding: 0.85rem 1.25rem;
-        margin-bottom: 1.25rem;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    .brand-title {
-        font-size: 1.25rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        color: #F8FAFC;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .brand-accent {
-        color: #10B981;
-        font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
-    }
-    .telemetry-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        align-items: center;
-    }
-    .telemetry-chip {
-        font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
-        font-size: 0.72rem;
-        font-weight: 600;
-        padding: 0.25rem 0.65rem;
-        border-radius: 4px;
-        background-color: #0F172A;
-        border: 1px solid #1E293B;
-        color: #94A3B8;
-        letter-spacing: 0.04em;
-    }
-    .telemetry-chip.live {
-        border-color: rgba(16, 185, 129, 0.4);
-        color: #10B981;
-    }
-
-    /* Tactical Dossier Card */
-    .dossier-card {
-        background-color: #111827;
-        border: 1px solid #1E293B;
-        border-radius: 8px;
-        padding: 1.25rem;
-        margin-bottom: 1.25rem;
-    }
-    .dossier-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid #1E293B;
-        padding-bottom: 0.85rem;
-    }
-    .player-name-display {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #F8FAFC;
-        letter-spacing: -0.02em;
-        margin: 0;
-        line-height: 1.2;
-    }
-    .player-sub-meta {
-        color: #94A3B8;
-        font-size: 0.85rem;
-        margin-top: 0.25rem;
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-    }
-    .meta-tag {
-        background: #1E293B;
-        padding: 0.15rem 0.5rem;
-        border-radius: 4px;
-        color: #CBD5E1;
-        font-size: 0.75rem;
-    }
-
-    /* KPI Pods */
-    .kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.85rem;
-        margin-bottom: 0.5rem;
-    }
-    .kpi-pod {
-        background-color: #161F30;
-        border: 1px solid #23324A;
-        border-radius: 6px;
-        padding: 0.85rem 1rem;
-        text-align: left;
-    }
-    .kpi-label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: #64748B;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-bottom: 0.35rem;
-    }
-    .kpi-val {
-        font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
-        font-size: 1.85rem;
-        font-weight: 800;
-        line-height: 1;
-        font-variant-numeric: tabular-nums;
-    }
-    .kpi-val.emerald {
-        color: #10B981;
-    }
-    .kpi-val.cyan {
-        color: #06B6D4;
-    }
-    .kpi-val.amber {
-        color: #F59E0B;
-    }
-    .kpi-sub {
-        font-size: 0.75rem;
-        color: #94A3B8;
-        margin-top: 0.35rem;
-        font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* Section Subheadings */
-    .section-header-hud {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: #F8FAFC;
-        margin-top: 1.5rem;
-        margin-bottom: 0.85rem;
-        letter-spacing: -0.01em;
-    }
-    .section-prefix {
-        color: #10B981;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.9rem;
-    }
-
-    /* Archetype Pods */
-    .archetype-card-dark {
-        background-color: #111827;
-        border: 1px solid #1E293B;
-        border-top: 3px solid #10B981;
-        border-radius: 8px;
-        padding: 1.15rem;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    .archetype-card-dark.rank-2 {
-        border-top: 3px solid #06B6D4;
-    }
-    .archetype-card-dark.rank-3 {
-        border-top: 3px solid #64748B;
-    }
-    .pod-topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.65rem;
-    }
-    .pod-tier-chip {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.68rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        padding: 0.15rem 0.5rem;
-        border-radius: 4px;
-        background: #1E293B;
-        color: #94A3B8;
-    }
-    .pod-pct-badge {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: #10B981;
-        font-variant-numeric: tabular-nums;
-    }
-    .pod-pct-badge.cyan {
-        color: #06B6D4;
-    }
-    .confidence-meter-track {
-        width: 100%;
-        height: 5px;
-        background-color: #1E293B;
-        border-radius: 999px;
-        margin-bottom: 0.85rem;
-        overflow: hidden;
-    }
-    .confidence-meter-fill {
-        height: 100%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #10B981, #06B6D4);
-    }
-    .star-name {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #F8FAFC;
-        margin: 0 0 0.25rem 0;
-    }
-    .star-meta {
-        font-size: 0.8rem;
-        color: #94A3B8;
-        margin-bottom: 0.85rem;
-    }
-    .trait-badge-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-        margin-top: 0.35rem;
-        margin-bottom: 0.75rem;
-    }
-    .trait-pill-aligned {
-        font-size: 0.72rem;
-        font-weight: 600;
-        background-color: rgba(16, 185, 129, 0.12);
-        color: #10B981;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        padding: 0.15rem 0.5rem;
-        border-radius: 4px;
-    }
-    .trait-pill-growth {
-        font-size: 0.72rem;
-        font-weight: 600;
-        background-color: rgba(245, 158, 11, 0.12);
-        color: #F59E0B;
-        border: 1px solid rgba(245, 158, 11, 0.3);
-        padding: 0.15rem 0.5rem;
-        border-radius: 4px;
-    }
-
-    /* Tactical Gap Telemetry Table */
-    .gap-metric-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.45rem 0.75rem;
-        background-color: #161F30;
-        border: 1px solid #1E293B;
-        border-radius: 4px;
-        margin-bottom: 0.4rem;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.8rem;
-    }
-    .gap-val-p {
-        color: #10B981;
-        font-weight: 700;
-    }
-    .gap-val-s {
-        color: #06B6D4;
-        font-weight: 700;
-    }
-    .gap-delta {
-        font-weight: 700;
-    }
-    .gap-delta.pos {
-        color: #10B981;
-    }
-    .gap-delta.neg {
-        color: #F59E0B;
-    }
-
-    /* Audit Terminal Box */
-    .audit-terminal-box {
-        background-color: #0B111D;
-        border: 1px solid #1E293B;
-        border-left: 3px solid #F59E0B;
-        border-radius: 6px;
-        padding: 1.25rem;
-        font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
-        font-size: 0.85rem;
-        line-height: 1.6;
-        color: #CBD5E1;
-    }
-
-    /* Tab Custom Styling */
-    button[data-baseweb="tab"] {
-        color: #94A3B8 !important;
-        font-weight: 600 !important;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #10B981 !important;
-        border-bottom-color: #10B981 !important;
-    }
-</style>
-"""
 
 
 def _configure_page() -> None:
@@ -357,7 +41,7 @@ def _configure_page() -> None:
         layout="wide",
         initial_sidebar_state="collapsed",
     )
-    st.markdown(DARK_CSS, unsafe_allow_html=True)
+    st.markdown(load_institutional_css(), unsafe_allow_html=True)
 
 
 # ==============================================================================
@@ -1251,30 +935,26 @@ def main() -> None:
         st.stop()
 
     backend_status = get_connection_status()
-    status_chip_class = "telemetry-chip live"
     try:
         catalog_stats = cached_catalog_stats()
     except Exception:
         catalog_stats = {"total_rows": 0, "distinct_players": 0, "min_year": 2015, "max_year": 2022}
 
     total_rows = int(catalog_stats.get("total_rows", 0))
-    distinct_players = int(catalog_stats.get("distinct_players", 0))
+    try:
+        hud_counts = query_hud_counts(DUCKDB_PATH)
+    except Exception:
+        hud_counts = {"season_rows": 0, "distinct_players": 0, "source": "unavailable"}
+    season_rows = int(hud_counts.get("season_rows", 0))
+    distinct_players = int(hud_counts.get("distinct_players", 0))
 
     st.markdown(
-        f"""
-    <div class="terminal-bar">
-        <div class="brand-title">
-            <span>⚽ ANALYTICS FC</span>
-            <span class="brand-accent">// SCOUTING INTELLIGENCE ENGINE</span>
-        </div>
-        <div class="telemetry-group">
-            <span class="{status_chip_class}">● {backend_status}</span>
-            <span class="telemetry-chip">{total_rows:,} SEASONS / {distinct_players:,} PLAYERS</span>
-            <span class="telemetry-chip live">CATALOG SEARCH: {total_rows:,} RECORDS ACTIVE</span>
-            <span class="telemetry-chip live">KERNEL: GAUSSIAN RBF (&lt;5ms)</span>
-        </div>
-    </div>
-    """,
+        render_terminal_bar(
+            status_label=backend_status,
+            season_rows=season_rows,
+            distinct_players=distinct_players,
+            catalog_rows=total_rows,
+        ),
         unsafe_allow_html=True,
     )
 
