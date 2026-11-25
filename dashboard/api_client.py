@@ -15,7 +15,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -76,7 +76,7 @@ def get_catalog_stats_summary() -> dict[str, int]:
         try:
             with urllib.request.urlopen(req, timeout=DEFAULT_TIMEOUT_SEC) as resp:
                 if resp.status == 200:
-                    return json.loads(resp.read().decode("utf-8"))
+                    return cast(dict[str, int], json.loads(resp.read().decode("utf-8")))
         except Exception as exc:
             logger.debug(f"FastAPI stats unavailable ({exc}), using embedded DuckDB.")
 
@@ -117,7 +117,7 @@ def search_players(
         try:
             with urllib.request.urlopen(req, timeout=DEFAULT_TIMEOUT_SEC) as resp:
                 if resp.status == 200:
-                    return json.loads(resp.read().decode("utf-8"))
+                    return cast(dict[str, Any], json.loads(resp.read().decode("utf-8")))
         except Exception as exc:
             logger.debug(f"FastAPI search unavailable ({exc}), invoking embedded DuckDB.")
 
@@ -146,7 +146,7 @@ def get_player_profile(
         try:
             with urllib.request.urlopen(req, timeout=DEFAULT_TIMEOUT_SEC) as resp:
                 if resp.status == 200:
-                    return json.loads(resp.read().decode("utf-8"))
+                    return cast(dict[str, Any], json.loads(resp.read().decode("utf-8")))
         except urllib.error.HTTPError as http_err:
             if http_err.code == 404:
                 return None
@@ -186,7 +186,7 @@ def match_ceiling(
         try:
             with urllib.request.urlopen(req, timeout=DEFAULT_TIMEOUT_SEC) as resp:
                 if resp.status == 200:
-                    return json.loads(resp.read().decode("utf-8"))
+                    return cast(dict[str, Any], json.loads(resp.read().decode("utf-8")))
         except urllib.error.HTTPError as http_err:
             if http_err.code == 404:
                 return None
@@ -384,7 +384,7 @@ def forecast_trajectory(
         try:
             with urllib.request.urlopen(req, timeout=DEFAULT_TIMEOUT_SEC) as resp:
                 if resp.status == 200:
-                    return json.loads(resp.read().decode("utf-8"))
+                    return cast(dict[str, Any], json.loads(resp.read().decode("utf-8")))
         except urllib.error.HTTPError as http_err:
             if http_err.code == 404:
                 return None

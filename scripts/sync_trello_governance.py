@@ -41,6 +41,10 @@ _COMMIT_HASH_RE = re.compile(
     r"\b(?![0-9]+\b)(?:[0-9a-f]{7,12}|[0-9a-f]{40})\b",
     re.IGNORECASE,
 )
+_CONTEXTUAL_COMMIT_HASH_RE = re.compile(
+    r"\bcommit(?:\s+hash)?\s*[:#]?\s*([0-9a-f]{7,12}|[0-9a-f]{40})\b",
+    re.IGNORECASE,
+)
 _TEST_EVIDENCE_RE = re.compile(
     r"\b(?:test(?:s|ed|ing)?|pytest|ruff|mypy|passed|verified|verification|check(?:s|ed)?)\b",
     re.IGNORECASE,
@@ -161,10 +165,11 @@ def validate_lane_transition(from_lane: str, to_lane: str) -> tuple[bool, list[s
 def extract_commit_hashes(text: str) -> list[str]:
     """Extract unique candidate Git commit SHAs (7-12 or 40 hex chars) from text."""
     seen: list[str] = []
-    for match in _COMMIT_HASH_RE.findall(text):
-        lower = match.lower()
-        if lower not in seen:
-            seen.append(lower)
+    for pattern in (_CONTEXTUAL_COMMIT_HASH_RE, _COMMIT_HASH_RE):
+        for match in pattern.findall(text):
+            lower = match.lower()
+            if lower not in seen:
+                seen.append(lower)
     return seen
 
 

@@ -86,11 +86,11 @@ def test_lane_transition_policy() -> None:
 def test_extract_commit_hashes_ignores_plain_numbers_and_trello_ids() -> None:
     """Confirm hash extraction skips 4-digit years and 24-char Trello IDs."""
     text = (
-        "Verified board 6add00820e13a7c7024609e8 in 2026 on commit 60cd10e "
-        "and full hash a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2."
+        "Verified board 6add00820e13a7c7024609e8 in 2026 on commit 60cd10e, "
+        "Commit: 9547594, and full hash a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2."
     )
     hashes = extract_commit_hashes(text)
-    assert hashes == ["60cd10e", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"]
+    assert hashes == ["60cd10e", "9547594", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"]
 
 
 def test_verify_git_commit_exists_against_temp_repo(tmp_path: Path) -> None:

@@ -250,13 +250,31 @@ def _fetch_player_with_velocity(
     rec["tactical_sector"] = get_sector_for_position(rec.get("positions"))
 
     if include_skills:
-        skill_sql = f"""
-            SELECT {", ".join(ALL_SKILL_COLUMNS)}
-            FROM raw.granular_15_24
-            WHERE player_id = ? AND fifa_version = ?
-            LIMIT 1;
-        """
-        skill_cursor = con.execute(skill_sql, [player_id, edition_year - 2000])
+        has_raw_table = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = 'raw' AND table_name = 'granular_15_24';
+            """
+        ).fetchone()
+        if has_raw_table and int(has_raw_table[0]) > 0:
+            skill_sql = f"""
+                SELECT {", ".join(ALL_SKILL_COLUMNS)}
+                FROM raw.granular_15_24
+                WHERE player_id = ? AND fifa_version = ?
+                LIMIT 1;
+            """
+            skill_params: list[Any] = [player_id, edition_year - 2000]
+        else:
+            skill_sql = f"""
+                SELECT {", ".join(ALL_SKILL_COLUMNS)}
+                FROM main.stg_fifa_granular
+                WHERE player_id = ? AND fifa_edition_year = ?
+                LIMIT 1;
+            """
+            skill_params = [player_id, edition_year]
+
+        skill_cursor = con.execute(skill_sql, skill_params)
         skill_cols = [desc[0] for desc in skill_cursor.description]
         skill_row = skill_cursor.fetchone()
         if skill_row is not None:

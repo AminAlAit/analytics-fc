@@ -286,9 +286,25 @@ def _run_core_integration_flow(
 
 def test_master_synthetic_ci_fallback(tmp_path: Path) -> None:
     """Guarantee CI fallback assets execute the full integration flow cleanly."""
+    from src.api.v2.router import _fetch_player_with_velocity
+
     db_path, gallery_path, q_path, c_path = _seed_synthetic_integration_assets(tmp_path)
     target = _run_core_integration_flow(tmp_path, db_path, gallery_path, q_path, c_path)
     assert int(target["player_id"]) == 239085
+
+    con = duckdb.connect(str(db_path), read_only=True)
+    try:
+        rec, vel = _fetch_player_with_velocity(
+            con,
+            player_id=int(target["player_id"]),
+            edition_year=int(target["fifa_edition_year"]),
+            include_skills=True,
+        )
+    finally:
+        con.close()
+    assert rec is not None
+    assert rec.get("attacking_finishing") == 85
+    assert vel == 4.0
 
 
 def test_master_platform_end_to_end_sub_60s(tmp_path: Path) -> None:
