@@ -13,7 +13,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir "fastapi>=0.115.0" "uvicorn[standard]>=0.34.0" "pydantic-settings>=2.0.0" "psutil>=5.9.0"
+    pip install --no-cache-dir "fastapi>=0.115.0" "uvicorn[standard]>=0.34.0" "pydantic-settings>=2.0.0" "psutil>=5.9.0" "matplotlib>=3.9.0"
 
 FROM python:3.11-slim-bookworm AS runtime
 

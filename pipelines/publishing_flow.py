@@ -8,43 +8,71 @@ boot a server.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from prefect import flow, task
 
-from pipelines.tasks.publish_task import run_publishing_sequence
+from pipelines.tasks.publish_task import (
+    dispatch_post,
+    draft_caption,
+    extract_spotlight,
+    render_card_payload,
+    run_publishing_sequence,
+)
+from src.publisher.compliance_guard import ComplianceLedger
 
 
 @task(name="extract-spotlight")
 def extract_spotlight_task(payload: dict[str, Any]) -> dict[str, Any]:
     """Task wrapper around spotlight extraction."""
-    from pipelines.tasks.publish_task import extract_spotlight
-
     return extract_spotlight(payload)
 
 
 @task(name="render-card")
-def render_card_task(spotlight: dict[str, Any]) -> dict[str, Any]:
+def render_card_task(
+    spotlight: dict[str, Any],
+    *,
+    dest: Path | str | None = None,
+    layout: str | None = None,
+    retina: bool = True,
+) -> dict[str, Any]:
     """Task wrapper around card payload rendering."""
-    from pipelines.tasks.publish_task import render_card_payload
-
-    return render_card_payload(spotlight)
+    return render_card_payload(spotlight, dest=dest, layout=layout, retina=retina)
 
 
 @task(name="draft-caption")
-def draft_caption_task(spotlight: dict[str, Any]) -> str:
+def draft_caption_task(
+    spotlight: dict[str, Any],
+    *,
+    complete: Callable[..., str] | None = None,
+    model: str | None = None,
+) -> str:
     """Task wrapper around caption drafting."""
-    from pipelines.tasks.publish_task import draft_caption
-
-    return draft_caption(spotlight)
+    return draft_caption(spotlight, complete=complete, model=model)
 
 
 @task(name="dispatch-post")
-def dispatch_post_task(caption: str) -> dict[str, Any]:
+def dispatch_post_task(
+    caption: str,
+    *,
+    client: Any = None,
+    media_path: Path | str | None = None,
+    player_id: int | None = None,
+    ledger: ComplianceLedger | None = None,
+    moment: datetime | None = None,
+) -> dict[str, Any]:
     """Task wrapper around post dispatch."""
-    from pipelines.tasks.publish_task import dispatch_post
-
-    return dispatch_post(caption)
+    return dispatch_post(
+        caption,
+        client=client,
+        media_path=media_path,
+        player_id=player_id,
+        ledger=ledger,
+        moment=moment,
+    )
 
 
 @flow(name="publishing-flow")

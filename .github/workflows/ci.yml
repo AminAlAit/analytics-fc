@@ -33,7 +33,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install ruff mypy pytest httpx dbt-duckdb dvc prefect pyyaml evidently
+          pip install ruff mypy pytest httpx dbt-duckdb dvc prefect pyyaml evidently matplotlib pillow psutil
 
       - name: Run Ruff Lint Checks
         run: |
@@ -61,4 +61,4 @@ jobs:
 
       - name: Run Automated Test Suite
         run: |
-          pytest -v tests/test_ruff_config.py tests/test_mypy_config.py tests/test_ci_workflow.py tests/test_architecture_sync.py tests/test_pipeline_gate.py tests/test_drift_config.py tests/test_drift_analyzer.py tests/test_dashboard_drift.py tests/test_trajectory_predictor.py tests/test_trajectory_dataset.py tests/test_trajectory_regressor.py tests/test_serving_bundle.py tests/test_dashboard_trajectory.py tests/test_docker_stack.py tests/test_observability.py tests/test_hardware_guard.py tests/test_git_hygiene.py tests/test_integration_master.py tests/test_trello_governance.py
+          pytest -v tests/test_ruff_config.py tests/test_mypy_config.py tests/test_ci_workflow.py tests/test_architecture_sync.py tests/test_pipeline_gate.py tests/test_drift_config.py tests/test_drift_analyzer.py tests/test_dashboard_drift.py tests/test_trajectory_predictor.py tests/test_trajectory_dataset.py tests/test_trajectory_regressor.py tests/test_serving_bundle.py tests/test_dashboard_trajectory.py tests/test_docker_stack.py tests/test_observability.py tests/test_hardware_guard.py tests/test_git_hygiene.py tests/test_integration_master.py tests/test_trello_governance.py tests/test_archetype_promoter.py tests/test_card_generator.py tests/test_compliance_guard.py tests/test_copy_engine.py tests/test_dossier_exporter.py tests/test_institutional_layout.py tests/test_publishing_flow.py tests/test_tactical_radar.py tests/test_trajectory_view.py tests/test_x_client.py
