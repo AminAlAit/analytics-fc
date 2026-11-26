@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DBT_DUCKDB_PATH: ${{ github.workspace }}/dbt_project/analytics_fc.duckdb
+      PYTHONPATH: ${{ github.workspace }}
     timeout-minutes: 10
 
     steps:
