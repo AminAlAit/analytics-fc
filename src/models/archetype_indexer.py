@@ -268,11 +268,16 @@ class ArchetypeVectorIndex:
         # Compute calibrated Gaussian RBF percentage
         similarities = self.calculate_rbf_similarity(penalized_distances)
 
-        candidates: list[ArchetypeMatchResult] = []
-        for idx, star in enumerate(target_meta):
-            if exclude_player_id is not None and star["player_id"] == exclude_player_id:
-                continue
+        ranked: list[tuple[float, int]] = [
+            (round(float(similarities[idx]), 1), idx)
+            for idx, star in enumerate(target_meta)
+            if exclude_player_id is None or star["player_id"] != exclude_player_id
+        ]
+        ranked.sort(key=lambda item: item[0], reverse=True)
 
+        candidates: list[ArchetypeMatchResult] = []
+        for sim_pct, idx in ranked[:top_k]:
+            star = target_meta[idx]
             star_attrs = star.get("attributes", {})
             star_vec = [float(star_attrs.get(c, 50.0)) for c in active_cols]
 
@@ -299,7 +304,7 @@ class ArchetypeVectorIndex:
                     tactical_sector=star.get("tactical_sector", query_sector),
                     primary_position=star.get("primary_position", clean_pos),
                     peak_overall=star.get("peak_overall", 85),
-                    similarity_score_pct=round(float(similarities[idx]), 1),
+                    similarity_score_pct=sim_pct,
                     raw_distance=round(float(raw_distances[idx]), 4),
                     penalized_distance=round(float(penalized_distances[idx]), 4),
                     top_growth_priorities=top_growth,
@@ -307,6 +312,4 @@ class ArchetypeVectorIndex:
                 )
             )
 
-        # Sort descending by calibrated similarity percentage
-        candidates.sort(key=lambda x: x.similarity_score_pct, reverse=True)
-        return candidates[:top_k]
+        return candidates
