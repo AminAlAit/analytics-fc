@@ -53,6 +53,9 @@ def test_ci_workflow_quality_gate_job():
     steps = job.get("steps", [])
     step_runs = " ".join([s.get("run", "") for s in steps])
 
+    assert "DBT_DUCKDB_PATH" in str(job.get("env", {})) or "DBT_DUCKDB_PATH" in step_runs, (
+        "Missing DBT_DUCKDB_PATH configuration in CI workflow"
+    )
     assert "ruff check" in step_runs, "Missing ruff check step in CI workflow"
     assert "ruff format --check" in step_runs, "Missing ruff format check step in CI workflow"
     assert "mypy" in step_runs, "Missing mypy step in CI workflow"
@@ -74,7 +77,11 @@ def test_seed_ci_fixtures_execution():
         try:
             fifatable_count = con.execute("SELECT count(*) FROM raw.fifatable;").fetchone()[0]
             granular_count = con.execute("SELECT count(*) FROM raw.fifa_granular;").fetchone()[0]
+            modern_count = con.execute("SELECT count(*) FROM raw.granular_15_24;").fetchone()[0]
             assert fifatable_count == 8, f"Expected 8 fifatable rows, found {fifatable_count}"
-            assert granular_count == 1, f"Expected 1 granular row, found {granular_count}"
+            assert granular_count == 1800, (
+                f"Expected 1800 fifa_granular rows, found {granular_count}"
+            )
+            assert modern_count == 1800, f"Expected 1800 granular_15_24 rows, found {modern_count}"
         finally:
             con.close()

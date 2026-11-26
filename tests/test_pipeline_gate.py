@@ -1,5 +1,7 @@
 """Unit and integration tests for the Automated Quality Test Gate task and flow."""
 
+from pathlib import Path
+
 import pytest
 
 from pipelines.flows import master_pipeline_flow
@@ -8,6 +10,15 @@ from pipelines.tasks.test_runner import (
     parse_pytest_summary,
     quality_gate_task,
 )
+
+_CANONICAL_DB = Path(__file__).resolve().parent.parent / "dbt_project" / "analytics_fc.duckdb"
+
+
+def _gate_target_test() -> str:
+    """Use full DuckDB contract suite locally and CI workflow suite on small fixture DBs."""
+    if _CANONICAL_DB.exists() and _CANONICAL_DB.stat().st_size > 50_000_000:
+        return "tests/test_duckdb_contracts.py"
+    return "tests/test_ci_workflow.py"
 
 
 def test_parse_pytest_summary_output():
@@ -29,9 +40,7 @@ def test_parse_pytest_summary_output():
 
 def test_execute_test_suite_runner():
     """Verify direct subprocess test suite execution returns exit code and timing."""
-    returncode, stdout, stderr, duration = execute_test_suite(
-        test_args=["tests/test_duckdb_contracts.py"]
-    )
+    returncode, stdout, stderr, duration = execute_test_suite(test_args=[_gate_target_test()])
     assert returncode == 0
     assert duration > 0.0
     assert "passed" in stdout
@@ -39,7 +48,7 @@ def test_execute_test_suite_runner():
 
 def test_quality_gate_task_execution():
     """Verify Prefect task execution passes against data contract suite."""
-    result = quality_gate_task.fn(test_args=["tests/test_duckdb_contracts.py"])
+    result = quality_gate_task.fn(test_args=[_gate_target_test()])
     assert result["status"] == "PASSED"
     assert result["exit_code"] == 0
     assert result["tests_passed"] >= 4

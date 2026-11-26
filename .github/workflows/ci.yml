@@ -17,6 +17,8 @@ jobs:
   quality-gate:
     name: Code Quality & Automated Test Gate
     runs-on: ubuntu-latest
+    env:
+      DBT_DUCKDB_PATH: ${{ github.workspace }}/dbt_project/analytics_fc.duckdb
     timeout-minutes: 10
 
     steps:

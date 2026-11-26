@@ -137,10 +137,11 @@ def test_live_hud_counts_on_canonical_duckdb() -> None:
     if not CANONICAL_DB.exists():
         pytest.skip("Canonical DuckDB is not available.")
     counts = query_hud_counts(CANONICAL_DB)
-    if counts["source"] == "fct_player_seasons+dim_players":
+    is_full_warehouse = CANONICAL_DB.stat().st_size > 50_000_000
+    if is_full_warehouse and counts["source"] == "fct_player_seasons+dim_players":
         assert counts["season_rows"] == 180021
         assert counts["distinct_players"] == 53111
-    elif counts["source"] == "fct_player_seasons":
+    elif counts["source"] in ("fct_player_seasons+dim_players", "fct_player_seasons"):
         assert int(counts["season_rows"]) > 0
         assert int(counts["distinct_players"]) > 0
     else:
